@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Demo clínica dental | Listo En Línea</title>
+  <meta name="description" content="Demo público sin login de una plataforma para clínica dental desarrollada por Listo En Línea.">
+  <style>
+    :root{--ink:#2d2632;--muted:#7e7382;--line:#ece6ef;--lilac:#705b83;--lilac2:#8d789d;--soft:#faf8fb;--peach:#f7e8df;--sage:#eaf1e9;--gold:#ead9aa;--shadow:0 18px 50px rgba(69,49,77,.09)}
+    *{box-sizing:border-box}body{margin:0;background:#f7f5f8;color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button{font:inherit}.demo-bar{position:sticky;top:0;z-index:80;min-height:48px;display:flex;align-items:center;justify-content:center;gap:14px;padding:9px 18px;background:#2f2735;color:#fff;font-size:12px}.demo-bar b{letter-spacing:.08em;text-transform:uppercase}.demo-bar a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.5)}.shell{min-height:calc(100vh - 48px);display:grid;grid-template-columns:230px minmax(0,1fr)}aside{position:sticky;top:48px;height:calc(100vh - 48px);padding:24px 16px;background:#fff;border-right:1px solid var(--line)}.brand{display:flex;align-items:center;gap:11px;padding:0 10px 22px;border-bottom:1px solid var(--line)}.brand-mark{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#f5eadc,#e4d7ef);font-weight:900;color:var(--lilac)}.brand strong{display:block;font-size:14px}.brand span{display:block;margin-top:3px;color:var(--muted);font-size:10px}.nav{display:grid;gap:5px;padding-top:20px}.nav button{width:100%;height:42px;display:flex;align-items:center;gap:10px;padding:0 12px;border:0;border-radius:10px;background:transparent;color:#756979;cursor:pointer;text-align:left;font-size:12px}.nav button.active,.nav button:hover{background:#f3edf6;color:var(--lilac);font-weight:800}.nav i{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.45}.aside-note{position:absolute;left:16px;right:16px;bottom:18px;padding:14px;border-radius:14px;background:#fbf6ef;color:#756a59;font-size:10px;line-height:1.5}.app{min-width:0}.topbar{height:72px;display:flex;align-items:center;gap:18px;padding:0 28px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.94);backdrop-filter:blur(14px)}.search{height:40px;min-width:260px;max-width:520px;flex:1;display:flex;align-items:center;padding:0 14px;border:1px solid var(--line);border-radius:11px;color:#988e9a;background:#fff;font-size:12px}.top-spacer{flex:1}.demo-pill{padding:7px 10px;border-radius:999px;background:#edf6ef;color:#397044;font-size:10px;font-weight:800}.avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:var(--lilac);color:#fff;font-size:11px;font-weight:800}.content{padding:28px;max-width:1450px;margin:0 auto}.hero{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:22px}.eyebrow{margin:0 0 7px;color:var(--lilac);font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.hero h1{margin:0;font-family:Georgia,serif;font-size:clamp(30px,4vw,50px);font-weight:500;line-height:1}.hero p{margin:9px 0 0;color:var(--muted);font-size:13px}.hero button{height:42px;padding:0 17px;border:0;border-radius:11px;background:var(--lilac);color:#fff;font-weight:800;cursor:pointer}.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}.card{border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 8px 24px rgba(69,49,77,.045)}.kpi{padding:18px}.kpi small{display:block;color:var(--muted);font-size:10px;font-weight:800}.kpi strong{display:block;margin:8px 0 4px;font-size:25px}.kpi span{font-size:10px;color:#8b7d8f}.grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,.75fr);gap:16px}.card-head{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:17px 18px;border-bottom:1px solid var(--line)}.card-head h2{margin:0;font-size:14px}.card-head span{color:var(--muted);font-size:10px}.agenda{padding:4px 18px 12px}.row{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #f1edf2}.row:last-child{border-bottom:0}.time strong{display:block;font-size:13px}.time span,.patient span{display:block;margin-top:3px;color:var(--muted);font-size:10px}.patient strong{font-size:12px}.status{padding:6px 8px;border-radius:999px;background:#eef6ef;color:#397145;font-size:9px;font-weight:900}.side-stack{display:grid;gap:16px}.mini-list{padding:13px 18px}.mini{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #f1edf2;font-size:11px}.mini:last-child{border-bottom:0}.mini span{color:var(--muted)}.progress{height:8px;margin:16px 18px 20px;border-radius:999px;background:#f0ebf2;overflow:hidden}.progress i{display:block;width:72%;height:100%;background:linear-gradient(90deg,var(--lilac),#ad96bd)}.view{display:none}.view.active{display:block}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:13px 14px;border-bottom:1px solid var(--line);font-size:11px;text-align:left}.table th{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.note{margin-top:16px;padding:13px 15px;border:1px solid #eadfca;border-radius:13px;background:#fff9ef;color:#7a6b4c;font-size:10px;line-height:1.6}@media(max-width:900px){.shell{grid-template-columns:1fr}aside{position:static;height:auto;display:block;padding:12px}.brand{border:0;padding:8px}.nav{display:flex;overflow:auto;padding-top:8px}.nav button{width:auto;white-space:nowrap}.aside-note{display:none}.topbar{padding:0 14px}.search{min-width:0}.kpis{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.content{padding:20px 14px}}@media(max-width:520px){.demo-bar{justify-content:flex-start;overflow:auto}.demo-bar span{white-space:nowrap}.topbar{height:60px}.demo-pill{display:none}.kpis{grid-template-columns:1fr 1fr}.kpi{padding:14px}.kpi strong{font-size:21px}.hero{align-items:flex-start}.hero button{display:none}.row{grid-template-columns:58px minmax(0,1fr)}.status{grid-column:2;justify-self:start}}
+  </style>
+</head>
+<body>
+  <div class="demo-bar"><b>Modo demo</b><span>Clínica dental · datos ficticios · sin login · no guarda información real</span><a href="../index.html#portfolio">Volver a Listo En Línea</a></div>
+  <div class="shell">
+    <aside>
+      <div class="brand"><div class="brand-mark">SS</div><div><strong>Samantha's Studio Lab</strong><span>Demo de clínica dental</span></div></div>
+      <nav class="nav" aria-label="Secciones demo">
+        <button class="active" data-view="resumen"><i></i>Inicio</button>
+        <button data-view="agenda"><i></i>Agenda</button>
+        <button data-view="pacientes"><i></i>Pacientes</button>
+        <button data-view="tratamientos"><i></i>Tratamientos</button>
+      </nav>
+      <div class="aside-note"><strong>Demo comercial.</strong><br>La interfaz representa una plataforma para consultorio dental. Los datos de pacientes son ficticios.</div>
+    </aside>
+    <div class="app">
+      <header class="topbar"><div class="search">⌕ &nbsp; Buscar paciente, cita o tratamiento…</div><div class="top-spacer"></div><span class="demo-pill">Demo público</span><div class="avatar">SS</div></header>
+      <main class="content">
+        <section class="view active" id="view-resumen">
+          <div class="hero"><div><p class="eyebrow">Vista integral · demo</p><h1>La clínica, sin perder ningún detalle.</h1><p>Agenda, pacientes, tratamientos, seguimiento y operación conectados.</p></div><button type="button">＋ Registrar paciente</button></div>
+          <div class="kpis">
+            <article class="card kpi"><small>Pacientes activos</small><strong>128</strong><span>+12 este mes</span></article>
+            <article class="card kpi"><small>Citas de hoy</small><strong>8</strong><span>6 confirmadas</span></article>
+            <article class="card kpi"><small>Seguimientos</small><strong>14</strong><span>3 prioritarios</span></article>
+            <article class="card kpi"><small>Meta mensual</small><strong>$95k</strong><span>72% alcanzado</span></article>
+          </div>
+          <div class="grid">
+            <article class="card">
+              <div class="card-head"><div><h2>Agenda de hoy</h2><span>Citas ficticias para mostrar el flujo</span></div><span>01 Oct</span></div>
+              <div class="agenda">
+                <div class="row"><div class="time"><strong>09:00</strong><span>45 min</span></div><div class="patient"><strong>Valentina G.</strong><span>Profilaxis · Dra. Samantha</span></div><span class="status">Confirmada</span></div>
+                <div class="row"><div class="time"><strong>10:15</strong><span>60 min</span></div><div class="patient"><strong>Mateo R.</strong><span>Restauración · Silla B</span></div><span class="status">Confirmada</span></div>
+                <div class="row"><div class="time"><strong>12:00</strong><span>30 min</span></div><div class="patient"><strong>Renata P.</strong><span>Valoración · Primera visita</span></div><span class="status">Pendiente</span></div>
+                <div class="row"><div class="time"><strong>16:30</strong><span>45 min</span></div><div class="patient"><strong>Emiliano S.</strong><span>Selladores · Silla C</span></div><span class="status">Confirmada</span></div>
+              </div>
+            </article>
+            <div class="side-stack">
+              <article class="card"><div class="card-head"><h2>Ingresos del mes</h2><span>$68,000 / $95,000</span></div><div class="progress"><i></i></div></article>
+              <article class="card"><div class="card-head"><h2>Acciones prioritarias</h2><span>Hoy</span></div><div class="mini-list"><div class="mini"><strong>Confirmar citas</strong><span>3</span></div><div class="mini"><strong>Presupuestos abiertos</strong><span>5</span></div><div class="mini"><strong>Inventario crítico</strong><span>4</span></div></div></article>
+            </div>
+          </div>
+        </section>
+        <section class="view" id="view-agenda"><div class="hero"><div><p class="eyebrow">Agenda</p><h1>Organiza el día clínico.</h1><p>Vista compacta de citas por horario, silla y estado.</p></div></div><article class="card"><div class="card-head"><h2>Agenda semanal</h2><span>Demo</span></div><table class="table"><thead><tr><th>Hora</th><th>Paciente</th><th>Tratamiento</th><th>Silla</th><th>Estado</th></tr></thead><tbody><tr><td>09:00</td><td>Valentina G.</td><td>Profilaxis</td><td>A</td><td>Confirmada</td></tr><tr><td>10:15</td><td>Mateo R.</td><td>Restauración</td><td>B</td><td>Confirmada</td></tr><tr><td>12:00</td><td>Renata P.</td><td>Valoración</td><td>C</td><td>Pendiente</td></tr><tr><td>16:30</td><td>Emiliano S.</td><td>Selladores</td><td>C</td><td>Confirmada</td></tr></tbody></table></article></section>
+        <section class="view" id="view-pacientes"><div class="hero"><div><p class="eyebrow">Pacientes</p><h1>Expediente centralizado.</h1><p>Información clínica y administrativa en un solo lugar.</p></div></div><article class="card"><div class="card-head"><h2>Pacientes recientes</h2><span>Datos ficticios</span></div><table class="table"><thead><tr><th>Paciente</th><th>Edad</th><th>Última visita</th><th>Tratamiento</th><th>Seguimiento</th></tr></thead><tbody><tr><td>Valentina G.</td><td>8</td><td>28 sep</td><td>Profilaxis</td><td>Al día</td></tr><tr><td>Mateo R.</td><td>10</td><td>25 sep</td><td>Restauración</td><td>7 días</td></tr><tr><td>Renata P.</td><td>6</td><td>Nueva</td><td>Valoración</td><td>Pendiente</td></tr></tbody></table></article></section>
+        <section class="view" id="view-tratamientos"><div class="hero"><div><p class="eyebrow">Tratamientos</p><h1>Catálogo clínico conectado.</h1><p>Precios, tiempos estimados y seguimiento de tratamientos.</p></div></div><div class="kpis"><article class="card kpi"><small>Profilaxis</small><strong>$650</strong><span>45 min</span></article><article class="card kpi"><small>Selladores</small><strong>$450</strong><span>30 min</span></article><article class="card kpi"><small>Restauración</small><strong>$900</strong><span>60 min</span></article><article class="card kpi"><small>Valoración</small><strong>$500</strong><span>30 min</span></article></div><div class="note">Este demo no contiene datos clínicos reales y no sustituye una implementación productiva con autenticación, permisos y expediente protegido.</div></section>
+      </main>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('[data-view]').forEach((button)=>{
+      button.addEventListener('click',()=>{
+        document.querySelectorAll('[data-view]').forEach((b)=>b.classList.remove('active'));
+        document.querySelectorAll('.view').forEach((view)=>view.classList.remove('active'));
+        button.classList.add('active');
+        document.getElementById('view-'+button.dataset.view)?.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
