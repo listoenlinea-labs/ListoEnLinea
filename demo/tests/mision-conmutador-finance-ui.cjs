@@ -39,7 +39,7 @@ const assert = require('node:assert/strict');
   await inicio.locator('.hl-chart-hit').first().waitFor({timeout:16000});
   const hits=await inicio.locator('.hl-chart-hit').count();
   assert(hits>10,'La gráfica debe tener múltiples puntos mensuales interactivos');
-  await inicio.locator('.hl-chart-hit').first().click({force:true});
+  await inicio.locator('.hl-chart-hit').first().evaluate(el=>el.dispatchEvent(new MouseEvent('click',{bubbles:true})));
   assert(await inicio.locator('#hlFinanceDetails').innerText().then(s=>s.includes('Ingresos')));
   console.log('PASS: gráfica financiera interactiva de Inicio');
  }finally{await browser.close()}
