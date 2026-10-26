@@ -97,6 +97,22 @@ function handle(uri,method,body,query){
  if(uri.startsWith('/pagos/cotizacion'))return ok({monto:debt(state.casas[0]),saldoPendiente:debt(state.casas[0])});
  if(uri==='/pagos'&&method==='POST'){const entry={id:++state.lastId,casaId:state.casas[0].id,estado:'PENDIENTE_VALIDACION',referencia:body.referencia||'DEMO-'+state.lastId,monto:cap(body.monto),fecha:longDate};state.reportes.push(entry);save();return ok(entry)}
  if(uri.startsWith('/pagos/'))return ok({historial:state.pagos,reportes:state.reportes});
+
+ if(uri==='/cuotas'&&method==='GET'){
+  const year=Number(query.get('anio'))||yyyy,mon=String(query.get('mes')||monthName[mm-1]).toUpperCase(),idx=monthName.indexOf(mon),target=period(year,idx<0?mm:idx+1);
+  const result=state.casas.map(c=>{const override=(state.cuotas||[]).find(q=>q.casaId===c.id&&q.anio===year&&q.mes===mon)||{};const pagado=c.paidThrough>=target;return {id:year*100000+(idx+1)*1000+c.id,casaId:c.id,casa:houses().find(h=>h.id===c.id),mes:mon,anio:year,monto:c.cuota,montoPagado:pagado?c.cuota:0,importePagado:pagado?c.cuota:0,pagado,estado:pagado?'PAGADO':'PENDIENTE',estatus:pagado?'PAGADO':'PENDIENTE',fechaPago:pagado?longDate:null,calleSnapshot:c.calle,numeroCasaSnapshot:c.numero,nombreCondominoSnapshot:c.nombre,...override}});
+  return ok(result);
+ }
+ if(uri==='/cuotas'&&method==='POST'){const c=byId(body.casaId),entry={id:++state.lastId,casaId:c.id,anio:Number(body.anio)||yyyy,mes:String(body.mes||monthName[mm-1]).toUpperCase(),monto:Number(body.monto)||c.cuota,...body};state.cuotas=state.cuotas||[];state.cuotas.push(entry);save();return ok(entry)}
+ if(uri==='/cuotas/lote'&&method==='PATCH'){state.cuotas=state.cuotas||[];for(const op of body.operaciones||[]){const c=state.cuotas.find(x=>x.id===op.id);if(c)Object.assign(c,op.cambios)}save();return ok({actualizados:(body.operaciones||[]).length})}
+ if(uri==='/cuotas/recibos/enviar-lote')return {ok:true,resultados:(body.ids||[]).map(id=>({id,enviado:false,motivo:'Demo: no se envían correos reales'})),message:'Comprobantes simulados; no se enviaron correos.'};
+ if(uri.startsWith('/cuotas/')){const id=Number(parts[1]),record=(state.cuotas||[]).find(c=>c.id===id);if(method==='DELETE'){state.cuotas=(state.cuotas||[]).filter(c=>c.id!==id);save();return ok({deleted:true})}if(method==='PATCH'&&record){Object.assign(record,body);save();return ok(record)}return ok(record||{})}
+ if(uri==='/eventos'&&method==='GET')return ok(state.eventos||[],{eventos:state.eventos||[]});
+ if(uri==='/eventos'&&method==='POST'){state.eventos=state.eventos||[];const e={id:++state.lastId,...body};state.eventos.push(e);save();return ok(e)}
+ if(uri.startsWith('/eventos/')&&method==='DELETE'){state.eventos=(state.eventos||[]).filter(e=>String(e.id)!==parts[1]);save();return ok({deleted:true})}
+ if(uri.startsWith('/casas/')&&uri.endsWith('/residentes')&&method==='GET'){const c=byId(parts[1]);return ok(c?c.residentes||[{id:c.id,nombre:c.nombre,correo:c.correo,telefono:c.telefono}]:[])}
+ if(uri.startsWith('/casas/')&&uri.endsWith('/residentes')&&method==='POST'){const c=byId(parts[1]);if(!c)return {ok:false,message:'Vivienda inexistente'};c.residentes=c.residentes||[];const resident={id:++state.lastId,...body};c.residentes.push(resident);save();return ok(resident)}
+ if(uri.startsWith('/visitas/')&&method==='PATCH'){const entry=state.visitas.find(v=>String(v.id)===parts[1]);if(!entry)return {ok:false,message:'Visita inexistente'};entry.estado=({entrada:'DENTRO',salida:'SALIO',autorizar:'AUTORIZADA',cancelar:'CANCELADA',rechazar:'RECHAZADA'})[parts[2]]||'ACTUALIZADA';save();return ok(entry)}
  if(uri.startsWith('/auth/cuentas'))return ok(state.cuentas,{cuentas:state.cuentas,solicitudes:state.cuentas,paginacion:{total:state.cuentas.length,pagina:1,paginas:1}});
  if(uri.startsWith('/auth/'))return ok({message:'Operación simulada',usuario:admin});
  if(uri.startsWith('/entorno/'))return ok({trafico:[],noticias:[],data:[],eventos:[]});
@@ -116,5 +132,8 @@ window.fetch=async(input,init={})=>{
  return nativeFetch(input,init);
 };
 const xhrOpen=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(method,url){const target=new URL(url,location.href);if(/(misionjardines|yerenariso)\.listoenlinea\.host$/.test(target.hostname)||!['GET','HEAD'].includes(String(method).toUpperCase())&&target.hostname!=='demo.invalid')throw Error('XHR externa bloqueada en demo');return xhrOpen.apply(this,arguments)};
+// Bloquear canales de telefonía, SMS, cámaras y acciones físicas del entorno real.
+window.WebSocket=class{constructor(){throw Error('WebSocket/telefonía real deshabilitados en este demo público')}};
+window.EventSource=class{constructor(){throw Error('Eventos remotos deshabilitados en demo')}};
 window.MISION_DEMO={getState:()=>structuredClone(state),reset(){localStorage.removeItem(KEY);location.reload()},version:1,simulatePayment(id,monto){const h=byId(id);if(!h)throw Error('Casa no existe');advance(h,monto);state.pagos.push({id:++state.lastId,casaId:h.id,monto:Number(monto),fecha:longDate});save();return {saldo:debt(h),paidThrough:h.paidThrough}}};
 })();
