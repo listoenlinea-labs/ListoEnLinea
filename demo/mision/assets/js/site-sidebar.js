@@ -27,7 +27,6 @@
       { page: 'casa-club.html', label: 'Casa Club', icon: 'calendar', roles: 'SUPER_ADMIN,ADMINISTRADOR,CONDOMINO' },
       { page: 'pagos.html', label: 'Pagos', icon: 'payment', roles: 'SUPER_ADMIN,ADMINISTRADOR,MESA_DIRECTIVA,CONDOMINO' },
       { page: 'bases_datos.html', label: 'Residentes', icon: 'residents', roles: 'SUPER_ADMIN,ADMINISTRADOR,MESA_DIRECTIVA,SEGURIDAD' },
-      { page: 'mapa.html', label: 'Mapa', icon: 'map', roles: 'SUPER_ADMIN,ADMINISTRADOR,SEGURIDAD,CONDOMINO' },
       { page: 'visitas.html', label: 'Visitas', icon: 'visits', roles: 'SUPER_ADMIN,ADMINISTRADOR,SEGURIDAD,CONDOMINO' },
       { page: 'zkteco.html', label: 'ZKTeco', icon: 'connection', roles: 'SUPER_ADMIN,ADMINISTRADOR,MESA_DIRECTIVA,SEGURIDAD' },
       { page: 'conmutador.html', label: 'Conmutador', icon: 'phone', roles: 'SUPER_ADMIN,ADMINISTRADOR,MESA_DIRECTIVA,SEGURIDAD' },
@@ -40,7 +39,6 @@
       { page: 'seguridad.html', label: 'Seguridad', icon: 'shield', roles: 'SUPER_ADMIN,ADMINISTRADOR,SEGURIDAD' },
       { page: 'analisis-cuotas.html', label: 'Análisis de cuotas', icon: 'reports' },
       { page: 'verificacion-cuentas.html', label: 'Verificación de cuentas', icon: 'shield', roles: 'SUPER_ADMIN,ADMINISTRADOR' },
-      { page: 'auto-users.html', label: 'Auto-users', icon: 'residents', roles: 'SUPER_ADMIN,ADMINISTRADOR' }
     ]}
   ];
 
@@ -49,13 +47,12 @@
   // el menú lateral para ningún rol (sigue accesible desde su propia página).
   function navigationGroups() {
     const administration = [], community = [], security = [], primary = [];
-    const securityPages = ['conmutador.html', 'seguridad.html', 'visitas.html', 'mapa.html', 'reportes.html'];
+    const securityPages = ['conmutador.html', 'seguridad.html', 'visitas.html', 'reportes.html'];
     const administrationOrder = [
       'analisis-cuotas.html',
       'zkteco.html',
       'bases_datos.html',
-      'verificacion-cuentas.html',
-      'auto-users.html'
+      'verificacion-cuentas.html'
     ];
     for (const group of groups) {
       for (const item of group.items) {
