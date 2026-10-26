@@ -8,6 +8,53 @@ const longDate=date(now),yearMonth=i=>String(Math.floor(i/12))+'-'+pad(i%12+1);
 const message='DEMO: el dispositivo, pago, notificación o servicio externo no fue contactado.';
 const owners=['Elena Fernández','Rodrigo Sánchez','Paola Flores','Carlos Aguilar','Mariana Solís','David Romero','Andrea Luna','Gabriel Navarro','Silvia Vázquez','Laura Campos','José Rivera','Sofía Moreno'];
 const streetList=['Rosas','Gardenias','Magnolias','Claveles','Azucenas','Jardines','Camelias','Orquídeas'];
+
+/**
+ * Presupuesto operativo ficticio, calculado desde ingresos efectivamente registrados.
+ * No crea números independientes de la contabilidad: cada mes se mantiene un margen
+ * moderado (5%-13%), con siete rubros verificables de egresos.
+ */
+function demoOperatingExpenses(data){
+ const margins=[.09,.07,.10,.05,.13,.08,.11,.06,.09,.10,.07,.08];
+ const rounded=n=>Math.round((Number(n)||0)*100)/100;
+ const result=[];
+ const descriptions=[
+  {name:'Vigilancia y control de accesos',category:'SEGURIDAD'},
+  {name:'Jardinería, poda y áreas verdes',category:'JARDINERIA'},
+  {name:'Limpieza de áreas comunes',category:'LIMPIEZA'},
+  {name:'Alumbrado y energía eléctrica',category:'SERVICIOS'},
+  {name:'Agua y mantenimiento de bombas',category:'AGUA'},
+  {name:'Administración e insumos',category:'ADMINISTRACION'},
+  {name:'Reparaciones y mantenimiento preventivo',category:'MANTENIMIENTO'}
+ ];
+ for(let m=1;m<=mm;m++){
+  const period=yyyy+'-'+pad(m);
+  const incoming=[...(data.pagos||[]),...(data.otrosIngresos||[]),...(data.pagosConcepto||[])].filter(p=>String(p.fecha||'').slice(0,7)===period)
+    .reduce((sum,p)=>sum+Number(p.monto||0),0);
+  const manual=(data.egresos||[]).filter(p=>String(p.fecha||'').slice(0,7)===period &&
+    !(/^EGRESO-FICTICIO-\d+$/.test(String(p.referencia||''))) && p.origen!=='DEMO_OPERATIVO')
+    .reduce((sum,p)=>sum+Number(p.monto||0),0);
+  const budget=Math.max(0,Math.round(incoming*(1-margins[(m-1)%12])-manual));
+  if(!budget)continue;
+  const security=Math.min(20000,Math.round(budget*.55));
+  let remaining=budget-security;
+  const allocations=[security];
+  const weights=[.24,.19,.17,.12,.11];
+  for(const weight of weights){const portion=Math.round(remaining*weight);allocations.push(portion);}
+  allocations.push(budget-allocations.reduce((sum,v)=>sum+v,0));
+  for(let category=0;category<descriptions.length;category++){
+   const amount=rounded(allocations[category]);
+   if(!amount)continue;
+   result.push({id:600000+m*10+category,concepto:descriptions[category].name+' · Demo',
+    categoria:descriptions[category].category,monto:amount,
+    fecha:period+'-'+pad(5+(category*3)%20),
+    referencia:'EGRESO-OPERATIVO-DEMO-'+pad(m)+'-'+category,
+    origen:'DEMO_OPERATIVO'});
+  }
+ }
+ return result;
+}
+
 function fixture(){
  // Un único padrón de 231 viviendas; cada calle posee un porcentaje distinto.
  // Las cifras de la tabla, donut, barras, Excel e Inicio se derivan de este ledger.
@@ -65,16 +112,14 @@ function fixture(){
   }
   return [entry];
  });
- const egresos=Array.from({length:mm},(_,i)=>({
-  id:3001+i,concepto:['Seguridad','Jardinería','Alumbrado','Limpieza','Mantenimiento'][i%5]+' · Demo',
-  categoria:'OPERACION',monto:13000+((i*71+5)%13)*960,fecha:yyyy+'-'+pad(i+1)+'-15',referencia:'EGRESO-FICTICIO-'+(i+1)
- }));
  const otrosIngresos=Array.from({length:mm},(_,i)=>({id:4001+i,concepto:'Ingreso adicional ficticio',
   monto:200+((i*53+7)%9)*145,fecha:yyyy+'-'+pad(i+1)+'-19'}));
- return {version:2,casas,tags,pagos,egresos,otrosIngresos,saldoInicial:12000,
+ const fixtureData={version:3,casas,tags,pagos,egresos:[],otrosIngresos,saldoInicial:12000,
   accesos:[],visitas:[{id:1,casaId:1,nombre:'Gabriela Ramos',placa:'DEM-001',
     motivo:'Visita familiar',estado:'PROGRAMADA',fecha:longDate,hora:'11:30',codigo:'VIS-DEMO-0001'}],
   reportes:[],reservas:[],cuotasExtra:[],pagosConcepto:[],incidentes:[],cuentas:[],logs:[],lastId:5000};
+ fixtureData.egresos=demoOperatingExpenses(fixtureData);
+ return fixtureData;
 }
 function dueEndFixture(c){
  const y=Math.floor(c.paidThrough/12),m=c.paidThrough%12;
@@ -85,6 +130,15 @@ function debtForFixture(c){
  return Math.max(0,amount-(c.credito||0));
 }
 let state;try{state=JSON.parse(localStorage.getItem(KEY))}catch{}if(!state?.casas)state=fixture();
+// Se actualizan exclusivamente egresos de ejemplo anteriores; conservamos pagos,
+// cuotas, TAGs, reservas y egresos manuales creados por el visitante.
+if(state.version!==3){
+ state.egresos=(state.egresos||[]).filter(e=>!/^EGRESO-FICTICIO-\d+$/.test(String(e.referencia||''))&&
+   e.origen!=='DEMO_OPERATIVO');
+ state.egresos.push(...demoOperatingExpenses(state));
+ state.version=3;
+ try{localStorage.setItem(KEY,JSON.stringify(state))}catch(_){}
+}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn('Sin almacenamiento persistente',e)}};
 const byId=id=>state.casas.find(c=>Number(c.id)===Number(id)),byTag=id=>state.tags.find(t=>Number(t.id)===Number(id));
 const cap=n=>Math.max(0,Math.round((Number(n)||0)*100)/100);

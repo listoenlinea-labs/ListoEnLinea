@@ -5,8 +5,9 @@ const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.resolve(__dirname,'../..');
 const load=p=>fs.readFileSync(path.join(root,p),'utf8');
 function storage(){const map=new Map();return {getItem:k=>map.get(k)||null,setItem:(k,v)=>map.set(k,String(v)),removeItem:k=>map.delete(k)}}
-function residential(){
+function residential(preloadedState){
  const memory=storage(),requests=[];
+ if(preloadedState)memory.setItem('lel_mision_copy_demo_v2',JSON.stringify(preloadedState));
  const win={fetch:async(url)=>{requests.push(url);throw Error('Intento de red real: '+url)}};
  const sandbox={window:win,localStorage:memory,sessionStorage:memory,URL,Response,Headers,Date,structuredClone,console,
   location:{href:'https://listoenlinea.com/demo/mision/index.html',reload(){}},
@@ -218,4 +219,54 @@ test('Casa Club rechaza fechas anteriores a hoy y solicitudes de deudores',async
  const today=await request('/casa-club/reservas','POST',{casaId:owing.casaId,fecha:local});
  assert.equal(today.ok,false);assert.equal(today.codigo,'ADEUDOS_RESERVA');
  assert(today.adeudos.totales.MANTENIMIENTO>0);
+});
+
+
+test('Presupuesto ficticio realista: ingresos superan moderadamente a gastos, sin saldos exagerados',async()=>{
+ const {win,request}=residential();
+ const dashboard=await request('/dashboard');
+ const rows=dashboard.recaudacion.serie;
+ assert(rows.length>=10);
+ const sample=win.MISION_DEMO.getState();
+ assert.equal(sample.version,3);
+ assert(sample.egresos.length>=6*rows.length,'Cada mes debe reflejar rubros operativos');
+ const categories=new Set(sample.egresos.map(x=>x.categoria));
+ for(const category of ['SEGURIDAD','JARDINERIA','LIMPIEZA','SERVICIOS','AGUA','ADMINISTRACION','MANTENIMIENTO'])
+  assert(categories.has(category),'Falta concepto de gasto: '+category);
+ for(const r of rows){
+  assert(r.ingresos>r.egresos,'La operación mensual debe conservar superávit, '+r.etiqueta);
+  assert(r.egresos>=r.ingresos*.85,'Egresos demasiado bajos en '+r.etiqueta);
+  assert(r.egresos<=r.ingresos*.96,'Egresos excesivos en '+r.etiqueta);
+  const sum=sample.egresos.filter(e=>e.fecha.startsWith(r.anio+'-'+String(r.mes).padStart(2,'0')))
+    .reduce((n,e)=>n+e.monto,0);
+  assert.equal(r.egresos,sum,'Egresos gráficos distintos a los egresos desglosados en '+r.etiqueta);
+ }
+ const final=rows.at(-1);
+ assert(final.disponible>20000&&final.disponible<125000,
+  'Saldo acumulado no realista: '+final.disponible);
+ assert(final.egresos>final.ingresos*.85&&final.egresos<final.ingresos);
+ const finance=(await request('/finanzas/analisis')).data;
+ assert.equal(finance.totalEgresos,final.egresos);
+ assert.equal(finance.balanceReportado,final.disponible);
+ assert.equal(Object.values(finance.egresosCategorias).reduce((a,b)=>a+b,0),final.egresos);
+});
+test('Migración de datos anteriores respeta pagos, TAGs, reservas y egresos manuales',()=>{
+ const old=residential().win.MISION_DEMO.getState();
+ old.version=2;
+ old.egresos=Array.from({length:10},(_,i)=>({id:3001+i,
+  concepto:'Gasto antiguo',monto:13000+((i*71+5)%13)*960,fecha:'2026-'+String(i+1).padStart(2,'0')+'-15',
+  referencia:'EGRESO-FICTICIO-'+(i+1),categoria:'OPERACION'}));
+ old.egresos.push({id:5004,concepto:'Pago manual ficticio',monto:950,
+  fecha:'2026-10-20',referencia:'EGRESO-MANUAL',categoria:'OTRO'});
+ old.reservas.push({id:8123,casaId:7,fecha:'2026-11-15',estatus:'PENDIENTE'});
+ old.tags[0].activo=false;
+ old.pagos.push({id:9999,casaId:1,monto:50,fecha:'2026-10-25'});
+ const state=residential(old).win.MISION_DEMO.getState();
+ assert.equal(state.version,3);
+ assert.equal(state.reservas.length,old.reservas.length);
+ assert.equal(state.pagos.length,old.pagos.length);
+ assert.equal(state.tags[0].activo,false);
+ assert(state.egresos.some(e=>e.id===5004&&e.monto===950),'Se perdieron egresos registrados por el visitante');
+ assert(state.egresos.some(e=>e.categoria==='SEGURIDAD'));
+ assert(!state.egresos.some(e=>e.referencia==='EGRESO-FICTICIO-1'));
 });
