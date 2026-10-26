@@ -65,8 +65,8 @@ test('Un ZIP CBCT válido abre 12 cortes y reconstruye volumen 3D MPR',async()=>
  assert.notEqual(volume.sample(model,.5,.5,0),volume.sample(model,.5,.5,1));
 });
 test('ZIP con menos de doce cortes o DICOM falsificado se rechaza',async()=>{
- await assert.rejects(()=>cbct.fromFiles([await archiveZip(4)],{zipLib:JSZip}),/entre 12 y 400/);
- await assert.rejects(()=>cbct.fromFiles([await archiveZip(12,{broken:true})],{zipLib:JSZip}),/no es un DICOM/);
+ await assert.rejects(async()=>cbct.fromFiles([await archiveZip(4)],{zipLib:JSZip}),/entre 12 y 400/);
+ await assert.rejects(async()=>cbct.fromFiles([await archiveZip(12,{broken:true})],{zipLib:JSZip}),/no es un DICOM/);
 });
 test('Serie con pacientes/series diferentes no puede producir volumetría engañosa',async()=>{
  const records=Array.from({length:12},(_,i)=>file('corte_'+i+'.dcm',makeSlice(i,{series:i===7?'OTRA.SERIE':'1.2.3.999'})));
