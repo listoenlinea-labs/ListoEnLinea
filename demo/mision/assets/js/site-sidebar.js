@@ -138,7 +138,7 @@
     }).join('');
     const account = accountData();
     return `<div class="mj-side-inner">
-      <div class="mj-side-logo"><img src="assets/images/logo-mision-jardines.png" alt="Misión Jardines"></div>
+      <div class="mj-side-logo"><img src="../../assets/img/projects/mision-jardines.webp" alt="Misión Jardines"></div>
       <div class="mj-side-community"><strong>Misión Jardines</strong><span>Zapopan, Jalisco</span></div>
       <nav class="mj-side-nav" aria-label="Navegación principal">${nav}</nav>
       <a class="mj-side-account${active === 'cuenta.html' ? ' active' : ''}" href="cuenta.html">${icons.account}<span><strong>${account.name}</strong><small>${account.role} · Editar cuenta</small></span></a>
