@@ -11,7 +11,7 @@
   <script src="assets/js/page-access.js?v=20261012-seguridad"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Reportes | Misión Jardines</title>
+  <title>Reportes | Fraccionamiento Demo</title>
   <style>
     :root {
       color-scheme: light
@@ -870,7 +870,7 @@
       </div>
     </section>
 
-    <footer class="footer"><span>Misión Jardines Residencial · Zapopan, Jalisco</span><span>Plataforma desarrollada por
+    <footer class="footer"><span>Fraccionamiento Demo · Modo demostración</span><span>Plataforma desarrollada por
         <a href="https://listoenlinea.com" target="_blank" rel="noopener">ListoEnLinea.com</a></span></footer>
   </main>
 
@@ -929,7 +929,7 @@
     const token = localStorage.getItem('misionJardinesToken') || sessionStorage.getItem('misionJardinesToken');
     const TYPES = [['Alumbrado', '💡', 'Luminarias o zonas oscuras'], ['Agua / Fuga', '💧', 'Fugas, presión o tuberías'], ['Vialidad', '🚧', 'Baches, banquetas o accesos'], ['Limpieza', '🧹', 'Basura, maleza o escombro'], ['Jardinería', '🌳', 'Poda, riego y áreas verdes'], ['Mascota perdida', '🐾', 'Mascotas extraviadas o encontradas'], ['Seguridad', '🛡️', 'Situaciones que requieren vigilancia'], ['Otro', '📌', 'Cualquier otra incidencia']];
     const STREETS = ['Jardines', 'Gardenias', 'Magnolias', 'Rosas', 'Lirios', 'Valle de México', 'Guadalajara', 'Atotonilco'].sort((a,b)=>a.localeCompare(b,'es-MX',{numeric:true,sensitivity:'base'}));
-    const DEFAULT_REPORTS = [{ folio: 'REP-1001', date: '2026-06-04 18:20', type: 'Alumbrado', house: 'Misión Jardines · 101', location: 'Frente a casa 101', reportedBy: 'Laura Gómez', priority: 'Alta', area: 'Mantenimiento', status: 'En proceso', description: 'Luminaria parpadeando y zona oscura por la noche.', photo: '', updates: [] }, { folio: 'REP-1002', date: '2026-06-03 09:15', type: 'Jardinería', house: 'Misión Gardenias · 28', location: 'Área común', reportedBy: 'Martín Pérez', priority: 'Media', area: 'Jardinería', status: 'Abierto', description: 'Se requiere poda y limpieza de maleza cerca del jardín.', photo: '', updates: [] }];
+    const DEFAULT_REPORTS = [{ folio: 'REP-1001', date: '2026-06-04 18:20', type: 'Alumbrado', house: 'Fraccionamiento Demo · 101', location: 'Frente a casa 101', reportedBy: 'Laura Gómez', priority: 'Alta', area: 'Mantenimiento', status: 'En proceso', description: 'Luminaria parpadeando y zona oscura por la noche.', photo: '', updates: [] }, { folio: 'REP-1002', date: '2026-06-03 09:15', type: 'Jardinería', house: 'Misión Gardenias · 28', location: 'Área común', reportedBy: 'Martín Pérez', priority: 'Media', area: 'Jardinería', status: 'Abierto', description: 'Se requiere poda y limpieza de maleza cerca del jardín.', photo: '', updates: [] }];
     let selectedPhoto = '', currentUser = null, reports = [];
     if (!token) location.replace('login.html');
     const $ = id => document.getElementById(id), esc = v => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;'), norm = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
