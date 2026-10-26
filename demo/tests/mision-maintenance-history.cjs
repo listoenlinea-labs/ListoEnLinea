@@ -30,7 +30,10 @@ const {chromium}=require('playwright');
    await modal.waitFor({state:'hidden'});
    const pendingId=await frame.locator('body').evaluate(async()=>{
     const data=await fetch('https://demo.invalid/api/finanzas/analisis').then(r=>r.json());
-    return data.data.viviendas.find(h=>h.saldoPendiente>0&&h.tarifaMensual===300)?.casaId;
+    // Respetar paginación/orden actual de la tabla: elegir una casa visible.
+    const visible=new Set([...document.querySelectorAll('[data-paid-history]')].map(b=>
+      Number(b.getAttribute('data-paid-history'))));
+    return data.data.viviendas.find(h=>visible.has(h.casaId)&&h.saldoPendiente>0)?.casaId;
    });
    assert(pendingId);
    await frame.locator('[data-paid-history="'+pendingId+'"]').click();
