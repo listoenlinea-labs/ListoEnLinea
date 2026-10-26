@@ -37,6 +37,17 @@ const assert = require('node:assert/strict');
     const checked=await fetch('https://demo.invalid/api/finanzas/analisis',{headers:{Authorization:'Bearer '+token}}).then(r=>r.json());
     return {updated:changed.paidThrough>pre,valid:checked.ok===true,token,tagCount:after.tags.length};
   });
+  const extended=await page.evaluate(async()=>{
+   const api='https://demo.invalid/api';const post=(path,data)=>fetch(api+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(r=>r.json());
+   const before=MISION_DEMO.getState();const debtor=before.casas.find(c=>c.paidThrough<new Date().getFullYear()*12+new Date().getMonth()),payer=before.casas.find(c=>c.paidThrough>=new Date().getFullYear()*12+new Date().getMonth());
+   const denied=await post('/casa-club/reservas',{casaId:debtor.id,fecha:'2026-12-15',nombre:'Evento de prueba'});
+   const allowed=await post('/casa-club/reservas',{casaId:payer.id,fecha:'2026-12-16',nombre:'Evento ficticio'});
+   const conflict=await post('/casa-club/reservas',{casaId:payer.id,fecha:'2026-12-16',nombre:'Otro evento'});
+   const isolation=await fetch('https://api-misionjardines.listoenlinea.host/api/auth/me').then(()=>false,()=>true);
+   return {denied:denied.ok===false,allowed:allowed.ok===true,conflict:conflict.ok===false,isolation};
+  });
+  console.log('MISION EXTENDED',extended);
+  assert.deepEqual(extended,{denied:true,allowed:true,conflict:true,isolation:true});
   console.log('MISION',m);
   assert(m.updated);assert(m.valid);assert(m.tagCount>0);
   assert.equal(errors.length,0,'Page exceptions: '+errors.join(' | '));
