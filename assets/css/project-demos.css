@@ -194,3 +194,44 @@
 #projectDetailsModal .modal-content{border:0;border-radius:20px;box-shadow:0 22px 80px #172b4240;overflow:hidden}
 #projectDetailsModal .modal-header,#projectDetailsModal .modal-body,#projectDetailsModal .modal-footer{padding:21px 26px}
 @media(max-width:575px){.portfolio .project-card .portfolio-info{padding-bottom:76px!important}.project-details-button{right:14px;bottom:14px}}
+
+
+/*
+ * Portfolio cards are informational cards, not template hover overlays.
+ * main.css has `.portfolio .portfolio-item .portfolio-info {opacity:0;bottom:-100%}`
+ * and reveals it only on hover. Override both normal and hover states so
+ * project names, descriptions, demo links and detail buttons are always shown,
+ * including on touchscreens where hover is unavailable.
+ */
+.portfolio .portfolio-item.project-card > .portfolio-info,
+.portfolio .portfolio-item.project-card:hover > .portfolio-info,
+.portfolio .portfolio-item.project-card:focus-within > .portfolio-info {
+  position: relative !important;
+  inset: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  display: flex !important;
+  flex: 1 1 auto;
+  flex-direction: column;
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+  transition: none !important;
+  background: #fff;
+  min-height: 210px;
+}
+
+/* Keep the CTA anchored without making the rest of the card a hover layer. */
+.portfolio .portfolio-item.project-card > .portfolio-info .project-link {
+  display: inline-flex;
+  margin-top: auto;
+  align-self: flex-start;
+}
+
+@media (max-width: 575.98px) {
+  .portfolio .portfolio-item.project-card > .portfolio-info {
+    min-height: 0;
+    padding-bottom: 76px !important;
+  }
+}
