@@ -157,7 +157,7 @@
   if(!ExcelJS?.Workbook)throw Error('No se cargó el generador de archivos Excel. Actualiza la página e inténtalo nuevamente.');
   const reporte=prepararReporte(data,tipo);
   const workbook=new ExcelJS.Workbook();
-  workbook.creator='Administración Misión Jardines';
+  workbook.creator='Administración Fraccionamiento Demo';
   workbook.title=reporte.titulo;
   workbook.created=new Date();
   const addSheet=(nombre,cabeceras,filas)=>{
