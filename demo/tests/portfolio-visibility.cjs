@@ -47,7 +47,7 @@ const { chromium } = require('playwright');
         assert.equal(state.opacity, '1', state.heading + ': invisible sin hover');
         assert.equal(state.visibility, 'visible');
         assert.equal(state.position, 'relative');
-        assert.equal(state.bottom, 'auto');
+        assert(['auto', '0px'].includes(state.bottom), state.heading + ': desplazamiento no esperado (' + state.bottom + ')');
         assert(state.belowImage, state.heading + ': texto superpuesto a la imagen');
         assert(state.infoHeight > 170, state.heading + ': tarjeta colapsada');
         assert(state.linkWidth > 30 && state.detailWidth > 30, state.heading + ': acciones ocultas');
@@ -57,7 +57,7 @@ const { chromium } = require('playwright');
         state = await read();
         assert.equal(state.opacity, '1');
         assert.equal(state.position, 'relative');
-        assert.equal(state.bottom, 'auto');
+        assert(['auto', '0px'].includes(state.bottom), state.heading + ': desplazamiento no esperado (' + state.bottom + ')');
         assert(state.belowImage, state.heading + ': cambia a overlay con hover');
       }
       console.log('PASS', viewport.width, 'px — three always-visible cards');
