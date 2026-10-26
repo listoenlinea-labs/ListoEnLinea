@@ -337,3 +337,71 @@ test('Un pago ficticio recién registrado aparece en la línea de tiempo sin dup
  assert.equal(final.movimientos.reduce((t,m)=>t+m.monto,0),
   state.pagos.filter(x=>x.casaId===house.casaId).reduce((t,m)=>t+m.monto,0));
 });
+
+
+test('Seguridad refleja el mismo estado de cuotas que Análisis, sin consultar TAGs ni servicios reales',async()=>{
+ const {request,requests}=residential();
+ const analysis=(await request('/finanzas/analisis')).data;
+ const expected=new Map(analysis.viviendas.map(h=>[h.calle+' '+h.numero,h]));
+ const rows=[];
+ for(let pagina=1;pagina<=16;pagina++){
+  const page=await request('/seguridad-cuotas/cuotas-viviendas?pagina='+pagina);
+  assert.equal(page.ok,true);
+  assert.equal(page.total,231);
+  assert.equal(page.paginas,16);
+  assert(page.viviendas.length<=15);
+  assert.equal(page.periodo,analysis.periodo);
+  rows.push(...page.viviendas);
+ }
+ assert.equal(rows.length,231);
+ for(const r of rows){
+  const h=expected.get(r.calle+' '+r.numero);
+  assert(h,'Vivienda inexistente en Seguridad: '+r.calle+' '+r.numero);
+  assert.equal(r.estado,h.estatus==='PAGADO'?'AL_CORRIENTE':'DEUDOR');
+  assert.equal(r.ultimaFechaPago,h.ultimoPago?.fecha?.slice(0,10)||null);
+  assert.equal(r.ultimoMesPagado,
+    (h.ultimoMesPagado?.mes||'').toUpperCase()+' '+h.ultimoMesPagado.anio);
+ }
+ assert.equal(rows.filter(r=>r.estado==='AL_CORRIENTE').length,analysis.pagadas);
+ assert.equal(rows.filter(r=>r.estado==='DEUDOR').length,analysis.pendientes);
+ const paid=await request('/seguridad-cuotas/cuotas-viviendas?estado=AL_CORRIENTE');
+ assert.equal(paid.total,analysis.pagadas);
+ assert(paid.viviendas.every(r=>r.estado==='AL_CORRIENTE'));
+ const due=await request('/seguridad-cuotas/cuotas-viviendas?estado=DEUDOR');
+ assert.equal(due.total,analysis.pendientes);
+ assert(due.viviendas.every(r=>r.estado==='DEUDOR'));
+ const search=await request('/seguridad-cuotas/cuotas-viviendas?calle=ROSAS&numero=11');
+ assert.equal(search.total,1);
+ assert.equal(search.viviendas[0].calle,'Rosas');
+ assert.equal(search.viviendas[0].numero,'11');
+ const invalid=await request('/seguridad-cuotas/cuotas-viviendas?estado=INCORRECTO');
+ assert.equal(invalid.ok,false);
+ assert.equal(requests.length,0,'Las consultas del demo no deben alcanzar ninguna API real');
+});
+test('Al registrar un pago ficticio, Seguridad y Análisis actualizan el mismo domicilio',async()=>{
+ const {request}=residential();
+ const analysis=(await request('/finanzas/analisis')).data;
+ const house=analysis.viviendas.find(h=>h.saldoPendiente>0&&h.tarifaMensual===300);
+ assert(house);
+ const query='/seguridad-cuotas/cuotas-viviendas?calle='+encodeURIComponent(house.calle)+'&numero='+house.numero;
+ const before=await request(query);
+ assert.equal(before.viviendas[0].estado,'DEUDOR');
+ const paid=await request('/finanzas/pagos-vivienda','POST',{casaId:house.casaId,montoTotal:house.saldoPendiente});
+ assert.equal(paid.ok,true);
+ const after=await request(query);
+ const updated=(await request('/finanzas/analisis')).data.viviendas.find(h=>h.casaId===house.casaId);
+ assert.equal(updated.estatus,'PAGADO');
+ assert.equal(after.viviendas[0].estado,'AL_CORRIENTE');
+ assert.equal(after.viviendas[0].ultimoMesPagado,(updated.ultimoMesPagado.mes+' '+updated.ultimoMesPagado.anio).toUpperCase());
+});
+test('Las rutas Mapa y Auto-users no están permitidas por el demo',()=>{
+ const policy=require('../mision/assets/js/permissions.js');
+ assert(!policy.pages.includes('mapa.html'));
+ assert(!policy.pages.includes('auto-users.html'));
+ assert.equal(policy.canAccess('ADMINISTRADOR','mapa.html'),false);
+ assert.equal(policy.canAccess('ADMINISTRADOR','auto-users.html'),false);
+ assert.equal(policy.canAccess('ADMINISTRADOR','seguridad.html'),true);
+ const nav=load('demo/mision/assets/js/site-sidebar.js');
+ assert(!nav.includes("page: 'mapa.html'"));
+ assert(!nav.includes("page: 'auto-users.html'"));
+});

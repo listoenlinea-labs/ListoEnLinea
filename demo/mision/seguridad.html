@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png?v=20261005">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png?v=20261005">
 
-  <script src="assets/js/permissions.js?v=20261012-seguridad"></script>
+  <script src="assets/js/permissions.js?v=20261026-sin-mapa-auto-users"></script>
   <script src="assets/js/page-access.js?v=20261012-seguridad"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -927,7 +927,7 @@
       <div class="panel-head">
         <div><span class="eyebrow">ESTADO DE MANTENIMIENTO</span>
           <h2 id="seguridadCuotasTitulo">Cuotas por vivienda</h2>
-          <p>Solo calle, casa, estado, última fecha de pago y último mes pagado. Información de MySQL, no del TAG.</p>
+          <p>Estado de mantenimiento de prueba, calculado con los mismos datos ficticios de Análisis de cuotas; no depende de los TAGs.</p>
         </div><button type="button" class="btn" id="segCuotasRefresh">Actualizar</button>
       </div>
       <div class="seg-cuotas-filters">
@@ -1220,8 +1220,8 @@ $('openGate').addEventListener('click', () => controlGate('open')); $('closeGate
     $('filterText').value = new URLSearchParams(location.search).get('buscar') || '';
     $('currentDate').textContent = window.MJDateDisplay.format(new Date()); renderIncidents(); setAdminContact(); Promise.all([loadHouses(), loadAccesses()]).catch(error => { $('apiStatus').textContent = 'Sin conexión'; toast(error.message) });
   </script>
-  <script src="assets/js/seguridad-cuotas.js?v=20261011"></script>
-  <script src="assets/js/site-sidebar.js?v=20261021-refresco-scroll"></script>
+  <script src="assets/js/seguridad-cuotas.js?v=20261026-demo-tabla"></script>
+  <script src="assets/js/site-sidebar.js?v=20261026-sin-mapa-auto-users"></script>
 </body>
 
 </html>

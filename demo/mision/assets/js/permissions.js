@@ -1,13 +1,13 @@
 /* Shared page policy: browser navigation and server authorization. */
 (function(root) {
   const admins = ['SUPER_ADMIN', 'ADMINISTRADOR'];
-  const security = ['index.html','bases_datos.html','mapa.html','visitas.html','zkteco.html','conmutador.html','reportes.html','reporte.html','seguridad.html'];
+  const security = ['index.html','bases_datos.html','visitas.html','zkteco.html','conmutador.html','reportes.html','reporte.html','seguridad.html'];
   const resident = ['index.html','cuotas.html','pagos.html','casa-club.html','anuncios.html','calendario.html','directorio.html'];
   const legacy = {
     MESA_DIRECTIVA: ['index.html','cuotas.html','pagos.html','bases_datos.html','zkteco.html','conmutador.html','anuncios.html','calendario.html','directorio.html'],
     MANTENIMIENTO: ['index.html','reportes.html','reporte.html','anuncios.html','calendario.html','directorio.html']
   };
-  const pages = [...new Set([...security,...resident,'index.html','cuenta.html','viviendas.html','verificacion-cuentas.html','auto-users.html','analisis-cuotas.html'])];
+  const pages = [...new Set([...security,...resident,'index.html','cuenta.html','viviendas.html','verificacion-cuentas.html','analisis-cuotas.html'])];
   function canAccess(role, page) {
     if (!pages.includes(page)) return false;
     if (admins.includes(role)) return true;
