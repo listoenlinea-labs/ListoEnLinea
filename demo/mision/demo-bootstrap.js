@@ -275,11 +275,87 @@ function handle(uri,method,body,query){
  if(uri==='/zkteco/logs')return ok([]);
  if(uri==='/zkteco/calles')return ok(streetList.map(calle=>({calle,total:state.casas.filter(c=>c.calle===calle).length})));
  if(uri==='/zkteco/pluma')return ok({simulado:true,accion:body.accion||'ABRIR',message:message});
- if(uri.startsWith('/casa-club/fechas'))return ok(state.reservas.map(r=>({fecha:r.fecha,estatus:r.estado})));
- if(uri==='/casa-club/mias'||uri==='/casa-club/administracion')return ok(state.reservas);
- if(uri==='/casa-club/solicitudes-pendientes')return ok(state.reservas.filter(r=>r.estado==='PENDIENTE'));
- if(uri==='/casa-club/reservas'&&method==='POST'){const c=byId(body.casaId)||state.casas[0];if(debt(c)>0||extraDue(c)>0)return {ok:false,message:'Reserva bloqueada por adeudos de mantenimiento o cuotas extraordinarias.'};if(state.reservas.some(r=>r.fecha===body.fecha&&r.estado!=='CANCELADA'))return {ok:false,message:'La fecha ya está reservada'};const entry={id:++state.lastId,casaId:c.id,casa:c,fecha:body.fecha,estado:'PENDIENTE',...body};state.reservas.push(entry);save();return ok(entry)}
- if(uri.startsWith('/casa-club/')&&parts.length>=3&&(method==='PATCH'||method==='PUT')){const entry=state.reservas.find(r=>r.id===Number(parts[2]));if(entry)entry.estado=parts[3]==='cancelar'?'CANCELADA':body.accion==='APROBAR'?'APROBADA':body.accion==='RECHAZAR'?'RECHAZADA':entry.estado;save();return ok(entry)}
+ // Casa Club: mismas estructuras de API que el controlador original, sin red real.
+ const clubToday=()=>new Intl.DateTimeFormat('sv-SE',{
+  timeZone:'America/Mexico_City',year:'numeric',month:'2-digit',day:'2-digit'
+ }).format(new Date());
+ const clubStatus=r=>r.estatus||r.estado||'PENDIENTE';
+ const clubRow=r=>({...r,estatus:clubStatus(r),casa:byId(r.casaId)||r.casa||null,
+   cuotaRecuperacion:Number(r.cuotaRecuperacion||0),depositoGarantia:Number(r.depositoGarantia||0),
+   limpieza:Number(r.limpieza||0),pagado:Boolean(r.pagado)});
+ const activeClub=r=>['PENDIENTE','APROBADA'].includes(clubStatus(r));
+ const validClubDate=value=>/^\d{4}-\d{2}-\d{2}$/.test(String(value||''))&&
+   !Number.isNaN(Date.parse(String(value)+'T12:00:00Z'))&&
+   new Date(String(value)+'T12:00:00Z').toISOString().slice(0,10)===value;
+ if(uri==='/casa-club/fechas'&&method==='GET'){
+  const desde=validClubDate(query.get('desde'))?query.get('desde'):clubToday();
+  const hasta=validClubDate(query.get('hasta'))?query.get('hasta'):'9999-12-31';
+  if(hasta<desde)return {ok:false,message:'Rango de fechas inválido'};
+  const ocupadas=state.reservas.filter(r=>activeClub(r)&&r.fecha>=desde&&r.fecha<=hasta)
+   .map(r=>({fecha:r.fecha,estatus:clubStatus(r)}));
+  // No envolver en {data}: casa-club.js espera {ok:true,ocupadas:[...]}.
+  return {ok:true,ocupadas};
+ }
+ if(uri==='/casa-club/mias'||uri==='/casa-club/administracion')
+  return ok(state.reservas.map(clubRow).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha))));
+ if(uri==='/casa-club/solicitudes-pendientes')
+  return {ok:true,cantidad:state.reservas.filter(r=>clubStatus(r)==='PENDIENTE').length};
+ if(uri==='/casa-club/reservas'&&method==='POST'){
+  const fecha=String(body.fecha||''),c=byId(body.casaId)||(!body.casaId?state.casas[0]:null);
+  if(!validClubDate(fecha)||fecha<clubToday())
+   return {ok:false,message:'Selecciona una fecha válida, desde hoy en adelante'};
+  if(!c)return {ok:false,message:'Vivienda ficticia inexistente'};
+  const mantenimiento=debt(c),extraordinarias=extraDue(c);
+  if(mantenimiento>0||extraordinarias>0){
+   const total=cap(mantenimiento+extraordinarias);
+   return {ok:false,codigo:'ADEUDOS_RESERVA',message:'Esta vivienda tiene adeudos en mantenimiento o cuotas extraordinarias.',
+    adeudos:{total,totales:{MANTENIMIENTO:mantenimiento,EXTRAORDINARIO:extraordinarias},
+      tipos:{MANTENIMIENTO:mantenimiento?[{periodo:yearMonth(curr),monto:mantenimiento}]:[],
+        EXTRAORDINARIO:extraordinarias?extraCharges(c).filter(x=>x.estado!=='PAGADO'&&x.periodoIndice<=curr):[]}}};
+  }
+  if(state.reservas.some(r=>r.fecha===fecha&&activeClub(r)))
+   return {ok:false,message:'Esta fecha ya está ocupada o pendiente de aprobación'};
+  const entry={id:++state.lastId,usuarioId:admin.id,casaId:c.id,fecha,fechaBloqueada:fecha,
+   solicitante:String(body.solicitante||c.nombre),telefono:String(body.telefono||c.telefono),
+   correo:String(body.correo||c.correo),propietario:Boolean(body.propietario),
+   motivo:String(body.motivo||'Evento de demostración'),estatus:'PENDIENTE',
+   pagado:false,cuotaRecuperacion:0,depositoGarantia:0,limpieza:0,
+   garantiaDevuelta:false,fechaLimitePago:null,notas:''};
+  state.reservas.push(entry);save();
+  return ok({id:entry.id,fecha},{message:'Solicitud ficticia registrada: fecha apartada hasta revisión de Administración.'});
+ }
+ if(uri.startsWith('/casa-club/reservas/')&&uri.endsWith('/cancelar')&&method==='PATCH'){
+  const row=state.reservas.find(r=>r.id===Number(parts[2]));
+  if(!row)return {ok:false,message:'Reserva no encontrada'};
+  if(!activeClub(row))return {ok:false,message:'La reserva no puede cancelarse en este estado'};
+  row.estatus='CANCELADA';row.fechaBloqueada=null;save();
+  return ok({id:row.id},{message:'Reserva ficticia cancelada'});
+ }
+ if(uri.startsWith('/casa-club/administracion/')&&method==='PATCH'){
+  const row=state.reservas.find(r=>r.id===Number(parts[2])),action=String(body.accion||'').toUpperCase();
+  if(!row)return {ok:false,message:'Reserva no encontrada'};
+  if(['APROBAR','RECHAZAR'].includes(action)){
+   if(clubStatus(row)!=='PENDIENTE')return {ok:false,message:'La solicitud ya fue revisada'};
+   if(action==='APROBAR'){
+    const c=byId(row.casaId);
+    if(debt(c)>0||extraDue(c)>0)return {ok:false,message:'No se puede aprobar una reserva con adeudos'};
+    row.cuotaRecuperacion=cap(body.cuotaRecuperacion);
+    row.depositoGarantia=cap(body.depositoGarantia);
+    row.limpieza=cap(body.limpieza);
+    row.fechaLimitePago=body.fechaLimitePago||null;
+   }
+   row.estatus=action==='APROBAR'?'APROBADA':'RECHAZADA';
+   if(row.estatus==='RECHAZADA')row.fechaBloqueada=null;
+  }else if(action==='PAGO'){
+   if(clubStatus(row)!=='APROBADA')return {ok:false,message:'Solo se puede pagar una reserva aprobada'};
+   row.pagado=Boolean(body.pagado);row.folio=String(body.folio||'FOLIO-FICTICIO-'+row.id);
+  }else if(action==='GARANTIA'){
+   if(clubStatus(row)!=='APROBADA'||!row.pagado)return {ok:false,message:'Debes confirmar el pago antes de devolver la garantía'};
+   row.garantiaDevuelta=Boolean(body.garantiaDevuelta);
+  }else return {ok:false,message:'Acción de Casa Club inválida'};
+  row.notas=String(body.notas||row.notas||'');save();
+  return ok(clubRow(row),{message:'Cambios ficticios guardados'});
+ }
  if(uri==='/visitas'&&method==='GET')return ok(state.visitas,{visitas:state.visitas});
  if(uri==='/visitas'&&method==='POST'){const entry={id:++state.lastId,fecha:longDate,estado:'PROGRAMADA',...body};state.visitas.push(entry);save();return ok(entry)}
  if(uri.startsWith('/visitas/')&&method==='DELETE'){state.visitas=state.visitas.filter(v=>v.id!==Number(parts[1]));save();return ok({deleted:true})}
