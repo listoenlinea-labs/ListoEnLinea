@@ -1,0 +1,20 @@
+:root{
+  --mint-50:#f5faf7;--mint-100:#eaf6f2;--mint-200:#d3eae3;--mint-300:#afd6c9;--mint-500:#7daea0;
+  --pink-100:#fff2f6;--pink-200:#f6dbe5;--lavender-100:#f6f0fa;--lavender-300:#cab7d7;
+  --ink:#33433f;--ink-soft:#70817b;--line:#e2ece7;--paper:#ffffff;--canvas:#f7faf8;
+  --shadow:0 14px 45px rgba(73,103,93,.08);--shadow-lg:0 22px 80px rgba(62,104,90,.14);
+  --radius:20px;--font:'Aptos','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:var(--font);color:var(--ink);background:var(--canvas);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}svg{display:block}
+.btn{border:0;border-radius:12px;padding:12px 18px;font-size:13px;font-weight:700;display:inline-flex;gap:9px;align-items:center;justify-content:center;transition:transform .16s ease,box-shadow .16s ease,background .16s ease;text-decoration:none}
+.btn:hover{transform:translateY(-1px)}.btn:focus-visible,.nav-link:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #b5dace;outline-offset:2px}
+.btn-primary{background:#82b6a7;color:#fff;box-shadow:0 7px 22px rgba(99,155,137,.18)}.btn-primary:hover{background:#6da796}
+.btn-secondary{background:#eff7f3;color:#4c8979}.btn-outline{background:#fff;color:#5e887d;border:1px solid #d9e9e1}
+.btn-danger{background:#fff0f2;color:#ac6271}.muted{color:var(--ink-soft)}.hidden{display:none!important}
+.field{display:flex;flex-direction:column;gap:7px}.field label{font-size:12px;font-weight:750;color:#536a62}
+.field input,.field select,.field textarea{width:100%;border:1px solid #dfeae5;background:#fff;border-radius:12px;padding:12px 13px;outline:none;color:var(--ink);min-width:0}
+.field textarea{min-height:80px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:#92c4b4;box-shadow:0 0 0 4px rgba(177,215,203,.24)}
+.badge{border-radius:999px;padding:5px 10px;font-size:11px;font-weight:750;white-space:nowrap}
+.badge-confirmed{color:#378d68;background:#e3f6e8}.badge-pending{color:#af8250;background:#fff2de}.badge-completed{color:#6b83ae;background:#eaf0ff}.badge-cancelled{color:#b16e81;background:#fff0f2}.badge-in_progress{color:#5a83b0;background:#edf4fc}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

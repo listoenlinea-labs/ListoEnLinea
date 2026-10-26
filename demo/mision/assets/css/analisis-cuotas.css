@@ -1,0 +1,700 @@
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f5f7fa;color:#25324a}
+*{box-sizing:border-box}body{margin:0;padding:25px 26px}button,input,select{font:inherit}button{cursor:pointer}.analysis-page{max-width:1490px;margin:auto}
+.analysis-hero{background:linear-gradient(110deg,#fff8f1,#faf6ff 57%,#f3fcf5);padding:25px 31px;border:1px solid #e7e7ec;border-radius:22px}
+.analysis-hero h1{font-size:clamp(26px,3vw,39px);margin:8px 0}.analysis-hero em{color:#ed8d34;font-style:normal}
+.analysis-hero p,.hint{font-size:11px;color:#7888a1;line-height:1.6}.eyebrow{color:#d16e18;letter-spacing:.13em;font-size:10px;font-weight:850}
+.analysis-tabs{display:flex;gap:10px;padding:6px;margin:14px 0;border:1px solid #e9e6ee;border-radius:14px;background:white}
+.analysis-tabs a{padding:11px 24px;font-size:12px;text-decoration:none;color:#7a6998;border-radius:10px;font-weight:850}.analysis-tabs a.active{color:#694e86;background:#f8f0ff;border:1px solid #e6d6f0}
+.analysis-card{border:1px solid #e2e8ef;border-radius:19px;background:white;padding:21px;margin-bottom:15px;box-shadow:0 6px 22px #2b41560a}.analysis-card h2{font-size:19px;margin:8px 0 16px}
+.filters,.expense-form{display:grid;grid-template-columns:1fr 1fr auto;align-items:end;gap:11px}.filters label,.expense-form label{font-size:10px;color:#667893;font-weight:850}
+.filters input,.filters select,.expense-form input,.expense-form select{display:block;width:100%;min-width:0;padding:10px 12px;height:43px;border-radius:10px;margin-top:6px;border:1px solid #d8e1ed;background:#fff;color:#2d3d59}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16' fill='none' stroke='%23796492' stroke-width='2.3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 12px center!important;padding-right:34px!important}
+.primary{border:0;background:linear-gradient(110deg,#eb9137,#db760d);color:white;border-radius:11px;padding:13px 17px;font-size:11px;font-weight:900}.soft{border:1px solid #e6d5ee;background:#fbf7ff;color:#6d5889;border-radius:10px;padding:12px 16px;font-size:11px;font-weight:850}
+.metric-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:17px}.metric{padding:18px;border-radius:16px;border:1px solid #dcebe4;background:linear-gradient(145deg,#f6fcf8,#fff)}.metric:nth-child(2n){border-color:#eadcf3;background:#fcf8ff}.metric:nth-child(3n){border-color:#f4dfc9;background:#fff8f1}.metric small{display:block;margin-bottom:11px;font-size:11px;color:#788499}.metric strong{font-size:24px;font-weight:900;color:#264d3b}
+.analysis-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:15px}.donut-wrapper{display:flex;gap:30px;align-items:center;justify-content:center;min-height:250px}
+.donut{flex-shrink:0;display:grid;place-items:center;width:200px;height:200px;border-radius:50%;background:conic-gradient(#77bb97 0 var(--percent),#f3cead var(--percent) 100%);position:relative}
+.donut:before{content:'';position:absolute;inset:36px;background:white;border-radius:50%}.donut>div{position:relative;font-weight:900;font-size:27px;text-align:center;color:#385b48}.donut small{display:block;font-size:10px;color:#75849c;font-weight:600}
+.legend-block{font-size:12px;line-height:2.2;color:#67778e}.legend-block b{font-size:15px;color:#33445e}.bars{display:grid;gap:11px;max-height:320px;overflow-y:auto}.bar-row{display:grid;grid-template-columns:150px 1fr 62px;gap:10px;align-items:center;font-size:11px;color:#66758e}.bar-row strong{color:#2e435b;font-size:11px}.track{height:14px;border-radius:9px;background:#f4eaf1;overflow:hidden}.fill{height:100%;border-radius:9px;background:linear-gradient(100deg,#a8dbb6,#79bd99);min-width:0}.fill.cost{background:linear-gradient(100deg,#f3bf9e,#e88c75)}
+.money-bars{display:grid;gap:13px;margin-bottom:15px}.money-row{display:grid;grid-template-columns:150px 1fr 100px;gap:10px;align-items:center;font-size:11px;color:#69778b}.money-row strong{font-size:12px;text-align:right}.money-row .track{height:18px}
+.expense-form{grid-template-columns:1fr 1fr 1fr;margin:13px 0 20px}.expense-form button{align-self:end}
+.heading{display:flex;justify-content:space-between;align-items:center;gap:10px}.heading p{margin-top:0;color:#7f8da4;font-size:11px}
+.table-scroll{overflow:auto;border-radius:12px;border:1px solid #e9e8ef}table{border-collapse:collapse;width:100%;min-width:650px;font-size:11px}th{background:#fbf7ff;color:#73638c;text-align:left;padding:12px;border-bottom:1px solid #e9deef;position:sticky;top:0}td{padding:12px;border-bottom:1px solid #e9edf1;color:#45546e}.houses-scroll{max-height:430px}
+.residences-filter{grid-template-columns:1.5fr 1fr 1fr auto;margin-bottom:15px}
+.status-paid,.status-pending{padding:5px 8px;border-radius:9px;font-weight:800}.status-paid{background:#e4f5eb;color:#37774c}.status-pending{background:#fff0e4;color:#ad6a31}
+#financeNotice{border:1px solid #edcdd0;background:#fff6f5;color:#a4505c;border-radius:11px;margin:12px 0;padding:12px;font-size:11px}
+@media(max-width:1050px){.analysis-columns{grid-template-columns:1fr}.metric-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:700px){body{padding:14px}.analysis-card{padding:14px}.filters,.expense-form,.residences-filter{grid-template-columns:1fr}.money-row,.bar-row{grid-template-columns:95px 1fr 57px}.donut-wrapper{flex-wrap:wrap}.metric strong{font-size:21px}}
+
+
+/* Tabs compartidas visualmente con cuotas.html: siempre horizontales. */
+.analysis-page nav.analysis-tabs{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  width:100%;
+  max-width:100%;
+  min-height:0!important;
+  height:auto!important;
+  margin:14px 0 17px!important;
+  padding:6px!important;
+  overflow-x:auto;
+  overflow-y:hidden;
+  border:1px solid #e9e6ee;
+  border-radius:14px;
+  background:#fff;
+  scrollbar-width:thin;
+}
+.analysis-page nav.analysis-tabs > a{
+  display:inline-flex;
+  flex:0 0 auto;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:10px 24px;
+  border:1px solid transparent;
+  border-radius:10px;
+  color:#7a6998;
+  text-decoration:none;
+  font-size:12px;
+  font-weight:850;
+  white-space:nowrap;
+  line-height:1.2;
+  transition:background .18s ease,border-color .18s ease;
+}
+.analysis-page nav.analysis-tabs > a:hover{background:#faf6ff;color:#694e86}
+.analysis-page nav.analysis-tabs > a.active,
+.analysis-page nav.analysis-tabs > a[aria-current="page"]{
+  background:#f8f0ff;
+  border-color:#e6d6f0;
+  color:#694e86;
+}
+.analysis-page nav.analysis-tabs > a:focus-visible{
+  outline:3px solid #caaee0;
+  outline-offset:2px;
+}
+/* La barra lateral ocupa espacio del body: el margen vive dentro de main,
+   por lo que se mantiene también cuando el menú se colapsa. */
+.analysis-page{
+  box-sizing:border-box;
+  width:calc(100% - 48px);
+  max-width:1490px;
+  min-width:0;
+  margin-inline:auto;
+}
+.analysis-page > *{min-width:0}
+@media(max-width:820px){
+  .analysis-page{width:calc(100% - 36px)}
+}
+@media(max-width:480px){
+  .analysis-page{width:calc(100% - 28px)}
+  .analysis-page nav.analysis-tabs{gap:6px!important;padding:5px!important}
+  .analysis-page nav.analysis-tabs > a{flex:1 1 0;min-width:0;padding:10px 12px}
+}
+
+
+/* Registro de egresos: referencia automática, filtros y orden */
+.expense-reference-note{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:10px 13px;min-height:43px;border-radius:10px;border:1px solid #dbede2;background:#f6fbf8;color:#376d50;font-size:11px}
+.expense-reference-note strong{font-weight:850}.expense-reference-note span{font-size:10px;color:#688675}
+.expense-filters{display:grid;grid-template-columns:minmax(150px,1.35fr) repeat(3,minmax(115px,1fr)) minmax(185px,1.2fr) auto;gap:10px;align-items:end;padding:16px;margin:4px 0 8px;border:1px solid #e9e7f0;border-radius:13px;background:#fdfbff}
+.expense-filters label{min-width:0;font-size:10px;font-weight:850;color:#667893}
+.expense-filters input,.expense-filters select{display:block;width:100%;min-width:0;margin-top:6px;padding:10px 12px;height:43px;border:1px solid #d8e1ed;border-radius:10px;background-color:#fff;color:#2d3d59}
+.expense-filters button{min-height:43px;white-space:nowrap}
+.expense-results{font-size:11px;color:#6a7991;margin:9px 1px 11px}
+.expense-table-scroll{max-height:520px;overflow:auto}
+@media(max-width:1250px){.expense-filters{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.expense-filters{grid-template-columns:repeat(2,minmax(0,1fr));padding:11px}.expense-filters label:first-child{grid-column:span 2}.expense-filters button{grid-column:span 2}}
+@media(max-width:420px){.expense-filters{grid-template-columns:1fr}.expense-filters label:first-child,.expense-filters button{grid-column:auto}}
+
+
+/* Confirmación de cuotas por vivienda / estado de sincronización ZKTeco */
+.house-payment-button{padding:8px 11px;min-width:102px;white-space:nowrap}
+.finance-pay-overlay[hidden]{display:none!important}
+.finance-pay-overlay{position:fixed;inset:0;z-index:10090;display:grid;place-items:center;padding:16px;background:rgba(26,33,53,.65);backdrop-filter:blur(6px)}
+.finance-pay-dialog{width:min(720px,100%);max-height:calc(100vh - 32px);overflow-y:auto;padding:22px;border-radius:19px;border:1px solid #e5e8f1;background:#fff;box-shadow:0 22px 70px rgba(21,28,43,.25)}
+.finance-pay-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.finance-pay-heading h2{margin:5px 0 2px;font-size:20px}
+.house-payment-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin-top:14px}
+.house-payment-form label{min-width:0;font-size:11px;font-weight:850;color:#60708a}
+.house-payment-form input,.house-payment-form select{display:block;width:100%;min-width:0;height:43px;margin-top:6px;padding:9px 12px;border:1px solid #d8e1ed;border-radius:10px;background-color:#fff;color:#2d3d59}
+.house-payment-preview{grid-column:1/-1;border-radius:12px;padding:14px;color:#385842;font-size:12px;line-height:1.65;background:#f3faf5;border:1px solid #d4ebdb}
+.house-payment-notice{grid-column:1/-1;margin:0}
+.house-payment-actions{grid-column:1/-1;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px}
+.house-payment-actions button{min-height:43px}
+.house-payment-status{font-size:12px;line-height:1.6;color:#5d5375;margin:14px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.house-payment-status:empty{display:none}
+@media(max-width:640px){.finance-pay-dialog{padding:15px}.house-payment-form{grid-template-columns:1fr}.house-payment-actions button{flex:1 1 150px}.finance-pay-heading h2{font-size:17px}}
+
+
+/* Pago manual desde último período realmente liquidado */
+.house-last-payment{grid-column:1/-1;border:1px solid #cde8dd;background:#f3faf6;border-radius:12px;padding:13px 15px;color:#316c53;font-size:12px;font-weight:750;line-height:1.6}
+.house-payment-review[hidden]{display:none!important}
+.house-payment-review{grid-column:1/-1;background:#fff8eb;border:1px solid #f3d6a6;padding:13px 15px;border-radius:12px}
+.house-payment-review label{display:flex;flex-direction:row;align-items:flex-start;gap:10px;font-weight:750;line-height:1.55}
+.house-payment-review input{flex:0 0 auto;width:18px;height:18px;margin:1px 0 0;accent-color:#da7b11}
+.house-payment-review p{margin:9px 0 0;color:#825c30;font-size:11px;line-height:1.5}
+.house-payment-form input[readonly]{background:#f2f6fb;color:#5d6d83;cursor:default}
+.house-payment-preview{white-space:pre-wrap}
+
+/* Importe del último movimiento: acceso al historial contable de la vivienda. */
+.house-paid-history{display:inline-flex;align-items:center;justify-content:center;width:max-content;min-width:0;max-width:100%;padding:8px 10px;border:1px solid #cfe9dc;border-radius:10px;background:#f0faf4;color:#286a4c;text-align:left;white-space:nowrap}
+.house-paid-history strong{font-size:12px;font-variant-numeric:tabular-nums}
+.house-paid-history:hover,.house-paid-history:focus-visible{border-color:#65b588;background:#e3f6ea;outline-offset:2px}
+/* Pagado toma el tono del estado, sin alterar el importe ni su historial. */
+.house-paid-history.is-pending{border-color:#f3dac4;background:#fff0e4;color:#ad6a31}
+.house-paid-history.is-pending:hover,.house-paid-history.is-pending:focus-visible{border-color:#e5b995;background:#ffe8d7}
+.house-paid-history.is-neutral{border-color:#e2e7ef;background:#f0f3f8;color:#6e7b91}
+.house-paid-history.is-neutral:hover,.house-paid-history.is-neutral:focus-visible{border-color:#c9d3e1;background:#e7ebf3}
+.house-payment-actions .primary:disabled{background:#e7eaf0!important;color:#929cad!important;opacity:1;cursor:not-allowed;box-shadow:none}
+.tags-dates{display:flex;flex-direction:column;gap:4px;overflow-wrap:anywhere}
+.tags-dates strong{color:#26664c;font-size:12px}
+.tags-dates small{font-size:11px;color:#7b8298}
+.tags-dates .tags-date-unverified{color:#8a8399}
+.tags-date-mismatch{padding:6px 8px;border-radius:9px;background:#fff0dc;color:#97572a;font-size:11px;line-height:1.45}
+.history-dialog{width:min(740px,100%)}
+.history-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:17px 0 20px}
+.history-stat{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:13px;border:1px solid #dbebdf;background:#f3fbf5}
+.history-stat:nth-child(2){border-color:#e6dbf2;background:#faf5ff}
+.history-stat.credit{border-color:#cce7db;background:#f0fbf6}
+@media(max-width:700px){.history-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.history-stat.debt{border-color:#f6ddc8;background:#fff8ee}
+.history-stat small{font-size:11px;color:#6d788c}.history-stat strong{font-size:19px;color:#35576a;overflow-wrap:anywhere}
+.history-timeline{position:relative;display:grid;gap:13px;max-height:410px;overflow-y:auto;padding:0 4px 0 19px}
+.history-timeline:before{content:"";position:absolute;left:6px;top:10px;bottom:10px;width:2px;background:#d8e8e0}
+.history-event{position:relative}.history-dot{position:absolute;left:-18px;top:16px;width:13px;height:13px;border-radius:50%;border:3px solid #83c5a2;background:#fff}
+.history-event-card{border:1px solid #e1e9ef;border-radius:13px;background:linear-gradient(115deg,#f9fdfb,#fff);padding:13px 15px}
+.history-event:nth-child(3n+2) .history-event-card{background:#fbf8ff;border-color:#eae0f3}
+.history-event:nth-child(3n+3) .history-event-card{background:#fffaf2;border-color:#f3e5d1}
+.history-event-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}.history-event-top strong{font-size:18px;color:#2c5541}.history-event-top time{font-size:12px;font-weight:750;color:#5e6e84}
+.history-event-card .history-concept{font-size:12px;color:#586b80;margin:8px 0}
+.history-event-card>small{display:block;margin-top:9px;font-size:10px;color:#8791a1;overflow-wrap:anywhere}
+.history-months{display:flex;flex-wrap:wrap;gap:5px}.history-months span{padding:5px 9px;border-radius:999px;background:#e8f5f0;color:#366d55;font-size:10px;font-weight:750}
+.history-event-card .history-penalty{margin:9px 0 0;color:#a26230;font-size:11px}
+/* Recibo por movimiento: boton discreto, adaptable y sin interferir con la linea de tiempo. */
+.history-event-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:9px}
+.history-event-footer>small{flex:1 1 190px;min-width:0;overflow-wrap:anywhere;font-size:10px;color:#8791a1}
+.history-receipt-button{flex:0 0 auto;min-height:34px;padding:7px 12px;border:1px solid #e7d8f1;border-radius:10px;background:#fbf7ff;color:#70578a;font-size:11px;font-weight:800;line-height:1.25;cursor:pointer;transition:background .15s,border-color .15s}
+.history-receipt-button:hover{background:#f5edfd;border-color:#cbb2e6}
+.history-receipt-button:focus-visible{outline:3px solid #b9a4d1;outline-offset:2px}
+.history-receipt-button:disabled{opacity:.52;cursor:not-allowed}
+#houseReceiptModal{z-index:10110}
+@media(max-width:580px){.history-event-footer{align-items:stretch}.history-receipt-button{width:100%}}
+@media(prefers-reduced-motion:reduce){.history-receipt-button{transition:none}}
+.history-debts{margin-top:20px}.history-debts h3{font-size:14px;color:#43576d}
+.history-debt-list{display:grid;gap:8px}.history-debt{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#fff6ee;border:1px solid #f1ddca;border-radius:12px;padding:11px 13px}
+.history-debt>div{display:flex;flex-direction:column;gap:4px}.history-debt strong{font-size:12px;color:#72523f}.history-debt small{font-size:11px;color:#977a69}.history-debt b{font-size:14px;color:#9b5835;text-align:right}
+.history-paid-up,.history-empty{padding:14px;border:1px solid #d9eddf;border-radius:12px;background:#f5fbf6;color:#417154;font-size:12px}
+@media(max-width:580px){.history-summary{grid-template-columns:1fr 1fr}.history-stat.debt{grid-column:1/-1}.history-stat strong{font-size:16px}.history-debt{align-items:flex-start}.tags-detail-header{display:none}.tags-detail-item{min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px}.tags-detail-item .tags-dates{grid-column:1/-1;border-top:1px solid #edf0f5;padding-top:9px}}
+
+/* Mensaje verde únicamente cuando el servidor confirma el registro del pago. */
+#financeNotice[data-kind="success"]{border-color:#cae8d7;background:#f1faf5;color:#276347}
+
+/* Mantener legible la nueva columna de período, con scroll horizontal en móvil. */
+.houses-scroll table{min-width:900px}.houses-scroll th,.houses-scroll td{white-space:nowrap}
+
+/* Estado de TAGs en Análisis: compacta la tabla y evita estados inventados. */
+.houses-scroll table{min-width:1120px}
+.house-tags-button{display:inline-flex;align-items:center;justify-content:center;gap:0;min-width:0;padding:8px 12px;border:1px solid #e7d8f3;border-radius:11px;background:#fdf9ff;color:#66527e;text-align:left;font-size:11px;cursor:pointer}
+.house-tags-button:hover,.house-tags-button:focus-visible{border-color:#b9a4d1;background:#f7efff;outline-offset:2px}
+.house-tags-button strong{font-size:12px;color:#46345f}
+.tags-dialog{width:min(860px,100%)}
+.tags-summary{padding:13px;border:1px solid #d9e7f0;background:#f5fafc;border-radius:12px;color:#324e65;font-size:12px;font-weight:800;line-height:1.6}
+.tags-check-note{padding:10px 12px;border:1px solid #eadff5;background:#fcf8ff;border-radius:10px;color:#695e80;font-size:11px;line-height:1.6}
+.tags-detail-scroll{overflow-x:auto;margin-top:14px}
+.tags-detail-header,.tags-detail-item{display:grid;grid-template-columns:minmax(120px,1fr) minmax(200px,1.55fr) minmax(140px,1fr);gap:14px;align-items:center;min-width:525px}
+.tags-detail-header{padding:12px 14px;border:1px solid #eadff0;border-radius:11px;background:#fbf7ff;color:#746287;font-size:11px;font-weight:850}
+.tags-detail-header[hidden]{display:none!important}
+.tags-detail-list{display:grid;gap:9px;margin-top:10px}
+.tags-detail-item{padding:13px 14px;border:1px solid #e4eaf1;border-radius:11px;background:#fff}
+.tags-detail-item strong{font-size:12px;color:#344761;overflow-wrap:anywhere}
+.tags-detail-item .tags-date{white-space:nowrap}
+.tags-detail-item .tags-state{font-size:11px}
+.tags-state{width:fit-content;max-width:100%;border-radius:8px;padding:5px 8px;font-weight:800;line-height:1.45}
+.tags-state.is-active{background:#e8f6ed;color:#287344}
+.tags-state.is-inactive{background:#fff0e9;color:#a2472f}
+.tags-state.is-unknown{background:#f0f3f8;color:#68758a}
+.tags-empty{padding:18px;text-align:center;color:#8390a0;font-size:12px}
+.tags-modal-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;padding-top:14px;border-top:1px solid #e9edf3}
+.tags-modal-footer button{min-height:42px}
+.tags-modal-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+@media(max-width:700px){.tags-modal-footer{flex-wrap:wrap}.tags-modal-actions{width:100%}}
+@media(max-width:420px){.tags-modal-footer>button{width:100%}.tags-modal-actions button{flex:1}}
+
+/* Inconsistencias cuotas/C3: señal visual suave, sin textos extra en la tabla. */
+.house-tags-button.is-warning{
+  border-color:#eeaaa0;
+  background:linear-gradient(120deg,#fff0e8,#ffe4e2);
+  color:#9f4238;
+}
+.house-tags-button.is-warning strong{color:#973a32}
+.house-tags-button.is-warning:hover,.house-tags-button.is-warning:focus-visible{
+  border-color:#d98978;
+  background:linear-gradient(120deg,#ffe6db,#ffd6d1);
+  outline-offset:2px;
+}
+/* La alerta detallada se lee en rojo dentro del modal, distinta del resumen. */
+.tags-summary-alert{
+  display:inline-block;
+  margin:3px 0 0 5px;
+  padding:5px 9px;
+  border:1px solid #f0b8b7;
+  border-radius:8px;
+  background:#fff0ef;
+  color:#ab3543;
+  font-size:11px;
+  font-weight:900;
+  line-height:1.5;
+}
+
+/* iPhone / móviles: filtros de egresos en filas completas.
+   A 421-700px el diseño anterior aún dividía los date inputs en dos columnas,
+   y el control nativo de Safari podía invadir el select adyacente. */
+@media(max-width:700px){
+  body.page-analisis .expense-filters{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:none!important;
+    grid-auto-flow:row!important;
+    grid-auto-rows:max-content!important;
+    align-items:stretch!important;
+    gap:12px!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    padding:13px!important;
+  }
+  body.page-analisis .expense-filters>label,
+  body.page-analisis .expense-filters>button{
+    display:block!important;
+    grid-column:1/-1!important;
+    grid-row:auto!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    margin:0!important;
+  }
+  body.page-analisis .expense-filters>label{
+    overflow-wrap:anywhere!important;
+    font-size:11px!important;
+    line-height:1.35!important;
+  }
+  body.page-analisis .expense-filters :is(input,select){
+    display:block!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:44px!important;
+    height:44px!important;
+    margin:6px 0 0!important;
+    font-size:16px!important;
+    line-height:1.2!important;
+  }
+  body.page-analisis .expense-filters input[type="date"]{
+    -webkit-min-logical-width:0;
+    padding-inline:11px!important;
+    overflow:hidden;
+    font-variant-numeric:tabular-nums;
+  }
+  body.page-analisis .expense-filters>button{
+    min-height:44px!important;
+    margin-top:2px!important;
+    text-align:center!important;
+  }
+}
+
+/* El control contenedor es neutro en escritorio: el input nativo conserva
+   todas sus funciones y el diseño original. Solo iOS/móvil usa la vista compacta. */
+.mj-date-control{display:contents}
+.mj-date-control>.mj-date-display{display:none}
+
+/* En Análisis la navegación Cuotas/Análisis está conservada, pero oculta.
+   Se necesita !important para prevalecer sobre el display:flex!important del
+   tema compartido, que se inserta después de esta hoja. */
+body.page-analisis.mj-shared-sidebar-enabled .analysis-page nav.analysis-tabs[hidden],
+body.page-analisis .analysis-page nav.analysis-tabs[hidden]{
+  display:none!important;
+  height:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+}
+
+/* Consulta de viviendas: cobro directo, sin abrir primero los TAGs. */
+.houses-scroll table{min-width:1120px}
+.house-pay-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:36px;
+  max-width:100%;
+  padding:8px 12px;
+  border:1px solid #e6d5ee;
+  border-radius:11px;
+  background:#fbf7ff;
+  color:#6d5889;
+  font-size:11px;
+  font-weight:850;
+  line-height:1.2;
+  white-space:nowrap;
+  cursor:pointer;
+  transition:border-color .15s ease,background .15s ease;
+}
+.house-pay-button:hover,.house-pay-button:focus-visible{
+  border-color:#b9a4d1;
+  background:#f7efff;
+  outline-offset:2px;
+}
+.tags-modal-footer{justify-content:flex-end}
+@media(max-width:700px){
+  .houses-scroll .house-pay-button{
+    max-width:100%;
+    min-height:36px;
+    padding:8px 10px;
+    font-size:11px;
+    white-space:normal;
+    text-align:center;
+  }
+}
+
+/* Filtro de último pago: LOV compuesta únicamente por mes y año. */
+.residences-filter{
+  grid-template-columns:minmax(170px,1.4fr) minmax(140px,.9fr)
+    minmax(140px,.9fr) minmax(235px,1.15fr) auto;
+}
+.residences-filter .paid-through-filter{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  margin:0;
+  padding:0;
+  border:0;
+}
+.residences-filter .paid-through-filter legend{
+  padding:0;
+  margin:0 0 6px;
+  color:#667893;
+  font-size:10px;
+  font-weight:850;
+}
+.residences-filter .paid-through-controls{
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(0,.8fr);
+  gap:7px;
+  align-items:center;
+  min-width:0;
+}
+.residences-filter .paid-through-controls select{
+  box-sizing:border-box;
+  display:block;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  height:43px;
+  margin:0;
+  padding-left:10px!important;
+  border:1px solid #d8e1ed;
+  border-radius:10px;
+  background-color:white;
+  color:#2d3d59;
+  font-size:12px;
+  font-weight:650;
+}
+@media(min-width:701px) and (max-width:1200px){
+  .residences-filter{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .residences-filter>label:first-child{grid-column:1/-1}
+}
+@media(max-width:700px){
+  body.page-analisis.mj-shared-sidebar-enabled .filters.residences-filter,
+  body.page-analisis .residences-filter{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  body.page-analisis.mj-shared-sidebar-enabled .residences-filter>*,
+  body.page-analisis .residences-filter>*{
+    grid-column:1/-1!important;
+    min-width:0!important;
+  }
+  body.page-analisis .residences-filter .paid-through-controls{
+    grid-template-columns:minmax(0,1.4fr) minmax(0,.75fr)!important;
+  }
+  body.page-analisis .residences-filter .paid-through-controls select{
+    height:44px!important;
+    min-height:44px!important;
+    font-size:16px!important;
+  }
+}
+#newExpense [hidden],#housePaymentForm [hidden],.finance-pay-overlay[hidden]{display:none!important}
+
+/* Tres conceptos sobre una misma consulta, filtros, TAGs y paginación. */
+.finance-concept-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:5px;margin:13px 0 7px;border:1px solid #e6e0f0;border-radius:13px;background:#f8f6fb}
+.finance-concept-tabs button{display:flex;align-items:center;justify-content:center;min-width:0;min-height:46px;padding:9px 10px;border:1px solid transparent;border-radius:10px;background:transparent;color:#6c6780;font-size:12px;font-weight:760;line-height:1.3;text-align:center;overflow-wrap:break-word;cursor:pointer}
+.finance-concept-tabs button.active,.finance-concept-tabs button[aria-selected="true"]{border-color:#d4eadd;background:#ebf8f0;color:#226846;box-shadow:0 3px 10px #2c725614}
+.finance-concept-tabs button:focus-visible{outline:2px solid #916ec3;outline-offset:2px}
+.finance-concept-hint{min-height:20px;margin:7px 2px 12px;color:#697991;font-size:11px;line-height:1.45}
+.status-neutral{display:inline-flex;padding:5px 8px;border-radius:9px;background:#f0f3f8;color:#6e7b91;font-weight:800;white-space:nowrap}
+@media(max-width:700px){
+  .finance-concept-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;padding:4px!important;width:100%;min-width:0}
+  .finance-concept-tabs button{min-height:52px;padding:7px 4px;font-size:clamp(9px,2.45vw,11px);line-height:1.25;hyphens:auto}
+  .finance-concept-hint{font-size:10px}
+}
+
+/* Solo escritorio: mismo ancho visual para Estado y Pagado en cada vivienda.
+   El estilo compacto por contenido se conserva en celulares y tabletas. */
+@media (min-width: 1024px) {
+  .houses-scroll #financeHouseRows .house-field-value > :is(.status-paid, .status-pending, .status-neutral),
+  .houses-scroll #financeHouseRows .house-paid-history {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 128px;
+    min-width: 128px;
+    max-width: 128px;
+    min-height: 36px;
+    padding-inline: 8px;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+/* Recibos: selección exclusiva de la pestaña Mantenimiento. */
+.finance-receipt-toolbar{display:flex;align-items:center;justify-content:space-between;gap:13px;flex-wrap:wrap;margin:12px 0;padding:12px 14px;border:1px solid #e4e8ef;border-radius:13px;background:#f7faf8}
+.finance-receipt-toolbar[hidden],.finance-receipt-preview[hidden],.finance-receipt-send[hidden]{display:none!important}
+.finance-receipt-toolbar span{color:#56657a;font-size:12px;line-height:1.5}
+.finance-receipt-toolbar button{min-height:37px;padding:9px 18px;border-radius:11px;white-space:nowrap}
+.finance-receipt-toolbar button:disabled{opacity:.48;cursor:not-allowed}
+.maintenance-receipt-active .houses-scroll table{min-width:1120px}
+.maintenance-receipt-active .houses-scroll #financeHouseRows>tr[data-receipt-row]{cursor:pointer}
+.maintenance-receipt-active .houses-scroll #financeHouseRows>tr[data-receipt-row]:focus-visible{outline:3px solid #b4753b;outline-offset:-3px}
+.maintenance-receipt-active .houses-scroll #financeHouseRows>tr.house-receipt-selected{background:#f5d0a7}
+.maintenance-receipt-active .houses-scroll #financeHouseRows>tr.house-receipt-selected>td{background:#f5d0a7;border-bottom-color:#daa576}
+.maintenance-receipt-active .houses-scroll #financeHouseRows>tr.house-receipt-selected>td:first-child{box-shadow:none}
+.finance-receipt-dialog{width:min(800px,100%)}
+.finance-receipt-status{margin:12px 0;padding:10px 13px;border:1px solid #e4e7ef;border-radius:10px;background:#f9f8fb;color:#59647a;font-size:12px;line-height:1.5}
+.finance-receipt-status[data-kind="error"]{border-color:#ecc9b5;background:#fff4ec;color:#985037}
+.finance-receipt-preview{display:block;width:100%;height:min(55vh,580px);min-height:320px;margin:12px 0;border:1px solid #dfe3e9;border-radius:12px;background:white}
+.finance-receipt-send{display:grid;gap:7px;padding:12px;border:1px solid #e5deed;border-radius:11px;background:#faf8fd}
+.finance-receipt-send label{color:#55476b;font-size:12px;font-weight:800}
+.finance-receipt-send input{box-sizing:border-box;width:100%;padding:11px;border:1px solid #ded6e9;border-radius:10px;background:white;color:#314258;font-size:14px;font-variant-numeric:tabular-nums}
+.finance-receipt-send input:focus-visible{outline:3px solid #e7c6a9;outline-offset:1px}
+.finance-receipt-send input[aria-invalid="true"]{border-color:#b45a40}
+.finance-receipt-send small{color:#758092;font-size:11px;line-height:1.5}
+.finance-receipt-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:14px}
+.finance-receipt-actions button{padding:11px 15px;border-radius:11px}
+.finance-receipt-actions button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:600px){.finance-receipt-toolbar{align-items:stretch}.finance-receipt-toolbar button{width:100%}.finance-receipt-preview{height:50vh;min-height:280px}.finance-receipt-actions button{flex:1 1 180px}}
+
+/* Las cuatro métricas principales son botones accesibles para descargar Excel. */
+button.finance-export-card{display:block;width:100%;font:inherit;text-align:left;cursor:pointer;color:inherit;transition:transform .15s,border-color .15s,box-shadow .15s}
+button.finance-export-card:hover{transform:translateY(-2px);border-color:#d7b89f;box-shadow:0 5px 17px #6e66561a}
+button.finance-export-card:focus-visible{outline:3px solid #efa96e;outline-offset:3px}
+button.finance-export-card:disabled{opacity:.65;cursor:wait}
+/* Señal de descarga ligera: icono primero, seguido del título de la tarjeta. */
+button.finance-export-card small{display:flex;align-items:center;gap:6px;min-width:0}
+button.finance-export-card small .finance-export-icon{
+ display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+ width:20px;height:20px;
+ border:1px solid rgba(105,125,145,.18);border-radius:6px;
+ background:rgba(112,132,151,.08);color:#8193a5;
+ transition:color .15s,background-color .15s,border-color .15s;
+}
+button.finance-export-card .finance-export-icon svg{display:block;width:14px;height:14px}
+button.finance-export-card:is(:hover,:focus-visible) .finance-export-icon{
+ color:#aa6b37;background:#fff3e9;border-color:rgba(198,126,70,.29);
+}
+@media(max-width:700px){
+ button.finance-export-card small{gap:4px}
+ button.finance-export-card small .finance-export-icon{width:18px;height:18px}
+ button.finance-export-card .finance-export-icon svg{width:13px;height:13px}
+}
+@media(prefers-reduced-motion:reduce){
+ button.finance-export-card .finance-export-icon{transition:none}
+}
+.finance-receipt-period{display:grid;gap:7px;color:#55476b;font-size:12px;font-weight:800}
+.finance-receipt-period[hidden]{display:none!important}
+.finance-receipt-period select{width:100%;padding:10px 12px;border:1px solid #decfbd;border-radius:10px;background:#fffaf6;color:#314258;font-size:13px}
+@media(max-width:700px){
+ body.page-analisis.mj-shared-sidebar-enabled .houses-scroll #financeHouseRows>tr.house-receipt-selected{background:#f5d0a7!important;border-color:#d99b64!important;box-shadow:0 0 0 1px #d99b64}
+ body.page-analisis.mj-shared-sidebar-enabled .houses-scroll #financeHouseRows>tr.house-receipt-selected>td{background:transparent!important}
+ body.page-analisis.mj-shared-sidebar-enabled .houses-scroll #financeHouseRows>tr.house-receipt-selected>td:first-child{box-shadow:none!important}
+}
+
+/* El editor de tarifa se muestra al lado del historial sin sustituirlo. */
+.history-dialog-layout{width:min(1200px,100%);max-height:calc(100vh - 32px);display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-items:start}
+.history-dialog-layout:has(.history-tariff-panel:not([hidden])){grid-template-columns:minmax(0,740px) minmax(275px,360px)}
+.history-dialog-layout>.finance-pay-dialog{width:100%;max-height:calc(100vh - 32px)}
+.history-heading-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.history-tariff-panel[hidden]{display:none!important}
+.history-tariff-panel{border-color:#eedecf;background:#fffdfb}
+.history-tariff-panel form{display:grid;gap:14px;margin-top:16px}
+.history-tariff-label{display:grid;gap:7px;font-size:12px;font-weight:700;color:#52647e}
+.history-tariff-label input{width:100%;border:1px solid #dce3ee;border-radius:12px;padding:11px 12px;font-size:18px;font-weight:700}
+.history-tariff-panel form>.primary{width:100%}
+
+/* Estado compacto: refleja únicamente la configuración confirmada por API. */
+.history-tariff-save-indicator{
+  display:inline-flex;align-items:center;gap:7px;width:max-content;max-width:100%;
+  margin-top:5px;padding:5px 9px;border:1px solid #e1e7ee;
+  border-radius:999px;background:#f7f9fc;color:#66758b;
+  font-size:11px;font-weight:750;line-height:1.25;
+}
+.history-tariff-status-dot{
+  flex:0 0 7px;width:7px;height:7px;border-radius:50%;
+  background:#9ba9b9;
+}
+.history-tariff-save-indicator[data-state="exempt"]{
+  background:#eef9f3;border-color:#d2eadd;color:#267653;
+}
+.history-tariff-save-indicator[data-state="exempt"] .history-tariff-status-dot{background:#3bba7c}
+.history-tariff-save-indicator[data-state="active"]{
+  background:#f6f7fa;border-color:#e2e6ed;color:#64718a;
+}
+.history-tariff-save-indicator[data-state="pending"]{
+  background:#fff8ee;border-color:#f2dec1;color:#a36a30;
+}
+.history-tariff-save-indicator[data-state="pending"] .history-tariff-status-dot{background:#df9f4c}
+.history-tariff-save-indicator[data-state="unknown"] .history-tariff-status-dot{background:#9ba9b9}
+
+/* Casilla alineada en la misma fila que la leyenda de exención.
+   Selectores específicos para evitar estilos globales de inputs de cuotas. */
+#houseTariffPanel .history-tariff-checkline{
+ display:flex;flex-direction:row;align-items:center;justify-content:flex-start;
+ gap:10px;min-width:0;margin:0;padding:12px 13px;
+ border:1px solid #e6dcea;border-radius:13px;background:#fbf9fd;
+ color:#3e516e;font-size:12px;font-weight:750;line-height:1.45;
+ cursor:pointer;
+}
+#houseTariffPanel .history-tariff-checkline:has(>input:checked){
+ border-color:#c9e6d7;background:#f5fbf7;
+}
+#houseTariffPanel .history-tariff-checkline > input[type="checkbox"]{
+ display:block;flex:0 0 18px;width:18px;height:18px;min-width:18px;
+ margin:0;padding:0;appearance:auto;accent-color:#4285ed;
+ border:0;box-shadow:none;transform:none;vertical-align:middle;
+ cursor:pointer;
+}
+#houseTariffPanel .history-tariff-checkline > input:focus-visible{
+ outline:2px solid #754bb4;outline-offset:3px;
+}
+#houseTariffPanel .history-tariff-checkline > span{
+ display:block;flex:1 1 auto;min-width:0;text-align:left;
+}
+@media(max-width:400px){
+ #houseTariffPanel .history-tariff-checkline{gap:9px;padding:11px;font-size:11px}
+}
+@media(max-width:850px){
+ .history-dialog-layout,.history-dialog-layout:has(.history-tariff-panel:not([hidden])){grid-template-columns:1fr;max-height:calc(100dvh - 20px);overflow-y:auto}
+ .history-dialog-layout>.finance-pay-dialog{max-height:none;overflow:visible}
+ .history-dialog-layout{gap:10px}
+ .history-heading-actions{justify-content:flex-start}
+}
+/* "Modificar cuotas" tiene su propia fila bajo el título y sobre
+   los tres saldos: jamás comparte columnas con las tarjetas. */
+.history-dialog > .history-tariff-toolbar{
+  display:flex;justify-content:flex-end;align-items:center;
+  width:100%;margin:14px 0 10px;
+}
+.history-dialog > .history-tariff-toolbar #houseTariffOpen{
+  flex:0 0 auto;max-width:100%;min-height:44px;
+  padding:10px 14px;margin:0;white-space:nowrap;
+}
+.history-dialog > .history-tariff-toolbar #houseTariffOpen[hidden]{display:none!important}
+.history-dialog > #houseHistorySummary{
+  width:100%;min-width:0;margin:0 0 20px;
+}
+@media(max-width:580px){
+  .history-dialog > .history-tariff-toolbar{margin-top:12px}
+}
+
+/* Orden de la consulta de viviendas: botones nativos y alternativa móvil. */
+.houses-scroll th .house-column-sort{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:3px 0;border:0;background:transparent;color:inherit;font:inherit;font-weight:800;text-align:left;cursor:pointer}
+.houses-scroll th .house-column-sort:hover{color:#7c3eab}
+.houses-scroll th .house-column-sort:focus-visible{outline:2px solid #7c3eab;outline-offset:3px;border-radius:3px}
+.houses-scroll th[aria-sort="ascending"],.houses-scroll th[aria-sort="descending"]{background:#efe2fa;color:#66398a}
+.houses-scroll th [data-sort-indicator]{font-size:14px}
+.house-sort-mobile{display:none}
+@media(max-width:700px){
+ .house-sort-mobile{display:flex;align-items:flex-end;gap:10px;margin:12px 0;flex-wrap:wrap}
+ .house-sort-mobile label{display:grid;gap:5px;flex:1;min-width:160px;font-size:12px}
+ .house-sort-mobile select{width:100%;min-height:42px;padding:8px;border:1px solid #e2d8ea;border-radius:9px;background:#fff;font:inherit}
+ .house-sort-mobile button{min-height:42px}
+}
+
+/* Orden por registro de pago: misma fila que los filtros existentes en escritorio.
+   En pantallas estrechas el grupo se reorganiza sin desbordar el viewport. */
+@media(min-width:701px){
+  body.page-analisis .filters.residences-filter,
+  body.page-analisis.mj-shared-sidebar-enabled .filters.residences-filter{
+    display:grid!important;
+    grid-template-columns:minmax(125px,1.45fr) minmax(105px,.95fr)
+      minmax(100px,.95fr) minmax(200px,1.55fr) minmax(160px,1.25fr) minmax(80px,auto)!important;
+    gap:8px!important;align-items:end;
+    min-width:0;max-width:100%;overflow-x:auto;
+  }
+  body.page-analisis .residences-filter>label:first-child{
+    grid-column:auto!important;
+  }
+}
+.residences-filter .finance-register-order{min-width:0!important;display:block}
+.residences-filter .finance-register-order select{width:100%;min-width:0;font-size:12px}
+@media(max-width:700px){
+  body.page-analisis .filters.residences-filter,
+  body.page-analisis.mj-shared-sidebar-enabled .filters.residences-filter{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;
+  }
+  body.page-analisis .residences-filter>*,
+  body.page-analisis.mj-shared-sidebar-enabled .residences-filter>*{grid-column:auto!important;min-width:0!important}
+  body.page-analisis .residences-filter>label:first-child,
+  body.page-analisis .residences-filter .paid-through-filter{grid-column:1/-1!important}
+  body.page-analisis .residences-filter .finance-register-order{grid-column:1!important}
+  body.page-analisis .residences-filter #financeClear{grid-column:2!important;width:100%;min-height:43px}
+}
+@media(max-width:390px){
+  body.page-analisis .residences-filter .finance-register-order{grid-column:1/-1!important}
+  body.page-analisis .residences-filter #financeClear{grid-column:1/-1!important}
+}
+.houses-scroll th .house-column-sort [data-sort-indicator]{
+  display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px;
+  height:22px;border-radius:7px;background:rgba(128,88,166,.10);
+  color:#754995;font-size:15px;line-height:1;transition:background .15s ease,color .15s ease;
+}
+.houses-scroll th[aria-sort="ascending"] .house-column-sort [data-sort-indicator],
+.houses-scroll th[aria-sort="descending"] .house-column-sort [data-sort-indicator]{
+  background:#dfc9f4;color:#60378a;
+}
+
+/* Indicadores de orden elegantes, equivalentes al desplegable de selección.
+   Sin fondo, sin chip y sin flechas dobles; las etiquetas se mantienen legibles. */
+.houses-scroll th .house-column-sort{gap:6px}
+.houses-scroll th .house-column-sort [data-sort-indicator]{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 14px;width:14px;height:17px;min-width:14px;
+  padding:0;border:0;border-radius:0;box-shadow:none;
+  background:transparent!important;color:transparent!important;
+  font-size:0!important;line-height:0;
+}
+.houses-scroll th .house-column-sort [data-sort-indicator]::after{
+  content:'';display:block;width:6px;height:6px;
+  border-right:1.5px solid #8992a4;border-bottom:1.5px solid #8992a4;
+  transform:translateY(-2px) rotate(45deg);
+  transition:transform .15s ease,border-color .15s ease;
+}
+.houses-scroll th[aria-sort="ascending"] .house-column-sort [data-sort-indicator]::after{
+  transform:translateY(2px) rotate(225deg);border-color:#74628a;
+}
+.houses-scroll th[aria-sort="descending"] .house-column-sort [data-sort-indicator]::after{border-color:#74628a}
+.houses-scroll th[aria-sort="ascending"],
+.houses-scroll th[aria-sort="descending"]{background:#f7f0fc;color:#6d5986}
+
+/* Cierre anual: opción visible solo para mantenimiento y etiqueta compacta en tabla. */
+.house-annual-option{grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid #e6d7ee;border-radius:12px;background:#faf7fc}
+.house-annual-option[hidden]{display:none!important}
+.house-annual-button{flex:0 0 auto;min-height:40px;padding:9px 17px;border:1px solid #d9c2eb;background:#fff;color:#76518e;font-size:12px;font-weight:850}
+.house-annual-button.active,.house-annual-button[aria-pressed="true"]{background:#e9f6ef;border-color:#b1ddc2;color:#256a4a}
+.house-annual-button:focus-visible{outline:2px solid #9962b5;outline-offset:2px}
+.house-annual-option p{flex:1 1 230px;margin:0;color:#687891;font-size:11px;line-height:1.55}
+.house-annual-label{display:inline-flex;align-items:center;padding:6px 10px;border:1px solid #cce8d5;border-radius:9px;background:#eef9f1;color:#2f744e;font-weight:850;white-space:nowrap}
+@media(max-width:640px){.house-annual-option{align-items:stretch;flex-direction:column;gap:7px}.house-annual-button{width:100%}}

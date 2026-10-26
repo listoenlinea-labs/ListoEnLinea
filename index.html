@@ -32,7 +32,7 @@
 
   <!-- Main CSS File -->
   <link href="assets/css/main.css" rel="stylesheet">
-  <link href="assets/css/project-demos.css?v=1" rel="stylesheet">
+  <link href="assets/css/project-demos.css?v=2" rel="stylesheet">
 </head>
 
 <body class="index-page">
@@ -594,7 +594,7 @@
                 <p>Sitio de floristería con catálogo de arreglos, carrito y experiencia de compra enfocada en convertir visitas en pedidos.</p>
                 <a class="project-link" href="https://listoenlinea-labs.github.io/Floristeria-Magno/" target="_blank" rel="noopener noreferrer"
                   aria-label="Ver sitio real de Floristería Magno (abre en otra pestaña)">Ver proyecto real <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
-              </div>
+              <button class="project-details-button" type="button" data-project-details="Floristería Magno" aria-label="Ver detalles de Floristería Magno">Ver detalles <i class="bi bi-list-check" aria-hidden="true"></i></button></div>
             </article>
           </div>
 
@@ -602,15 +602,15 @@
             <article class="portfolio-item project-card rounded-4 overflow-hidden shadow-sm bg-white h-100">
               <div class="project-visual project-visual-dental">
                 <span class="project-type-badge demo">Demo sin login</span>
-                <img src="assets/img/projects/samantha-studio-lab.svg" alt="Logotipo de Samantha's Studio Lab"
+                <img src="demo/yerena/assets/images/sonrisa.svg" alt="Logotipo de Dra. Yerena Riso"
                   loading="lazy" decoding="async">
               </div>
               <div class="portfolio-info position-static opacity-100">
-                <h3>Samantha's Studio Lab</h3>
-                <p><strong>Demo de sistema para clínica dental.</strong> Agenda, pacientes, tratamientos, indicadores e historial clínico en una experiencia navegable sin usuario ni contraseña.</p>
+                <h3>Dra. Yerena Riso</h3>
+                <p><strong>Demo de consultorio dental.</strong> Agenda, expedientes, odontograma, periodontograma, radiografías y recordatorios simulados, sin inicio de sesión.</p>
                 <a class="project-link" href="demo/clinica-dental.html" target="_blank" rel="noopener noreferrer"
-                  aria-label="Abrir demo público de clínica dental Samantha's Studio Lab (abre en otra pestaña)">Abrir demo dental <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
-              </div>
+                  aria-label="Abrir demo público de clínica dental Dra. Yerena Riso (abre en otra pestaña)">Abrir demo dental <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+              <button class="project-details-button" type="button" data-project-details="Dra. Yerena Riso" aria-label="Ver detalles de Dra. Yerena Riso">Ver detalles <i class="bi bi-list-check" aria-hidden="true"></i></button></div>
             </article>
           </div>
 
@@ -626,7 +626,7 @@
                 <p>Demo de plataforma para fraccionamientos con dashboard, seguridad, visitas, cuotas y operación administrativa, disponible sin credenciales.</p>
                 <a class="project-link" href="demo/fraccionamiento.html" target="_blank" rel="noopener noreferrer"
                   aria-label="Abrir demo público de plataforma para fraccionamientos (abre en otra pestaña)">Abrir demo de fraccionamiento <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
-              </div>
+              <button class="project-details-button" type="button" data-project-details="Misión Jardines" aria-label="Ver detalles de Misión Jardines">Ver detalles <i class="bi bi-list-check" aria-hidden="true"></i></button></div>
             </article>
           </div>
 
@@ -1124,6 +1124,8 @@
 
 
 
-</body>
+<div class="modal fade" id="projectDetailsModal" tabindex="-1" aria-labelledby="projectDetailsTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><div><small class="text-muted">QUÉ INCLUYE ESTE PROYECTO</small><h3 class="modal-title fs-5" id="projectDetailsTitle"></h3></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body"><ul class="project-checklist" id="projectDetailsList"></ul><p class="text-muted small mt-3 mb-0">Algunas integraciones requieren servicios, equipos o configuración adicional. Los demos utilizan datos ficticios y no ejecutan operaciones reales.</p></div><div class="modal-footer"><a href="#contact" class="btn btn-info text-white" data-bs-dismiss="modal">Solicitar cotización</a></div></div></div></div><script>
+document.addEventListener('DOMContentLoaded',()=>{const features={"Floristería Magno":["Catálogo de arreglos florales y categorías","Carrito y experiencia de compra digital","Cobros mediante Mercado Pago (servicio de Mercado Libre)","Seguimiento de pedidos y atención al cliente","Diseño adaptable a móviles y escritorio"],"Dra. Yerena Riso":["Agenda inteligente y gestión de citas","Expedientes electrónicos de pacientes","Odontograma y periodontograma interactivos","Visualización de radiografías y tomografías DICOM/CBCT","Recordatorios automatizados por correo y WhatsApp (requiere integración)","Configuración administrativa y reportes"],"Misión Jardines":["Panel administrativo de indicadores","Gestión de viviendas, residentes y cuotas","Seguridad, visitantes y control de acceso","Administración de TAGs y vigencias ZKTeco (requiere hardware)","Vinculación de mantenimiento y vigencias de acceso","Reportes financieros, recibos y cuotas extraordinarias","Administración de casa club y reservas"]};const el=document.getElementById('projectDetailsModal');if(!el||!window.bootstrap)return;const modal=new bootstrap.Modal(el);document.querySelectorAll('[data-project-details]').forEach(button=>button.addEventListener('click',()=>{const name=button.dataset.projectDetails;document.getElementById('projectDetailsTitle').textContent=name;const list=document.getElementById('projectDetailsList');list.replaceChildren();(features[name]||[]).forEach(item=>{const li=document.createElement('li');li.textContent=item;list.appendChild(li)});modal.show()}))});
+</script></body>
 
 </html>

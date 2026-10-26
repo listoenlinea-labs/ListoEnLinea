@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><script src="demo-bootstrap.js"></script><meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico?v=20261005">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png?v=20261005">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png?v=20261005">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png?v=20261005">
+
+  <script src="assets/js/permissions.js?v=20261012-seguridad"></script>
+  <script src="assets/js/page-access.js?v=20261012-seguridad"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendario | Misión Jardines</title>
+  <link rel="stylesheet" href="assets/css/style.css?v=20260730-3" />
+  <style>
+    body.page-calendario {
+      display: block !important;
+      place-items: initial !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding-top: 0 !important;
+      overflow-x: hidden !important;
+    }
+
+    .page-calendario .hero,
+    .page-calendario .section,
+    .page-calendario footer,
+    .page-calendario .layout,
+    .page-calendario .layout > *,
+    .page-calendario .card,
+    .page-calendario .form-grid,
+    .page-calendario .two,
+    .page-calendario .calendar-head,
+    .page-calendario .calendar-grid,
+    .page-calendario .event-list,
+    .page-calendario .event-card,
+    .page-calendario .event-card-content {
+      min-width: 0 !important;
+      max-width: 100%;
+    }
+
+    .page-calendario .calendar-grid {
+      width: 100%;
+      display: grid !important;
+      grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+      gap: 7px;
+    }
+
+    .page-calendario .day-name {
+      padding: 8px 4px;
+      color: #71809a;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .page-calendario .day {
+      position: relative;
+      min-height: 92px;
+      padding: 8px;
+      border: 1px solid #e4e8ef;
+      border-radius: 12px;
+      background: #fff;
+      color: #20283d;
+      cursor: pointer;
+      transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease, background .16s ease;
+      outline: none;
+      overflow: hidden;
+    }
+
+    .page-calendario .day:hover,
+    .page-calendario .day:focus-visible {
+      border-color: #f0b376;
+      box-shadow: 0 7px 18px rgba(239, 125, 11, .10);
+      transform: translateY(-1px);
+    }
+
+    .page-calendario .day.muted {
+      background: #f7f8fb;
+      color: #a1a9b7;
+    }
+
+    .page-calendario .day.selected {
+      border-color: #ef7d0b;
+      background: #fff8f1;
+      box-shadow: 0 0 0 2px rgba(239, 125, 11, .14);
+    }
+
+    .page-calendario .day.today {
+      border: 2px solid #ef7d0b;
+      background: linear-gradient(145deg, #fff7ec, #fffdf9);
+      box-shadow: 0 8px 24px rgba(239, 125, 11, .16);
+    }
+
+    .page-calendario .day.today.selected {
+      box-shadow: 0 0 0 3px rgba(250, 204, 21, .42), 0 8px 24px rgba(239, 125, 11, .16);
+    }
+
+    .page-calendario .day-number-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .page-calendario .day-number {
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .page-calendario .today-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 18px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #ef7d0b;
+      color: #fff;
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .page-calendario .event-pill {
+      display: block;
+      width: 100%;
+      margin-top: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .page-calendario .more-events {
+      display: block;
+      margin-top: 4px;
+      color: #7a8498;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .page-calendario .day-detail-panel {
+      margin-top: 18px;
+      padding: 17px;
+      border: 1px solid #e1e6ee;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #fbfcff, #fffaf5);
+    }
+
+    .page-calendario .day-detail-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 13px;
+    }
+
+    .page-calendario .day-detail-head small {
+      display: block;
+      margin-bottom: 4px;
+      color: #ef7d0b;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .page-calendario .day-detail-head h3 {
+      margin: 0;
+      color: #20283d;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .page-calendario .day-detail-count {
+      flex: 0 0 auto;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid #eadfd3;
+      color: #9a560f;
+      font-size: 9px;
+      font-weight: 900;
+    }
+
+    .page-calendario .day-event-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .page-calendario .day-event-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 11px;
+      padding: 12px;
+      border: 1px solid #e8ebf1;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .page-calendario .day-event-time {
+      min-width: 55px;
+      padding: 6px 7px;
+      border-radius: 9px;
+      background: #fff5e9;
+      color: #b65c08;
+      font-size: 10px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .page-calendario .day-event-copy h4 {
+      margin: 0 0 3px;
+      color: #20283d;
+      font-size: 13px;
+    }
+
+    .page-calendario .day-event-copy p {
+      margin: 0;
+      color: #71809a;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .page-calendario .day-event-copy .description {
+      margin-top: 4px;
+      color: #566176;
+    }
+
+    .page-calendario .day-detail-empty {
+      padding: 20px 14px;
+      border: 1px dashed #d9dee7;
+      border-radius: 12px;
+      color: #7b8598;
+      background: rgba(255,255,255,.7);
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .page-calendario .grid .metric:nth-child(1) { background: #eef8ff !important; border-color: #d5e9f7 !important; }
+    .page-calendario .grid .metric:nth-child(2) { background: #effaf3 !important; border-color: #d4eadc !important; }
+    .page-calendario .grid .metric:nth-child(3) { background: #fff8ea !important; border-color: #f0dfbc !important; }
+    .page-calendario .grid .metric:nth-child(4) { background: #f7f2ff !important; border-color: #e6daf4 !important; }
+
+    @media (max-width: 1180px) {
+      .page-calendario .layout { grid-template-columns: minmax(0, 1fr) !important; }
+    }
+
+    @media (max-width: 900px) {
+      .page-calendario .hero,
+      .page-calendario .section {
+        width: 100% !important;
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+      }
+      .page-calendario .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+      .page-calendario .event-list { grid-template-columns: minmax(0, 1fr) !important; }
+    }
+
+    @media (max-width: 640px) {
+      .page-calendario .hero { padding-top: 26px !important; padding-bottom: 12px !important; }
+      .page-calendario .hero h1 { font-size: 31px !important; line-height: 1.08 !important; letter-spacing: -1.1px !important; }
+      .page-calendario .hero p,
+      .page-calendario .section-title p { font-size: 14px !important; line-height: 1.55 !important; }
+      .page-calendario .section { padding: 12px 14px 18px !important; }
+      .page-calendario .grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+      .page-calendario .two { grid-template-columns: minmax(0, 1fr) !important; }
+      .page-calendario .grid .metric { min-width: 0; min-height: 112px; padding: 13px !important; }
+      .page-calendario .grid .metric small { font-size: 9px !important; }
+      .page-calendario .grid .metric strong { display: block; margin: 5px 0; font-size: 20px !important; line-height: 1.05; white-space: nowrap; }
+      .page-calendario .grid .metric .hint { font-size: 8px !important; line-height: 1.35; }
+      .page-calendario .card { width: 100%; padding: 14px !important; border-radius: 15px !important; }
+      .page-calendario .actions { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; gap: 8px; }
+      .page-calendario .actions button { width: 100%; }
+      .page-calendario .calendar-head { display: block; margin-bottom: 12px; }
+      .page-calendario .calendar-title { margin-bottom: 11px; font-size: 22px; text-align: center; }
+      .page-calendario .calendar-actions { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+      .page-calendario .calendar-actions button { width: 100%; min-width: 0; min-height: 38px; padding: 7px 4px !important; font-size: 10px; line-height: 1.15; white-space: normal; }
+      .page-calendario .calendar-grid { gap: 3px !important; }
+      .page-calendario .day-name { padding: 6px 1px !important; overflow: hidden; border-radius: 8px !important; font-size: 9px !important; line-height: 1; }
+      .page-calendario .day { min-height: 67px !important; padding: 5px 3px !important; border-radius: 9px !important; }
+      .page-calendario .day:hover { transform: none !important; }
+      .page-calendario .day-number-row { justify-content: center; margin-bottom: 4px; }
+      .page-calendario .day-number { font-size: 11px; }
+      .page-calendario .today-badge { position: absolute; top: 2px; right: 2px; width: 7px; height: 7px; min-height: 0; padding: 0; font-size: 0; }
+      .page-calendario .event-pill { height: 5px; min-height: 5px; margin-top: 3px !important; padding: 0 !important; border: 0 !important; border-radius: 999px !important; font-size: 0 !important; line-height: 0 !important; text-shadow: none !important; }
+      .page-calendario .more-events { font-size: 0; height: 4px; }
+      .page-calendario .day-detail-panel { margin-top: 13px; padding: 12px; }
+      .page-calendario .day-detail-head h3 { font-size: 15px; }
+      .page-calendario .day-event-item { grid-template-columns: 50px minmax(0, 1fr); gap: 8px; }
+      .page-calendario .day-event-item > .chip,
+      .page-calendario .day-event-item > .btn-danger { grid-column: 2; justify-self: start; }
+      .page-calendario .event-card { gap: 10px; padding: 12px; }
+      .page-calendario .event-date { width: 50px; height: 50px; flex: 0 0 50px; border-radius: 12px; font-size: 12px; }
+      .page-calendario .event-card-content h3 { font-size: 14px; }
+      .page-calendario .event-card .event-meta,
+      .page-calendario .event-card .event-description { font-size: 11px; }
+      .page-calendario footer { padding: 28px 14px !important; font-size: 11px; }
+      .page-calendario .toast { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+    }
+  </style>
+  <script src="assets/js/date-display.js?v=20261019"></script>
+</head>
+
+<body class="page-calendario"><div style="position:fixed;z-index:2147483000;right:12px;bottom:10px;background:#183e4f;color:white;border-radius:17px;padding:9px 13px;font:700 12px system-ui;pointer-events:none">DEMO · Datos ficticios · Administrador</div>
+  <section class="hero">
+    <div class="badge">📅 Organización comunitaria</div>
+    <h1>Calendario de <span>Misión Jardines</span></h1>
+    <p>Administra eventos vecinales, asambleas, recolección de basura, mantenimiento, rondines y actividades importantes del fraccionamiento.</p>
+  </section>
+
+  <section class="section">
+    <div class="card" style="margin-bottom:24px;border:1px solid rgba(74,222,128,.35);background:rgba(74,222,128,.08);">
+      <h2 style="margin-bottom:14px">🚛 Recolección de basura</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px;">
+        <span class="chip basura">Lunes</span>
+        <span class="chip basura">Miércoles</span>
+        <span class="chip basura">Viernes</span>
+        <span class="chip basura">Sábado</span>
+      </div>
+      <p style="color:var(--muted)">Horario oficial: <strong>08:00 AM</strong><br>Favor de sacar la basura antes de la hora indicada.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="grid">
+      <div class="card metric"><small>Eventos del mes</small><strong id="metricEventos">0</strong><div class="hint">Actividades registradas</div></div>
+      <div class="card metric"><small>Mantenimientos</small><strong id="metricMantenimiento">0</strong><div class="hint">Trabajos programados</div></div>
+      <div class="card metric"><small>Asambleas</small><strong id="metricAsambleas">0</strong><div class="hint">Reuniones vecinales</div></div>
+      <div class="card metric"><small>Próximo evento</small><strong id="metricProximo">-</strong><div class="hint">Día más cercano</div></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="layout">
+      <div class="card">
+        <div class="section-title">
+          <div><h2>Nuevo evento</h2><p>Agrega actividades importantes para los vecinos.</p></div>
+        </div>
+        <div class="form-grid">
+          <div><label>Título del evento</label><input id="eventTitle" placeholder="Ej. Asamblea vecinal"></div>
+          <div class="two">
+            <div><label>Fecha</label><input id="eventDate" type="date"></div>
+            <div><label>Hora</label><input id="eventTime" type="time"></div>
+          </div>
+          <div class="two">
+            <div>
+              <label>Tipo</label>
+              <select id="eventType">
+                <option value="mantenimiento">Mantenimiento</option>
+                <option value="asamblea">Asamblea</option>
+                <option value="basura">Basura</option>
+                <option value="seguridad">Seguridad</option>
+                <option value="evento">Evento vecinal</option>
+              </select>
+            </div>
+            <div><label>Ubicación</label><input id="eventLocation" placeholder="Ej. Área común"></div>
+          </div>
+          <div><label>Descripción</label><textarea id="eventDescription" placeholder="Describe brevemente la actividad..."></textarea></div>
+          <div class="actions">
+            <button class="btn-primary" onclick="addEvent()">Agregar evento</button>
+            <button class="btn-secondary" onclick="clearEventForm()">Limpiar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="calendar-head">
+          <div class="calendar-title" id="calendarTitle">Calendario</div>
+          <div class="calendar-actions">
+            <button class="btn-secondary" onclick="previousMonth()">← Mes anterior</button>
+            <button class="btn-primary" onclick="goToday()">Hoy</button>
+            <button class="btn-secondary" onclick="nextMonth()">Mes siguiente →</button>
+          </div>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid"></div>
+
+        <div class="day-detail-panel" id="dayDetailPanel" aria-live="polite">
+          <div class="day-detail-head">
+            <div>
+              <small>Eventos del día</small>
+              <h3 id="selectedDayTitle">Selecciona un día</h3>
+            </div>
+            <span class="day-detail-count" id="selectedDayCount">0 eventos</span>
+          </div>
+          <div class="day-event-list" id="selectedDayEvents"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="card">
+      <div class="section-title">
+        <div><h2>Próximos eventos</h2><p>Actividades programadas para los próximos 30 días.</p></div>
+      </div>
+      <div class="event-list" id="eventList"></div>
+    </div>
+  </section>
+
+  <footer>
+    <div>Misión Jardines © 2026 — Portal vecinal para organización, comunicación y administración del fraccionamiento.</div>
+    <div class="powered-by">Plataforma desarrollada por <a href="https://listoenlinea.com" target="_blank">ListoEnLinea.com</a></div>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API_BASE_URL = window.MISION_JARDINES_API_URL || "https://demo.invalid/api";
+    const UPCOMING_DAYS = 30;
+    const BASURA_HORA = "08:00";
+    const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+
+    const linkedDate = new URLSearchParams(location.search).get('fecha');
+    const initialDate = /^\d{4}-\d{2}-\d{2}$/.test(linkedDate || '') && !Number.isNaN(new Date(`${linkedDate}T12:00:00`).getTime()) ? new Date(`${linkedDate}T12:00:00`) : new Date();
+    let currentDate = initialDate;
+    let selectedDate = formatDate(initialDate);
+    let events = [];
+
+    function getAuthToken() {
+      return localStorage.getItem("misionJardinesToken") || sessionStorage.getItem("misionJardinesToken");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    async function apiFetch(url, options = {}) {
+      const token = getAuthToken();
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...(options.headers || {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+      });
+
+      let result = {};
+      try { result = await response.json(); } catch (_) {}
+
+      if (response.status === 401) {
+        localStorage.removeItem("misionJardinesToken");
+        localStorage.removeItem("misionJardinesUsuario");
+        sessionStorage.removeItem("misionJardinesToken");
+        sessionStorage.removeItem("misionJardinesUsuario");
+        location.replace("login.html");
+        throw new Error("Tu sesión expiró.");
+      }
+
+      if (!response.ok) throw new Error(result.message || "No fue posible completar la operación");
+      return result;
+    }
+
+    const eventRepository = {
+      async list(from, to) {
+        const params = new URLSearchParams({ desde: formatDate(from), hasta: formatDate(to) });
+        const result = await apiFetch(`${API_BASE_URL}/eventos?${params}`);
+        return Array.isArray(result.data) ? result.data : [];
+      },
+      async create(event) {
+        const result = await apiFetch(`${API_BASE_URL}/eventos`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(event)
+        });
+        return result.data;
+      },
+      async remove(id) {
+        await apiFetch(`${API_BASE_URL}/eventos/${encodeURIComponent(id)}`, { method: "DELETE" });
+      }
+    };
+
+    function visibleRangeForMonth(date) {
+      const first = new Date(date.getFullYear(), date.getMonth(), 1);
+      const start = new Date(first);
+      start.setDate(first.getDate() - first.getDay());
+      const end = new Date(start);
+      end.setDate(start.getDate() + 41);
+      return { start, end };
+    }
+
+    async function loadData() {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const upcomingEnd = new Date(today);
+      upcomingEnd.setDate(today.getDate() + UPCOMING_DAYS - 1);
+      const visible = visibleRangeForMonth(currentDate);
+      const from = visible.start < today ? visible.start : today;
+      const to = visible.end > upcomingEnd ? visible.end : upcomingEnd;
+
+      try {
+        events = await eventRepository.list(from, to);
+      } catch (error) {
+        events = [];
+        showToast(error.message);
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.style.display = "block";
+      setTimeout(() => toast.style.display = "none", 3200);
+    }
+
+    async function addEvent() {
+      const payload = {
+        title: document.getElementById("eventTitle").value.trim(),
+        date: document.getElementById("eventDate").value,
+        time: document.getElementById("eventTime").value,
+        type: document.getElementById("eventType").value,
+        location: document.getElementById("eventLocation").value.trim(),
+        description: document.getElementById("eventDescription").value.trim()
+      };
+
+      if (!payload.title || !payload.date || !payload.location) {
+        showToast("Completa título, fecha y ubicación.");
+        return;
+      }
+
+      try {
+        await eventRepository.create(payload);
+        selectedDate = payload.date;
+        currentDate = new Date(payload.date + "T00:00:00");
+        clearEventForm();
+        await loadData();
+        renderAll();
+        showToast("Evento agregado al calendario.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    function clearEventForm() {
+      document.getElementById("eventTitle").value = "";
+      document.getElementById("eventDate").value = "";
+      document.getElementById("eventTime").value = "";
+      document.getElementById("eventType").value = "mantenimiento";
+      document.getElementById("eventLocation").value = "";
+      document.getElementById("eventDescription").value = "";
+    }
+
+    function formatDate(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function isTrashDay(date) {
+      return [1, 3, 5, 6].includes(date.getDay());
+    }
+
+    function createTrashEvent(dateString) {
+      const date = new Date(dateString + "T00:00:00");
+      if (!isTrashDay(date)) return null;
+      return {
+        id: "BASURA-" + dateString,
+        title: "🚛 Recolección de basura",
+        date: dateString,
+        time: BASURA_HORA,
+        type: "basura",
+        location: "Todo el fraccionamiento",
+        description: "Sacar la basura antes de las 08:00 AM.",
+        fixed: true
+      };
+    }
+
+    function eventsForDate(dateString) {
+      const normal = events.filter(event => event.date === dateString);
+      const trash = createTrashEvent(dateString);
+      return (trash ? [trash, ...normal] : normal).sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+    }
+
+    function eventTypeLabel(type) {
+      const labels = {
+        mantenimiento: "Mantenimiento",
+        asamblea: "Asamblea",
+        basura: "Basura",
+        seguridad: "Seguridad",
+        evento: "Evento vecinal"
+      };
+      return labels[type] || "Evento";
+    }
+
+    function formatLongDate(dateString) {
+      return window.MJDateDisplay.format(dateString);
+    }
+
+    async function selectCalendarDay(dateString) {
+      selectedDate = dateString;
+      const clicked = new Date(dateString + "T00:00:00");
+      if (clicked.getFullYear() !== currentDate.getFullYear() || clicked.getMonth() !== currentDate.getMonth()) {
+        currentDate = clicked;
+        await loadData();
+      }
+      renderAll();
+      document.getElementById("dayDetailPanel")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function renderCalendar() {
+      const grid = document.getElementById("calendarGrid");
+      grid.innerHTML = "";
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const todayString = formatDate(new Date());
+      const range = visibleRangeForMonth(currentDate);
+
+      document.getElementById("calendarTitle").textContent = `${monthNames[month]} ${year}`;
+
+      dayNames.forEach(day => {
+        const div = document.createElement("div");
+        div.className = "day-name";
+        div.textContent = day;
+        grid.appendChild(div);
+      });
+
+      for (let offset = 0; offset < 42; offset++) {
+        const date = new Date(range.start);
+        date.setDate(range.start.getDate() + offset);
+        const dateString = formatDate(date);
+        const dayEvents = eventsForDate(dateString);
+        const isToday = dateString === todayString;
+        const isSelected = dateString === selectedDate;
+        const isMuted = date.getMonth() !== month;
+
+        const div = document.createElement("div");
+        div.className = `day${isMuted ? " muted" : ""}${isToday ? " today" : ""}${isSelected ? " selected" : ""}`;
+        div.setAttribute("role", "button");
+        div.setAttribute("tabindex", "0");
+        div.setAttribute("aria-label", `${formatLongDate(dateString)}. ${dayEvents.length} eventos.`);
+        if (isSelected) div.setAttribute("aria-pressed", "true");
+
+        const visibleEvents = dayEvents.slice(0, 3);
+        div.innerHTML = `
+          <div class="day-number-row">
+            <span class="day-number">${date.getDate()}</span>
+            ${isToday ? '<span class="today-badge">Hoy</span>' : ''}
+          </div>
+          ${visibleEvents.map(event => `<span class="event-pill ${escapeHtml(event.type)}" title="${escapeHtml(event.title)}">${escapeHtml(event.title)}</span>`).join("")}
+          ${dayEvents.length > 3 ? `<span class="more-events">+${dayEvents.length - 3} más</span>` : ""}
+        `;
+
+        div.addEventListener("click", () => selectCalendarDay(dateString));
+        div.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            selectCalendarDay(dateString);
+          }
+        });
+        grid.appendChild(div);
+      }
+    }
+
+    function renderSelectedDay() {
+      const title = document.getElementById("selectedDayTitle");
+      const count = document.getElementById("selectedDayCount");
+      const list = document.getElementById("selectedDayEvents");
+      const dayEvents = eventsForDate(selectedDate);
+
+      title.textContent = formatLongDate(selectedDate);
+      count.textContent = `${dayEvents.length} ${dayEvents.length === 1 ? "evento" : "eventos"}`;
+      list.innerHTML = "";
+
+      if (!dayEvents.length) {
+        list.innerHTML = '<div class="day-detail-empty">No hay eventos registrados para este día.</div>';
+        return;
+      }
+
+      dayEvents.forEach(event => {
+        const item = document.createElement("div");
+        item.className = "day-event-item";
+        item.innerHTML = `
+          <div class="day-event-time">${escapeHtml(event.time || "Todo el día")}</div>
+          <div class="day-event-copy">
+            <h4>${escapeHtml(event.title)}</h4>
+            <p>${escapeHtml(event.location || "Sin ubicación")} · ${escapeHtml(eventTypeLabel(event.type))}</p>
+            <p class="description">${escapeHtml(event.description || "Sin descripción.")}</p>
+          </div>
+          ${event.fixed
+            ? '<span class="chip event-fixed">Evento fijo</span>'
+            : `<button class="btn-danger" type="button" data-delete-event="${escapeHtml(event.id)}">Eliminar</button>`}
+        `;
+        item.querySelector("[data-delete-event]")?.addEventListener("click", () => deleteEvent(event.id));
+        list.appendChild(item);
+      });
+    }
+
+    function renderEventList() {
+      const list = document.getElementById("eventList");
+      list.innerHTML = "";
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const endDate = new Date(today);
+      endDate.setDate(today.getDate() + UPCOMING_DAYS - 1);
+
+      const upcoming = [];
+      for (let offset = 0; offset < UPCOMING_DAYS; offset++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + offset);
+        upcoming.push(...eventsForDate(formatDate(date)));
+      }
+
+      const seen = new Set();
+      const sorted = upcoming
+        .filter(event => {
+          const key = `${event.id}|${event.date}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          const eventDate = new Date(event.date + "T00:00:00");
+          return eventDate >= today && eventDate <= endDate;
+        })
+        .sort((a, b) => a.date.localeCompare(b.date) || (a.time || "99:99").localeCompare(b.time || "99:99"));
+
+      if (!sorted.length) {
+        list.innerHTML = '<div class="event-list-empty">No hay eventos programados para los próximos 30 días.</div>';
+        return;
+      }
+
+      sorted.forEach(event => {
+        const date = new Date(event.date + "T00:00:00");
+        const div = document.createElement("div");
+        div.className = "event-card";
+        div.innerHTML = `
+          <div class="event-date">${String(date.getDate()).padStart(2, "0")}<br>${monthNames[date.getMonth()].slice(0, 3).toUpperCase()}</div>
+          <div class="event-card-content">
+            <h3>${escapeHtml(event.title)}</h3>
+            <p class="event-meta">${event.time ? escapeHtml(event.time) + " hrs · " : ""}${escapeHtml(event.location || "Sin ubicación")}</p>
+            <p class="event-description">${escapeHtml(event.description || "Sin descripción.")}</p>
+            <div class="event-card-actions">
+              <span class="chip ${escapeHtml(event.type)}">${escapeHtml(eventTypeLabel(event.type))}</span>
+              ${event.fixed ? '<span class="chip event-fixed">Evento fijo</span>' : `<button class="btn-danger event-delete" type="button" data-delete-event="${escapeHtml(event.id)}">Eliminar</button>`}
+            </div>
+          </div>
+        `;
+        div.addEventListener("click", eventClick => {
+          if (!eventClick.target.closest("button")) selectCalendarDay(event.date);
+        });
+        div.querySelector("[data-delete-event]")?.addEventListener("click", () => deleteEvent(event.id));
+        list.appendChild(div);
+      });
+    }
+
+    async function deleteEvent(id) {
+      if (!confirm("¿Seguro que deseas eliminar este evento?")) return;
+      try {
+        await eventRepository.remove(id);
+        events = events.filter(event => event.id !== id);
+        renderAll();
+        showToast("Evento eliminado.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    }
+
+    function updateMetrics() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const monthEvents = events.filter(event => {
+        const date = new Date(event.date + "T00:00:00");
+        return date.getFullYear() === year && date.getMonth() === month;
+      });
+
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      for (let day = 1; day <= daysInMonth; day++) {
+        const trash = createTrashEvent(formatDate(new Date(year, month, day)));
+        if (trash) monthEvents.push(trash);
+      }
+
+      document.getElementById("metricEventos").textContent = monthEvents.length;
+      document.getElementById("metricMantenimiento").textContent = monthEvents.filter(event => event.type === "mantenimiento").length;
+      document.getElementById("metricAsambleas").textContent = monthEvents.filter(event => event.type === "asamblea").length;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const next = events
+        .filter(event => new Date(event.date + "T00:00:00") >= today)
+        .sort((a, b) => a.date.localeCompare(b.date))[0];
+      document.getElementById("metricProximo").textContent = next ? String(new Date(next.date + "T00:00:00").getDate()).padStart(2, "0") : "-";
+    }
+
+    async function previousMonth() {
+      currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      selectedDate = formatDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1));
+      await loadData();
+      renderAll();
+    }
+
+    async function nextMonth() {
+      currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+      selectedDate = formatDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1));
+      await loadData();
+      renderAll();
+    }
+
+    async function goToday() {
+      currentDate = new Date();
+      selectedDate = formatDate(currentDate);
+      await loadData();
+      renderAll();
+    }
+
+    function renderAll() {
+      renderCalendar();
+      renderSelectedDay();
+      renderEventList();
+      updateMetrics();
+    }
+
+    async function initializeCalendar() {
+      await loadData();
+      renderAll();
+    }
+
+    initializeCalendar();
+  </script>
+  <script src="assets/js/site-sidebar.js?v=20261021-purple-x"></script>
+</body>
+</html>
