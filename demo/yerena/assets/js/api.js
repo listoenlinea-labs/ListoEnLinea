@@ -62,8 +62,9 @@ window.fetch=async function(input,init={}){
   if(file.size>14*1024*1024)return response({error:'Archivo demasiado grande. Límite: 14 MB.'},413);
   if(mime==='application/zip'&&!/\.zip$/i.test(name))return response({error:'El ZIP debe terminar en .zip.'},400);
   const header=new Uint8Array(await file.slice(0,136).arrayBuffer());
-  const isPdf=String.fromCharCode(...header.slice(0,5))==='%PDF-',isZip=header[0]===80&&header[1]===75,isDcm=header.length>=132&&String.fromCharCode(...header.slice(128,132))==='DICM';
+  const isPdf=String.fromCharCode(...header.slice(0,5))==='%PDF-',isZip=header[0]===80&&header[1]===75&&header[2]===3&&header[3]===4,isDcm=header.length>=132&&String.fromCharCode(...header.slice(128,132))==='DICM';
   if(mime==='application/pdf'&&!isPdf||mime==='application/zip'&&!isZip||mime==='application/dicom'&&!isDcm)return response({error:'La firma del archivo no corresponde con su formato.'},400);
+  if(mime==='application/zip'){const tail=new Uint8Array(await file.slice(Math.max(0,file.size-65558)).arrayBuffer());let central=false;for(let i=0;i<=tail.length-4;i++)if(tail[i]===80&&tail[i+1]===75&&tail[i+2]===5&&tail[i+3]===6){central=true;break}if(!central)return response({error:'El ZIP está incompleto o carece de directorio central.'},400)}
   if(mime==='application/zip'&&window.JSZip){try{const archive=await window.JSZip.loadAsync(file);if(!Object.keys(archive.files).length)return response({error:'El ZIP está vacío.'},400)}catch{return response({error:'El ZIP no contiene un archivo válido.'},400)}}
   const nextId=Math.max(0,...c.files.map(f=>f.id))+1,record={id:nextId,category,filename:name,mime_type:mime,size_bytes:file.size,description:url.searchParams.get('description')||'',created_at:new Date().toISOString()};
   try{await fileTransaction(id+':'+nextId,'readwrite',file);}catch(err){return response({error:'El navegador no pudo guardar el archivo. Revisa espacio y permisos.'},507)}
