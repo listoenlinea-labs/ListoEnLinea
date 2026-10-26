@@ -28,11 +28,12 @@ const {chromium}=require('playwright');
 
    // Los enlaces del propio menú son los que antes enviaban a app.html inexistente.
    for(const target of ['analisis-cuotas.html','zkteco.html','seguridad.html','visitas.html','viviendas.html','casa-club.html','pagos.html']){
-    const link=page.locator('.mj-side-link').filter({has:page.locator('a[href="'+target+'"]')}).first();
-    const fallback=page.locator('.mj-side-link[href="'+target+'"]').first();
-    const chosen=await fallback.count()?fallback:page.locator('a[href="'+target+'"]').first();
+    if(width<821 && await page.locator('body').evaluate(b=>b.classList.contains('mj-shared-sidebar-collapsed'))){
+      await page.locator('.mj-side-tab').click();
+    }
+    const chosen=page.locator('.mj-side-link[href="'+target+'"]').first();
     assert(await chosen.count(), 'No hay enlace de '+target);
-    await chosen.click({force:true});
+    await chosen.click();
     await page.waitForURL(url=>url.pathname.endsWith('/demo/mision/app.html')&&url.searchParams.get('page')===target,{timeout:16000});
     await page.waitForFunction(t=>window.MJShell?.currentPage===t,target,{timeout:16000});
     await page.waitForFunction(t=>[...document.querySelectorAll('.mj-app-frame')].some(f=>
@@ -43,10 +44,16 @@ const {chromium}=require('playwright');
     const next=target==='analisis-cuotas.html'?'zkteco.html':'analisis-cuotas.html';
     const nextLink=page.locator('.mj-side-link[href="'+next+'"]').first();
     assert(await nextLink.count(),'Menú del shell no tiene '+next);
+    if(width<821 && await page.locator('body').evaluate(b=>b.classList.contains('mj-shared-sidebar-collapsed'))){
+      await page.locator('.mj-side-tab').click();
+    }
     await nextLink.click();
     await page.waitForFunction(t=>window.MJShell?.currentPage===t,next);
     // Volver a Inicio a través del menú del shell para siguiente iteración.
     const home=page.locator('.mj-side-link[href="index.html"]').first();
+    if(width<821 && await page.locator('body').evaluate(b=>b.classList.contains('mj-shared-sidebar-collapsed'))){
+      await page.locator('.mj-side-tab').click();
+    }
     await home.click();
     await page.waitForFunction(()=>window.MJShell?.currentPage==='index.html');
     await page.goto('http://127.0.0.1:8765/demo/mision/index.html');
