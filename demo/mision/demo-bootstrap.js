@@ -17,13 +17,19 @@ let state;try{state=JSON.parse(localStorage.getItem(KEY))}catch{}if(!state?.casa
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn('Sin almacenamiento persistente',e)}};
 const byId=id=>state.casas.find(c=>Number(c.id)===Number(id)),byTag=id=>state.tags.find(t=>Number(t.id)===Number(id));
 const cap=n=>Math.max(0,Math.round((Number(n)||0)*100)/100);
-const debt=c=>{const months=Math.max(0,curr-c.paidThrough),late=months&&!c.exento&&now.getDate()>10?50:0;return cap(months*c.cuota+late-(c.credito||0))};
-const dates=c=>yearMonth(c.paidThrough),dueEnd=c=>{const y=Math.floor(c.paidThrough/12),m=c.paidThrough%12;return date(new Date(y,m+1,10))};
-const homeTitle=c=>c.calle+' '+c.numero;
-function advance(c,money){let amount=cap(money),penalty=debt(c)%c.cuota;if(debt(c)&&penalty===50){const charge=Math.min(amount,50);amount-=charge;}
- let total=cap(amount+(c.credito||0)),n=Math.floor((total+0.0001)/c.cuota);if(n>36)n=36;
- c.paidThrough+=n;c.credito=cap(total-n*c.cuota);
- state.tags.filter(t=>t.casaId===c.id).forEach(t=>{if(!debt(c)){t.activo=true;t.fechaFin=dueEnd(c)}});
+const overdue=i=>i<curr||(i===curr&&now.getDate()>10);
+const periodCost=(c,i)=>c.cuota+(overdue(i)&&!c.exento?50:0);
+const debt=c=>{let total=0;for(let i=c.paidThrough+1;i<=curr;i++)total+=periodCost(c,i);return cap(Math.max(0,total-(c.credito||0)))};
+const dates=c=>yearMonth(c.paidThrough);
+const dueEnd=c=>{const y=Math.floor(c.paidThrough/12),m=c.paidThrough%12;return date(new Date(y,m+1,10))};
+function advance(c,money){
+ let total=cap((c.credito||0)+cap(money)),n=0;
+ for(let i=c.paidThrough+1;i<c.paidThrough+37;i++){
+  const cost=periodCost(c,i);if(total+0.00001<cost)break;
+  total=cap(total-cost);n++;
+ }
+ c.paidThrough+=n;c.credito=total;
+ if(n)state.tags.filter(t=>t.casaId===c.id).forEach(t=>{t.fechaFin=dueEnd(c);if(debt(c)===0)t.activo=true});
  return n;
 }
 const token='SIMULACION_PUBLICA_SIN_AUTENTICACION',admin={id:1,nombre:'Administrador',apellidoPaterno:'Demo',apellidoMaterno:'',correo:'admin@example.test',telefono:'3300000000',rol:{id:1,nombre:'ADMINISTRADOR'},casa:state.casas[0],roles:['ADMINISTRADOR'],administrador:true};
@@ -61,8 +67,8 @@ function handle(uri,method,body,query){
  if(uri.startsWith('/finanzas/viviendas/')&&uri.endsWith('/cuota-por-cobrar')){const c=byId(parts[2]);c.cuota=cap(body.cuotaPorCobrar);c.exento=Boolean(body.sinRecargo);save();return ok(c)}
  if(uri.startsWith('/finanzas/pagos-vivienda/')&&uri.endsWith('/historial'))return ok(state.pagos.filter(p=>p.casaId===Number(parts[2])));
  if(uri.startsWith('/finanzas/pagos-vivienda/')&&uri.endsWith('/estado-c3')){const t=state.tags.filter(x=>x.casaId===Number(parts[2]));return ok({tags:t.length,sincronizacion:'COMPLETADO',fechaFinal:t[0]?.fechaFin,fechasTags:t.map(x=>({fechaFinal:x.fechaFin}))})}
- if(uri.startsWith('/finanzas/pagos-vivienda/')&&uri.endsWith('/cotizar')){const c=byId(parts[2]),targetYear=+query.get('anio')||yyyy,targetMonth=+query.get('mes')||mm,desired=period(targetYear,targetMonth),months=Math.max(1,desired-c.paidThrough);const periods=Array.from({length:months},(_,i)=>({mes:monthName[(c.paidThrough+i+1)%12],anio:Math.floor((c.paidThrough+i+1)/12),registrable:true}));return ok({tarifaMensual:c.cuota,ultimoMesPagado:{mes:monthName[c.paidThrough%12],anio:Math.floor(c.paidThrough/12)},meses:months,desde:periods[0]&&{nombre:periods[0].mes,anio:periods[0].anio},hasta:periods.at(-1)&&{nombre:periods.at(-1).mes,anio:periods.at(-1).anio},periodos:periods,montoSugerido:months*c.cuota,montoMinimo:months*c.cuota,montoMaximo:months*c.cuota+50,fechaFinObjetivo:date(new Date(targetYear,targetMonth,10)),bloqueado:false,requiereRevision:false,requiereConciliacionTarifa:false})}
- if(uri==='/finanzas/pagos-vivienda'&&method==='POST'){const c=byId(body.casaId);if(!c)return {ok:false,message:'Casa inexistente'};const monto=cap(body.monto||body.importe);advance(c,monto);const p={id:++state.lastId,casaId:c.id,monto,fecha:longDate,referencia:body.referencia||'PAGO-DEMO-'+state.lastId,concepto:'MANTENIMIENTO'};state.pagos.push(p);save();return ok({pago:p,fechaFinObjetivo:dueEnd(c),message:message})}
+ if(uri.startsWith('/finanzas/pagos-vivienda/')&&uri.endsWith('/cotizar')){const c=byId(parts[2]),targetYear=+query.get('anio')||yyyy,targetMonth=+query.get('mes')||mm,desired=period(targetYear,targetMonth),months=Math.max(1,desired-c.paidThrough);const periods=Array.from({length:months},(_,i)=>({mes:monthName[(c.paidThrough+i+1)%12],anio:Math.floor((c.paidThrough+i+1)/12),registrable:true}));return ok({tarifaMensual:c.cuota,ultimoMesPagado:{mes:monthName[c.paidThrough%12],anio:Math.floor(c.paidThrough/12)},meses:months,desde:periods[0]&&{nombre:periods[0].mes,anio:periods[0].anio},hasta:periods.at(-1)&&{nombre:periods.at(-1).mes,anio:periods.at(-1).anio},periodos:periods,montoSugerido:periods.reduce((sum,_,i)=>sum+periodCost(c,c.paidThrough+i+1),0),montoMinimo:periods.reduce((sum,_,i)=>sum+periodCost(c,c.paidThrough+i+1),0),montoMaximo:periods.reduce((sum,_,i)=>sum+periodCost(c,c.paidThrough+i+1),0),fechaFinObjetivo:date(new Date(targetYear,targetMonth,10)),bloqueado:false,requiereRevision:false,requiereConciliacionTarifa:false})}
+ if(uri==='/finanzas/pagos-vivienda'&&method==='POST'){const c=byId(body.casaId);if(!c)return {ok:false,message:'Casa inexistente'};const monto=cap(body.montoTotal??body.monto??body.importe);if(!(monto>0))return {ok:false,message:'El importe debe ser positivo.'};const previo=c.paidThrough;advance(c,monto);if(body.pagoAnual&&body.anio){const last=period(Number(body.anio),12);if(c.paidThrough<last)return {ok:false,message:'El monto no alcanza para cubrir los meses pendientes del pago anual.'};c.paidThrough=last;}const p={id:++state.lastId,casaId:c.id,monto,fecha:longDate,referencia:'PAGO-DEMO-'+state.lastId,concepto:'MANTENIMIENTO',pagoAnual:Boolean(body.pagoAnual)};state.pagos.push(p);save();return {ok:true,data:{referencia:p.referencia,pago:p,fechaFinObjetivo:dueEnd(c),meses:c.paidThrough-previo},message:'Pago ficticio registrado. TAGs actualizados únicamente en el simulador.'}}
  if(uri.startsWith('/finanzas/pagos-concepto'))return ok({EXTRAORDINARIO:[],CASA_CLUB:[]});
  if(uri.startsWith('/zkteco/estado'))return ok({modelo:'C3-200 (simulado)',deviceName:'C3-200 · Demo',lockCount:2,firmware:'DEMO',tarjetas:state.tags.length,escrituraUsuarios:'SIMULADO',inventarioAuto:{lastError:null}});
  if(uri==='/zkteco/sincronizar')return ok({noObservados:0,noObservadosDetalle:[],sincronizado:true,message:message});
