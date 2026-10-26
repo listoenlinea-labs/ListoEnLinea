@@ -198,7 +198,7 @@
     return {
       ok: false, ...best,
       message: !best.owner && !best.suffix ? 'No se encontró el beneficiario ni la terminación de cuenta en la sección Destino.'
-        : !best.owner ? 'El beneficiario del comprobante no coincide con la cuenta de Misión Jardines.'
+        : !best.owner ? 'El beneficiario del comprobante no coincide con la cuenta de Fraccionamiento Demo.'
         : 'No se encontró la terminación de cuenta ' + last4 + ' junto al beneficiario.'
     };
   }
