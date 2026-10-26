@@ -182,3 +182,15 @@
     padding: 6px 9px;
   }
 }
+
+/* Detalles comerciales de los proyectos */
+.portfolio .project-card .portfolio-info{display:flex;flex-direction:column;min-height:210px;position:relative!important;padding-bottom:65px!important}
+.portfolio .project-card .project-link{margin-top:auto;align-self:flex-start}
+.project-details-button{position:absolute;right:18px;bottom:18px;border:1px solid #bde7f1;background:#f0fbfe;border-radius:10px;padding:9px 13px;color:#0983a2;font-size:13px;font-weight:700;cursor:pointer;transition:.2s ease}
+.project-details-button:hover,.project-details-button:focus-visible{background:#0f97ba;color:white;border-color:#0f97ba}
+.project-checklist{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.project-checklist li{display:flex;gap:10px;align-items:flex-start;color:#324954;font-size:14px;line-height:1.5}
+.project-checklist li::before{content:'✓';color:#149a71;font-weight:900;flex:0 0 19px}
+#projectDetailsModal .modal-content{border:0;border-radius:20px;box-shadow:0 22px 80px #172b4240;overflow:hidden}
+#projectDetailsModal .modal-header,#projectDetailsModal .modal-body,#projectDetailsModal .modal-footer{padding:21px 26px}
+@media(max-width:575px){.portfolio .project-card .portfolio-info{padding-bottom:76px!important}.project-details-button{right:14px;bottom:14px}}
