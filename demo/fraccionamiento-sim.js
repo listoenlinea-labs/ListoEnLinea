@@ -7,7 +7,7 @@ const seed=()=>({homes:Array.from({length:30},(_,i)=>({id:i+1,street:streets[Mat
 let db;try{db=JSON.parse(localStorage.getItem(storageKey));}catch{}if(!db||!db.homes)db=seed();
 const save=()=>localStorage.setItem(storageKey,JSON.stringify(db));
 const cash=n=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
-const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;':'&quot;',"'":'&#39;'}[c]));
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const home=id=>db.homes.find(h=>h.id===Number(id));
 const addr=h=>h.street+' '+h.number;
 const button=(text,action)=>'<button type="button" data-demo-action="'+action+'" style="border:1px solid #f1d4bb;background:#fff6ee;border-radius:8px;color:#ca5a09;padding:7px 10px;cursor:pointer">'+text+'</button>';
