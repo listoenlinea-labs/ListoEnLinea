@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#edf7f2"><meta name="robots" content="noindex,nofollow">
+<title>Expediente del paciente | Dra. Yerena Riso</title>
+<link rel="icon" href="assets/images/sonrisa.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/tokens.css"><link rel="stylesheet" href="assets/css/clinical.css?v=20261021-odontogram-multiple"><link rel="stylesheet" href="assets/css/cbct-viewer.css?v=20261017-zip1"><link rel="stylesheet" href="assets/css/sidebar.css?v=20261021-collapse"></head>
+<body>
+<header class="history-topbar"><button type="button" id="history-menu-toggle" class="yer-sidebar-toggle" aria-controls="history-aside" aria-expanded="true" aria-label="Ocultar menú lateral">‹</button><a class="history-brand" href="app.html"><img src="assets/images/sonrisa.svg" alt="" width="43" height="43"><span><strong>Dra. Yerena Riso</strong><small>CONSULTORIO DENTAL</small></span></a><a class="history-return" href="app.html?view=pacientes">← Volver a pacientes</a></header>
+<div class="history-shell" id="history-shell">
+ <aside class="history-aside" id="history-aside">
+  <div class="history-patient-identity"><div class="history-photo" id="history-photo"><span>YR</span></div><div class="history-title"><span class="history-eyebrow">EXPEDIENTE PRIVADO</span><h1 id="history-patient-name">Cargando paciente…</h1><p id="history-patient-age"></p><small id="history-patient-contact"></small></div></div>
+  <nav class="history-nav" id="history-nav" aria-label="Secciones clínicas">
+    <button type="button" class="history-nav-item active" data-tab="filiation">Filiación</button>
+    <button type="button" class="history-nav-item" data-tab="history">Historia clínica</button>
+    <button type="button" class="history-nav-item" data-tab="odontogram">Odontograma</button>
+    <button type="button" class="history-nav-item" data-tab="periodontal">Periodontograma</button>
+    <button type="button" class="history-nav-item" data-tab="documents">Archivos PDF</button>
+    <button type="button" class="history-nav-item" data-tab="prescriptions">Prescripciones</button>
+    <button type="button" class="history-nav-item" data-tab="radiographs">Radiografías y Tomografías</button>
+  </nav>
+  <p class="clinical-data-note">Información clínica confidencial. Acceso exclusivo para personal autorizado.</p>
+ </aside>
+ <main class="history-main"><div class="clinical-header"><span class="history-eyebrow">HISTORIA CLÍNICA DIGITAL</span><h2 id="clinical-view-title">Filiación</h2><p id="clinical-view-subtitle">Información general del paciente.</p></div><div id="clinical-content" aria-live="polite"><p class="clinical-muted">Cargando expediente…</p></div></main>
+</div><div class="history-sidebar-overlay" id="history-sidebar-overlay" aria-hidden="true"></div><div id="clinical-toast" class="clinical-toast hidden" role="status"></div>
+<script defer src="assets/js/sidebar.js?v=20261021-collapse"></script>
+<script src="assets/js/config.js"></script><script src="assets/js/api.js"></script><script defer src="assets/js/dental-art.js?v=20261021-odontogram-multiple"></script>
+<script defer src="assets/js/clinical-dental.js?v=20261021-odontogram-multiple"></script>
+<script defer src="assets/js/radiograph-controls.js?v=20261016-rx-multiaxis"></script>
+<script defer src="assets/js/dicom-viewer.js?v=20261017-jpeg-lossless-sv1"></script>
+<script defer src="assets/js/dicom-volume.js?v=20261017-cbct1"></script>
+<script defer src="assets/js/cbct-viewer.js?v=20261017-cbct1"></script>
+<script defer src="assets/js/clinical.js?v=20261017-persist-zip"></script>
+<script defer src="assets/js/vendor/jszip.min.js?v=20261017-zip1"></script>
+<script defer src="assets/js/cbct-archive.js?v=20261017-zip1"></script>
+<script defer src="assets/js/cbct-integration.js?v=20261017-persist-zip"></script>
+</body></html>
