@@ -2,7 +2,7 @@
 (()=>{'use strict';
 /* Rutas excluidas del demo público: el shell y los enlaces directos vuelven a Inicio. */
 const unavailablePages=new Set(['mapa.html','auto-users.html']);
-if(unavailablePages.has(location.pathname.split('/').pop())){
+if(unavailablePages.has(new URL(location.href).pathname.split('/').pop())){
   location.replace('app.html?page=index.html');
   return;
 }
