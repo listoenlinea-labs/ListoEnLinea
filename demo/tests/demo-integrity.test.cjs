@@ -270,3 +270,70 @@ test('Migración de datos anteriores respeta pagos, TAGs, reservas y egresos man
  assert(state.egresos.some(e=>e.categoria==='SEGURIDAD'));
  assert(!state.egresos.some(e=>e.referencia==='EGRESO-FICTICIO-1'));
 });
+
+
+test('Historial de mantenimiento muestra pagos ficticios reales y coincide con Análisis de cuotas',async()=>{
+ const {request,win,requests}=residential();
+ const analysis=(await request('/finanzas/analisis')).data;
+ const sample=analysis.viviendas.find(x=>x.calle==='Azucenas'&&x.numero===15);
+ assert(sample,'No se encontró la vivienda ficticia Azucenas 15');
+ const detail=await request('/finanzas/pagos-vivienda/'+sample.casaId+'/historial?concepto=MANTENIMIENTO');
+ assert.equal(detail.ok,true);
+ assert.equal(detail.data.calle,sample.calle);
+ assert.equal(detail.data.numero,sample.numero);
+ assert(detail.data.movimientos.length>=6,'El historial debe incluir meses anteriores');
+ assert(detail.data.movimientos.every(p=>Number(p.monto)>0&&Array.isArray(p.periodos)
+   &&p.referencia&&p.fecha&&p.formaPago),'Formato de línea de tiempo inválido');
+ assert(detail.data.movimientos.some(p=>p.periodos.some(x=>x.mes==='ENERO'&&x.anio===new Date().getFullYear())));
+ const expected=win.MISION_DEMO.getState().pagos.filter(p=>p.casaId===sample.casaId);
+ assert.equal(detail.data.movimientos.length,expected.length);
+ assert.equal(Math.round(detail.data.movimientos.reduce((s,p)=>s+p.monto,0)*100),
+   Math.round(expected.reduce((s,p)=>s+p.monto,0)*100));
+ assert.equal(detail.data.movimientos[0].monto,sample.ultimoPago.monto);
+ assert.equal(detail.data.saldoPendiente,sample.saldoPendiente);
+ assert.equal(Math.round(detail.data.deudas.reduce((s,d)=>s+d.monto,0)*100),
+   Math.round(detail.data.saldoPendiente*100));
+ assert.equal(requests.length,0);
+});
+test('Vivienda pendiente presenta línea de tiempo histórica y detalle de deuda desde julio',async()=>{
+ const {request}=residential();
+ const analysis=(await request('/finanzas/analisis')).data;
+ const pending=analysis.viviendas.find(h=>h.ultimoMesPagado.mes==='Junio'&&h.saldoPendiente>0
+   &&h.tarifaMensual===300&&!h.exencionesRecargo?.length);
+ assert(pending,'Falta un caso de prueba con saldo pendiente desde julio');
+ const history=(await request('/finanzas/pagos-vivienda/'+pending.casaId+'/historial?concepto=MANTENIMIENTO')).data;
+ assert.equal(history.saldoPendiente,pending.saldoPendiente);
+ assert(history.movimientos.length>=6);
+ const year=String(new Date().getFullYear());
+ const expected=Array.from({length:new Date().getMonth()-5},(_,i)=>year+'-'+String(i+7).padStart(2,'0'));
+ assert.deepEqual(history.deudas.map(d=>d.periodo),expected);
+ assert(history.deudas.every(d=>d.recargo===50&&d.estado==='PENDIENTE'));
+ assert.equal(Math.round(history.deudas.reduce((s,d)=>s+d.monto,0)),
+   Math.round(pending.saldoPendiente));
+});
+test('Un pago ficticio recién registrado aparece en la línea de tiempo sin duplicarse',async()=>{
+ const {request,win}=residential();
+ const analysis=(await request('/finanzas/analisis')).data;
+ const house=analysis.viviendas.find(x=>x.saldoPendiente>=350&&x.tarifaMensual===300);
+ assert(house);
+ const previous=(await request('/finanzas/pagos-vivienda/'+house.casaId+'/historial')).data;
+ const first=await request('/finanzas/pagos-vivienda','POST',{
+  casaId:house.casaId,montoTotal:100,formaPago:'EFECTIVO'});
+ assert.equal(first.ok,true);
+ const partial=(await request('/finanzas/pagos-vivienda/'+house.casaId+'/historial')).data;
+ assert.equal(partial.movimientos.length,previous.movimientos.length+1);
+ assert.equal(partial.movimientos[0].monto,100);
+ assert.equal(partial.movimientos[0].meses,0);
+ assert.equal(partial.saldoPendiente,house.saldoPendiente-100);
+ const settlement=await request('/finanzas/pagos-vivienda','POST',{
+  casaId:house.casaId,montoTotal:partial.saldoPendiente});
+ assert.equal(settlement.ok,true);
+ const final=(await request('/finanzas/pagos-vivienda/'+house.casaId+'/historial')).data;
+ assert.equal(final.saldoPendiente,0);
+ assert.equal(final.deudas.length,0);
+ assert.equal(final.movimientos.length,previous.movimientos.length+2);
+ assert(final.movimientos[0].periodos.length>=1);
+ const state=win.MISION_DEMO.getState();
+ assert.equal(final.movimientos.reduce((t,m)=>t+m.monto,0),
+  state.pagos.filter(x=>x.casaId===house.casaId).reduce((t,m)=>t+m.monto,0));
+});
