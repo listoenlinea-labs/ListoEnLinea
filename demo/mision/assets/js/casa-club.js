@@ -63,7 +63,10 @@
  function monthShift(offset){
   const [y,m]=currentMonth.split('-').map(Number);
   const dt=new Date(Date.UTC(y,m-1+offset,1));
-  currentMonth=dt.toISOString().slice(0,7);
+  const target=dt.toISOString().slice(0,7);
+  // Ningún control puede desplazar el calendario a un mes anterior al actual.
+  if(target<today().slice(0,7))return;
+  currentMonth=target;
   selectedDate='';$('clubDate').value='';
   void calendar();
  }
@@ -72,15 +75,21 @@
  async function calendar(){
   const [year,month]=currentMonth.split('-').map(Number);
   const start=currentMonth+'-01',end=new Date(Date.UTC(year,month,0)).toISOString().slice(0,10);
-  const response=await api('/fechas?desde='+start+'&hasta='+end);
-  occupied=new Map(response.ocupadas.map(x=>[x.fecha,x.estatus]));
+  const monthStart=today().slice(0,7),cutoff=today();
+  // El encabezado debe verse incluso mientras se consultan fechas ficticias.
   $('calendarLabel').textContent=new Intl.DateTimeFormat('es-MX',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(start+'T12:00:00Z'));
-  $('prevMonth').disabled=start.slice(0,7)<=today().slice(0,7);
+  $('prevMonth').disabled=currentMonth<=monthStart;
+  const response=await api('/fechas?desde='+start+'&hasta='+end);
+  // Defensa ante datos antiguos de caché: ambos formatos permitidos sin llamar a servicios reales.
+  const entries=Array.isArray(response.ocupadas)?response.ocupadas:
+    Array.isArray(response.data)?response.data:[];
+  occupied=new Map(entries.filter(x=>x&&['PENDIENTE','APROBADA'].includes(x.estatus))
+    .map(x=>[x.fecha,x.estatus]));
   const days=$('calendarDays');days.replaceChildren();
   const offset=(new Date(Date.UTC(year,month-1,1)).getUTCDay()+6)%7;
   for(let n=0;n<offset;n++){let gap=document.createElement('div');gap.className='calendar-blank';days.append(gap);}
   for(let n=1;n<=new Date(Date.UTC(year,month,0)).getUTCDate();n++){
-   const date=currentMonth+'-'+String(n).padStart(2,'0'),status=occupied.get(date),past=date<today();
+   const date=currentMonth+'-'+String(n).padStart(2,'0'),status=occupied.get(date),past=date<cutoff;
    const btn=document.createElement('button');btn.type='button';
    btn.className=past?'past':status==='APROBADA'?'booked':status?'waiting':'available';
    if(date===selectedDate)btn.classList.add('selected');

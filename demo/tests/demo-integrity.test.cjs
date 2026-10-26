@@ -173,3 +173,49 @@ test('TAGs del simulador muestran estados sincronizados y jamás contactan el C3
  assert.equal(sync.data.simulado,true);
  assert.equal(requests.length,0);
 });
+
+
+test('Casa Club renderiza el mes actual con fechas ocupadas y permite reservar, aprobar y cancelar de forma ficticia',async()=>{
+ const {request,requests}=residential();
+ const hoy=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Mexico_City',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const [year,month]=hoy.split('-').map(Number);
+ const fin=new Date(Date.UTC(year,month,0)).toISOString().slice(0,10);
+ const first=await request('/casa-club/fechas?desde='+hoy.slice(0,7)+'-01&hasta='+fin);
+ assert.equal(first.ok,true);assert(Array.isArray(first.ocupadas));assert.equal(first.ocupadas.length,0);
+ const paidHouse=(await request('/finanzas/analisis')).data.viviendas.find(x=>x.estatus==='PAGADO');
+ assert(paidHouse,'Debe existir una casa ficticia al corriente');
+ const created=await request('/casa-club/reservas','POST',{
+  casaId:paidHouse.casaId,fecha:hoy,solicitante:'Residente ficticio',telefono:'3300000000',
+  correo:'demo@example.test',motivo:'Evento demo',propietario:true});
+ assert.equal(created.ok,true);assert(created.data.id);
+ const pending=await request('/casa-club/fechas?desde='+hoy.slice(0,7)+'-01&hasta='+fin);
+ assert.deepEqual(pending.ocupadas,[{fecha:hoy,estatus:'PENDIENTE'}]);
+ const duplicate=await request('/casa-club/reservas','POST',{casaId:paidHouse.casaId,fecha:hoy});
+ assert.equal(duplicate.ok,false);
+ const my=await request('/casa-club/mias');
+ assert.equal(my.ok,true);assert.equal(my.data.length,1);
+ assert.equal(my.data[0].estatus,'PENDIENTE');
+ const pendingCount=await request('/casa-club/solicitudes-pendientes');
+ assert.equal(pendingCount.cantidad,1);
+ const approval=await request('/casa-club/administracion/'+created.data.id,'PATCH',{
+  accion:'APROBAR',cuotaRecuperacion:700,depositoGarantia:700,limpieza:0,
+  fechaLimitePago:hoy});
+ assert.equal(approval.ok,true);
+ assert.equal((await request('/casa-club/fechas?desde='+hoy+'&hasta='+fin)).ocupadas[0].estatus,'APROBADA');
+ const cancelled=await request('/casa-club/reservas/'+created.data.id+'/cancelar','PATCH');
+ assert.equal(cancelled.ok,true);
+ assert.equal((await request('/casa-club/fechas?desde='+hoy+'&hasta='+fin)).ocupadas.length,0);
+ assert.equal(requests.length,0,'El demo no debe contactar servidores reales');
+});
+test('Casa Club rechaza fechas anteriores a hoy y solicitudes de deudores',async()=>{
+ const {request}=residential();
+ const local=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Mexico_City',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const ayer=new Date(Date.parse(local+'T12:00:00Z')-86400000).toISOString().slice(0,10);
+ const rejected=await request('/casa-club/reservas','POST',{casaId:1,fecha:ayer});
+ assert.equal(rejected.ok,false);assert.match(rejected.message,/desde hoy/);
+ const owing=(await request('/finanzas/analisis')).data.viviendas.find(v=>v.saldoPendiente>0);
+ assert(owing);
+ const today=await request('/casa-club/reservas','POST',{casaId:owing.casaId,fecha:local});
+ assert.equal(today.ok,false);assert.equal(today.codigo,'ADEUDOS_RESERVA');
+ assert(today.adeudos.totales.MANTENIMIENTO>0);
+});

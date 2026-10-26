@@ -8,6 +8,7 @@ on:
       - 'demo/mision/**'
       - 'demo/tests/mision-navigation-finance.cjs'
       - 'demo/tests/mision-conmutador-finance-ui.cjs'
+      - 'demo/tests/mision-casa-club-calendar.cjs'
       - '.github/workflows/mision-demo-navigation.yml'
 permissions:
   contents: read
@@ -25,3 +26,4 @@ jobs:
       - run: python3 -m http.server 8765 >/tmp/mision-demo-http.log 2>&1 &
       - run: node demo/tests/mision-navigation-finance.cjs
       - run: node demo/tests/mision-conmutador-finance-ui.cjs
+      - run: node demo/tests/mision-casa-club-calendar.cjs
