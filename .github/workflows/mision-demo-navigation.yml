@@ -1,0 +1,25 @@
+name: Mision Demo Dashboard and Navigation
+on:
+  push:
+    branches:
+      - fix/mision-demo-routes-dashboard-20261026
+  pull_request:
+    paths:
+      - 'demo/mision/**'
+      - 'demo/tests/mision-navigation-finance.cjs'
+      - '.github/workflows/mision-demo-navigation.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: python3 -m http.server 8765 >/tmp/mision-demo-http.log 2>&1 &
+      - run: node demo/tests/mision-navigation-finance.cjs
