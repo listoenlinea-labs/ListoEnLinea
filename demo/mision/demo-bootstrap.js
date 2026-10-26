@@ -1,5 +1,11 @@
 /* Entorno público aislado. No conecta con C3, MySQL, correo ni banca. */
 (()=>{'use strict';
+/* Rutas excluidas del demo público: el shell y los enlaces directos vuelven a Inicio. */
+const unavailablePages=new Set(['mapa.html','auto-users.html']);
+if(unavailablePages.has(location.pathname.split('/').pop())){
+  location.replace('app.html?page=index.html');
+  return;
+}
 const ORIGIN='https://demo.invalid', API=ORIGIN+'/api', KEY='lel_mision_copy_demo_v2';
 const monthName=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 const now=new Date(),yyyy=now.getFullYear(),mm=now.getMonth()+1,period=(y,m)=>y*12+m-1;
