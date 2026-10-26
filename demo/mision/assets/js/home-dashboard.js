@@ -1017,14 +1017,14 @@
 
     container.innerHTML = `
       <section class="hl-welcome">
-        <div><span class="hl-eyebrow">INICIO · DATOS EN VIVO</span><h1>Hola, ${escapeHtml(firstName)}.</h1><p>Este tablero se alimenta directamente de MySQL. No muestra cifras de demostración.</p></div>
+        <div><span class="hl-eyebrow">INICIO · MODO DEMOSTRACIÓN</span><h1>Hola, ${escapeHtml(firstName)}.</h1><p>Este tablero utiliza exclusivamente datos ficticios en tu navegador.</p></div>
         <div class="hl-actions">
           ${actions.map((action, index) => `<a class="hl-action ${index === 0 ? 'primary' : ''}" href="${action.href}"><b>${action.icon}</b>${action.label}</a>`).join('')}
           <button class="hl-refresh" type="button" id="hlRefresh">↻ Actualizar</button>
         </div>
       </section>
 
-      <section class="hl-kpis" aria-label="Indicadores conectados a la base de datos">
+      <section class="hl-kpis" aria-label="Indicadores simulados">
         <article class="hl-card hl-kpi hl-report-kpi hl-kpi-tone-blue">
           <div class="hl-kpi-content"><span>Cuotas al corriente</span><strong>${pct === null || pct === undefined ? '—' : `${Number(pct).toLocaleString('es-MX')}%`}</strong><small>${fuentes.cuotas ? `${integer.format(q.alCorriente || 0)} de ${integer.format(q.total || 0)} cuotas del periodo` : 'Fuente no disponible'}</small></div>
           
@@ -1057,7 +1057,7 @@
               <section class="hl-flip-face hl-finance-face" aria-label="Resumen financiero">
                 <div class="hl-card-head"><div><span class="hl-eyebrow">FINANZAS</span><h2>Resumen del mes</h2></div><button type="button" class="hl-face-switch" data-hl-show-face="agenda" aria-label="Girar tarjeta para ver próximos eventos">Ver agenda ↻</button></div>
                 <div id="hlFinanceDetails" class="hl-finance-details">${fuentes.cuotas ? financeSummary(data.recaudacion?.serie || [], Math.max(0, (data.recaudacion?.serie || []).length - 1)) : '<p class="hl-finance-no-data">Información financiera no disponible.</p>'}</div>
-                <div class="hl-data-note"><span class="hl-source ok">● Resumen mensual</span><span>Datos de cuotas y finanzas de MySQL.</span></div>
+                <div class="hl-data-note"><span class="hl-source ok">● Resumen mensual</span><span>Datos simulados; no existe conexión a MySQL.</span></div>
               </section>
               <section class="hl-flip-face hl-agenda-face" aria-label="Próximos eventos" aria-hidden="true" inert>
                 <div class="hl-card-head"><div><span class="hl-eyebrow">AGENDA</span><h2>Próximos eventos</h2></div><div class="hl-agenda-actions"><a href="calendario.html">Ver calendario</a><button type="button" class="hl-face-switch" data-hl-show-face="finanzas" aria-label="Girar tarjeta para ver el resumen financiero">Ver resumen ↻</button></div></div>
