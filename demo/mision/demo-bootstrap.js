@@ -10,7 +10,7 @@ const owners=['Elena Fernández','Rodrigo Sánchez','Paola Flores','Carlos Aguil
 const streetList=['Rosas','Gardenias','Magnolias','Claveles','Azucenas','Jardines','Camelias','Orquídeas'];
 function fixture(){
  const casas=Array.from({length:48},(_,i)=>({id:i+1,calle:streetList[Math.floor(i/6)],calleCorrecta:streetList[Math.floor(i/6)],numero:11+i%6+Math.floor(i/6)*40,nombre:owners[i%owners.length],cuota: i%11===0?150:300,paidThrough:curr-(i%5===0?2:i%3===0?1:0),credito:0,exento:i%13===0,permisosAcceso:{},telefono:'330000'+pad(i+21)+'00',correo:'residente'+(i+1)+'@example.test'}));
- const tags=casas.map((c,i)=>({id:i+1,casaId:c.id,numeroTarjeta:'DEMO'+String(10000+i),nombreDispositivo:'TAG '+String(i+1),fechaInicio:'2026-01-01',fechaFin:date(new Date(yyyy,mm+(c.paidThrough<curr?0:1),10)),activo:c.paidThrough===curr,fechaFinGuardada:date(new Date(yyyy,mm+1,10)),fisicamenteObservado:true}));
+ const tags=casas.map((c,i)=>({id:i+1,casaId:c.id,numeroTarjeta:'DEMO'+String(10000+i),nombreDispositivo:'TAG '+String(i+1),fechaInicio:'2026-01-01',fechaFin:date(new Date(yyyy,mm+(c.paidThrough<curr?-1:0),10)),activo:c.paidThrough===curr,fechaFinGuardada:date(new Date(yyyy,mm+1,10)),fisicamenteObservado:true}));
  return {casas,tags,accesos:[],visitas:[{id:1,casaId:1,nombre:'Gabriela Ramos',placa:'DEM-001',motivo:'Visita familiar',estado:'PROGRAMADA',fecha:longDate,hora:'11:30',codigo:'VIS-DEMO-0001'}],pagos:[],reportes:[],egresos:[],reservas:[],cuotasExtra:[],incidentes:[],cuentas:[],logs:[],lastId:100};
 }
 let state;try{state=JSON.parse(localStorage.getItem(KEY))}catch{}if(!state?.casas)state=fixture();
@@ -50,7 +50,11 @@ function handle(uri,method,body,query){
  if(uri==='/accesos'&&method==='GET')return ok(state.accesos,{data:state.accesos});
  if(uri==='/accesos'&&method==='POST'){const c=byId(body.casaId)||state.casas[0];const entry={id:++state.lastId,casa:c,fechaEntrada:new Date().toISOString(),estado:'DENTRO',...body};state.accesos.unshift(entry);save();return ok(entry)}
  if(uri.startsWith('/accesos/')&&uri.endsWith('/salida')){const entry=state.accesos.find(x=>x.id===Number(parts[1]));if(entry){entry.estado='SALIO';entry.fechaSalida=new Date().toISOString()}save();return ok(entry)}
- if(uri.startsWith('/dashboard'))return ok({kpis:{casas:state.casas.length,condominos:state.casas.length,visitas:state.visitas.length,pagos:state.pagos.length,accesos:state.accesos.length},operativo:{visitasHoy:state.visitas.length,accesosHoy:state.accesos.length},recaudacion:{total:state.pagos.reduce((s,p)=>s+p.monto,0)},fuentes:[],alcance:'Demo local',generadoEn:new Date().toISOString(),periodo:yearMonth(curr),eventos:[],eventosProximos7Dias:[],actividad:[],accesos:state.accesos});
+ if(uri.startsWith('/dashboard')){
+  const fin=analisis(),total=state.casas.length,vis=state.visitas.length,inside=state.accesos.filter(a=>a.estado==='DENTRO').length;
+  return ok({vista:'ADMINISTRADOR',fuentes:{cuotas:true,visitas:true,accesos:true,residentes:true,viviendas:true},kpis:{cuotas:{porcentajeAlCorriente:fin.porcentaje,alCorriente:fin.pagadas,total},visitas:{hoy:vis,programadas:vis,enCurso:inside},accesos:{activos:inside,entradasHoy:state.accesos.length},residentes:{activos:total,viviendasOcupadas:total,viviendasTotales:total}},
+  recaudacion:{totalMes:fin.ingresosParaBalance,variacionPorcentaje:0,serie:[{anio:yyyy,mes:mm,ingresos:fin.ingresosParaBalance,egresos:fin.totalEgresos,disponible:fin.balanceReportado,monto:fin.ingresosParaBalance}]},periodo:{actual:{etiqueta:monthName[mm-1]+' '+yyyy}},eventos:[],eventosProximos7Dias:[],actividad:state.accesos.slice(0,8),operativo:{visitas:state.visitas,accesos:state.accesos},generadoEn:new Date().toISOString()});
+ }
  if(uri==='/finanzas/analisis')return ok(analisis());
  if(uri==='/finanzas/egresos'&&method==='POST'){const e={id:++state.lastId,concepto:body.concepto||'Egreso demostrativo',categoria:body.categoria||'OPERACION',monto:cap(body.monto),fecha:body.fecha||longDate,referencia:body.referencia||'DEMO'};state.egresos.push(e);save();return ok(e)}
  if(uri.startsWith('/finanzas/egresos/')&&uri.endsWith('/activar-cuota')){state.cuotasExtra.push({id:++state.lastId,egresoId:Number(parts[2]),meses:Number(body.meses)||1,monto:state.egresos.find(e=>e.id===Number(parts[2]))?.monto||0});save();return ok({creada:true})}
