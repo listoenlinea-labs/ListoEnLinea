@@ -31,10 +31,10 @@ function fixture(){
    if(coverage>c.paidThrough)continue;
    // Un porcentaje de casas anticipa su mensualidad y otro paga después:
    // los movimientos por mes no resultan líneas artificialmente planas.
-   const shift=(c.id*13+month*7)%9===0?-1:(c.id*7+month*11)%8===0?1:0;
+   const shift=(c.id*13+month*7)%9===0?-1:(c.id*7+month*11)%11===0?-2:0;
    const registeredMonth=Math.max(1,Math.min(mm,month+shift));
    pagos.push({id:pagos.length+1001,casaId:c.id,monto:c.cuota,
-    fecha:yyyy+'-'+pad(registeredMonth)+'-'+pad(6+(c.id*3+month)%18),
+    fecha:yyyy+'-'+pad(registeredMonth)+'-'+pad(3+(c.id*3+month)%7),
     periodo:yearMonth(coverage),referencia:'PAGO-FICTICIO-'+pad(c.id)+'-'+pad(month),
     concepto:'MANTENIMIENTO',origen:'DEMO',estado:'VALIDADO'});
   }
