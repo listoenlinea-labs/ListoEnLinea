@@ -41,7 +41,8 @@ test('Las páginas y scripts visibles del demo no conservan el nombre del client
 });
 test('Claves internas y aislamiento de la aplicación no cambian con la marca',()=>{
  const script=relative('demo/mision/demo-bootstrap.js');
- assert(script.includes('https://demo.invalid/api'));
+ assert(relative('demo/mision/app.html').includes('https://demo.invalid/api'));
+ assert(script.includes('demo.invalid'));
  assert(script.includes('misionJardinesToken'));
  assert(script.includes('api-misionjardines'));
 });
