@@ -21,3 +21,4 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: python3 -m http.server 8765 > /tmp/demo-http.log 2>&1 &
       - run: node demo/tests/smoke.cjs
+      - run: node demo/tests/mobile.cjs
