@@ -37,8 +37,12 @@ const {chromium}=require('playwright');
    assert.equal(cells[1],String(selected.numero));
    assert.match(cells[2],/Deudor/);
    await frame.locator('body').evaluate(h=>{
-    // Mismo motor financiero que la API de pagos ficticios, sin un segundo servidor.
-    const result=window.MISION_DEMO.simulatePayment(h.casaId,h.saldoPendiente);
+    // Resolver por el domicilio visible, incluso si cambia el identificador de API.
+    const fixture=window.MISION_DEMO.getState().casas.find(c=>
+      String(c.calle)===String(h.calle)&&String(c.numero)===String(h.numero));
+    if(!fixture)throw Error('No se encontró en el padrón '+h.calle+' '+h.numero);
+    const amount=window.MISION_DEMO.getAnalysis().viviendas.find(x=>x.casaId===fixture.id).saldoPendiente;
+    const result=window.MISION_DEMO.simulatePayment(fixture.id,amount);
     if(result.saldo!==0)throw Error('El pago ficticio no liquidó la deuda: '+result.saldo);
    },selected);
    await frame.locator('#segCuotasRefresh').click();
