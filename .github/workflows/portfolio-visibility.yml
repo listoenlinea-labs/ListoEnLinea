@@ -1,0 +1,26 @@
+name: Portfolio visibility regression
+on:
+  push:
+    branches:
+      - fix/portfolio-cards-always-visible-20261026
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'assets/css/project-demos.css'
+      - 'demo/tests/portfolio-visibility.cjs'
+      - '.github/workflows/portfolio-visibility.yml'
+permissions:
+  contents: read
+jobs:
+  cards:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save --no-package-lock playwright@1.58.2
+      - run: npx playwright install --with-deps chromium
+      - run: python3 -m http.server 8765 >/tmp/listo-portfolio-http.log 2>&1 &
+      - run: node demo/tests/portfolio-visibility.cjs
