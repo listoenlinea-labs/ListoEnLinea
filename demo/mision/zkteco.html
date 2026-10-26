@@ -282,7 +282,7 @@ function fmt(v){return v?window.MJDateDisplay.formatDateTime(v):'—'}
 async function loadStatus(){
   try{
     const r=await api('/zkteco/estado',{headers:headers()});
-    const d=r.data||{};$('connectionPill').className='status-pill ok';$('connectionPill').innerHTML='<i></i><span>'+(d.inventarioAuto?.lastError?'C3 conectado · lectura en revisión':'Conectado al C3-200')+'</span>';
+    const d=r.data||{};$('connectionPill').className='status-pill ok';$('connectionPill').innerHTML='<i></i><span>'+(d.inventarioAuto?.lastError?'Simulador C3 · lectura de prueba':'C3-200 · Simulado')+'</span>';
     $('deviceName').textContent=d.deviceName||d.modelo||'C3-200';$('deviceMode').textContent='Directa';$('deviceDoors').textContent=d.lockCount||'2';$('deviceFirmware').textContent=d.firmware||'—';$('deviceWriteMode').textContent=d.escrituraUsuarios==='PULLSDK'?(d.bridge?.controller?'Pull SDK oficial · conectado':(d.bridge?.error?'Pull SDK · '+d.bridge.error:'Pull SDK oficial')):'No configurada';$('deviceCards').textContent=d.tarjetas||0;
   }catch(e){$('connectionPill').className='status-pill err';$('connectionPill').innerHTML='<i></i><span>Sin conexión</span>';toast(errorText(e))}
 }
