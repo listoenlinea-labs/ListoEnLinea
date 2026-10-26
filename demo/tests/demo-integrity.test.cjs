@@ -33,7 +33,7 @@ test('Portal residencial usa administrador ficticio sin salir a producción',asy
  const profile=await request('/auth/perfil');
  assert.equal(profile.usuario.rol.nombre,'ADMINISTRADOR');
  const a=await request('/finanzas/analisis?anio=2026&mes=10');
- assert.equal(a.data.casas,48);
+ assert.equal(a.data.casas,231);
  assert.ok(a.data.viviendas.every(h=>h.nombre&&!h.calle.includes('Atotonilco')));
  assert.equal(requests.length,0);
  await assert.rejects(()=>win.fetch('https://api-misionjardines.listoenlinea.host/api/auth/perfil'),/Bloqueado/);
@@ -82,4 +82,35 @@ test('Clínica: PDF se guarda, lee y elimina sin fuga de BLOB',async()=>{
  const fakeZip=new Blob(['PKnot-a-zip'],{type:'application/zip'});
  const zip=await win.fetch('demo://isolated/clinical/1/files?category=radiograph&name=bad.zip',{method:'POST',body:fakeZip,headers:{'Content-Type':'application/zip'}});
  assert.equal(zip.status,400);
+});
+
+test('Proyecto extraordinario reparte centavos exactos y no altera vigencias de TAG',async()=>{
+ const {request}=residential(),month=new Date().getMonth()+1,year=new Date().getFullYear();
+ const start=year+'-'+String(month).padStart(2,'0')+'-01';
+ const expense=await request('/finanzas/egresos','POST',{concepto:'Proyecto sintético',categoria:'PROYECTOS',monto:10000.01});
+ assert(expense.ok);
+ const created=await request('/finanzas/egresos/'+expense.data.id+'/activar-cuota','POST',{meses:2,fechaInicio:start});
+ assert.equal(created.ok,true);
+ assert.equal(created.data.conceptos,231*2);
+ const duplicate=await request('/finanzas/egresos/'+expense.data.id+'/activar-cuota','POST',{meses:2,fechaInicio:start});
+ assert.equal(duplicate.ok,false);
+ let cents=0;
+ for(let id=1;id<=231;id++){
+  const data=await request('/finanzas/pagos-concepto/'+id);
+  assert.equal(data.data.EXTRAORDINARIO.length,2);
+  for(const charge of data.data.EXTRAORDINARIO)cents+=Math.round(charge.monto*100);
+ }
+ assert.equal(cents,1000001);
+ const houseId=2;
+ const tagBefore=(await request('/zkteco/viviendas/'+houseId+'/vigencia-tags')).data.tarjetas[0].fechaFin;
+ const pending=(await request('/finanzas/pagos-concepto/'+houseId)).data.EXTRAORDINARIO;
+ const blocked=await request('/casa-club/reservas','POST',{casaId:houseId,fecha:'2030-06-15'});
+ assert.equal(blocked.ok,false);
+ const payment=await request('/finanzas/pagos-concepto','POST',{casaId:houseId,tipoPago:'EXTRAORDINARIO',conceptoId:pending[0].id,monto:pending[0].monto});
+ assert.equal(payment.ok,true);
+ assert.equal((await request('/finanzas/pagos-concepto','POST',{casaId:houseId,tipoPago:'EXTRAORDINARIO',conceptoId:pending[0].id,monto:pending[0].monto})).ok,false);
+ const after=(await request('/zkteco/viviendas/'+houseId+'/vigencia-tags')).data.tarjetas[0].fechaFin;
+ assert.equal(after,tagBefore);
+ const allowed=await request('/casa-club/reservas','POST',{casaId:houseId,fecha:'2030-06-15'});
+ assert.equal(allowed.ok,true,'Una cuota futura no debe bloquear una reserva actual');
 });
