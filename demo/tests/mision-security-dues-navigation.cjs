@@ -36,10 +36,10 @@ const {chromium}=require('playwright');
    assert.equal(cells[0],selected.calle);
    assert.equal(cells[1],String(selected.numero));
    assert.match(cells[2],/Deudor/);
-   await frame.locator('body').evaluate(async h=>{
-    const r=await fetch('https://demo.invalid/api/finanzas/pagos-vivienda',{method:'POST',
-      headers:{'Content-Type':'application/json'},body:JSON.stringify({casaId:h.casaId,montoTotal:h.saldoPendiente})});
-    const j=await r.json();if(!j.ok)throw Error(j.message||'No se pudo simular el pago');
+   await frame.locator('body').evaluate(h=>{
+    // Mismo motor financiero que la API de pagos ficticios, sin un segundo servidor.
+    const result=window.MISION_DEMO.simulatePayment(h.casaId,h.saldoPendiente);
+    if(result.saldo!==0)throw Error('El pago ficticio no liquidó la deuda: '+result.saldo);
    },selected);
    await frame.locator('#segCuotasRefresh').click();
    await frame.locator('#segCuotasRows tr').first().getByText('Al corriente').waitFor({timeout:15000});
