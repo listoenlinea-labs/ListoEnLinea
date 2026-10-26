@@ -65,6 +65,28 @@ const assert = require('node:assert/strict');
   console.log('MISION ROUTE SWEEP',JSON.stringify(diagnostics));
   assert.equal(diagnostics.filter(d=>!d.authorized).length,0,'Algunas pantallas no permitieron acceso de administrador');
   assert.equal(diagnostics.filter(d=>d.errors.length>0).length,0,'Errores JavaScript en pantallas: '+JSON.stringify(diagnostics.filter(d=>d.errors.length)));
+
+  await page.goto('http://127.0.0.1:8765/index.html#portfolio');
+  for(const label of ['Floristería Magno','Dra. Yerena Riso','Misión Jardines']){
+   await page.locator('[data-project-details="'+label+'"]').click();
+   await page.locator('#projectDetailsModal.show').waitFor();
+   const title=await page.locator('#projectDetailsTitle').textContent();
+   const features=await page.locator('#projectDetailsList li').count();
+   assert.equal(title,label);assert(features>=4,'Checklist incompleto: '+label);
+   await page.locator('#projectDetailsModal .btn-close').click();
+   await page.locator('#projectDetailsModal:not(.show)').waitFor();
+  }
+  await page.goto('http://127.0.0.1:8765/demo/yerena/expediente.html?id=1',{waitUntil:'domcontentloaded'});
+  await page.locator('[data-tab="documents"]').click();
+  await page.locator('#clinical-file-input').setInputFiles({name:'expediente-ficticio.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.4\nArchivo ficticio para validar el visor')});
+  await page.locator('form[data-form="files"] button[type="submit"]').click();
+  await page.locator('[data-file-open]').waitFor();
+  assert.equal(await page.locator('.clinical-file').count(),1);
+  page.once('dialog',dialog=>dialog.accept());
+  await page.locator('[data-file-delete]').click();
+  await page.locator('.clinical-empty').first().waitFor();
+  await page.locator('[data-tab="radiographs"]').click();
+  assert(await page.locator('#clinical-viewer').count()>0,'Visor radiográfico no visible');
   console.log('SMOKE PASS');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
