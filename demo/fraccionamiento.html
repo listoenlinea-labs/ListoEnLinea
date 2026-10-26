@@ -20,7 +20,7 @@
         <button class="active" data-view="resumen"><i></i>Inicio</button>
         <button data-view="seguridad"><i></i>Seguridad</button>
         <button data-view="cuotas"><i></i>Cuotas</button>
-        <button data-view="visitas"><i></i>Visitas</button>
+        <button data-view="visitas"><i></i>Visitas</button><button data-view="tags"><i></i>ZKTeco · TAGs</button><button data-view="viviendas"><i></i>Viviendas</button><button data-view="club"><i></i>Casa club</button>
       </nav>
     </aside>
     <div class="app">
@@ -42,7 +42,7 @@
         <section class="view" id="view-seguridad"><div class="welcome"><div><h1>Seguridad y accesos</h1><p>Control de entradas, placas, QR y visitantes.</p></div></div><article class="card"><div class="head"><h2>Últimos accesos</h2><span>Demo</span></div><table class="table"><thead><tr><th>Hora</th><th>Tipo</th><th>Destino</th><th>Placa / QR</th><th>Estado</th></tr></thead><tbody><tr><td>10:42</td><td>Visita</td><td>Atotonilco 24</td><td>QR-8134</td><td><span class="badge">Autorizado</span></td></tr><tr><td>10:12</td><td>Residente</td><td>Guadalajara 16</td><td>JAL-248-B</td><td><span class="badge">Autorizado</span></td></tr><tr><td>09:48</td><td>Proveedor</td><td>Casa Club</td><td>QR-5201</td><td><span class="badge orange">Temporal</span></td></tr></tbody></table></article></section>
         <section class="view" id="view-cuotas"><div class="welcome"><div><h1>Cuotas y cobranza</h1><p>Seguimiento de pagos ordinarios, extraordinarios y comprobantes.</p></div></div><div class="kpis"><article class="card kpi"><div class="kpi-icon">$</div><div><small>Recaudado</small><strong>$55,200</strong></div></article><article class="card kpi"><div class="kpi-icon">✓</div><div><small>Pagadas</small><strong>184</strong></div></article><article class="card kpi"><div class="kpi-icon">!</div><div><small>Pendientes</small><strong>44</strong></div></article><article class="card kpi"><div class="kpi-icon">↗</div><div><small>Comprobantes</small><strong>12</strong></div></article></div><article class="card"><div class="head"><h2>Resumen por calle</h2><span>Demo</span></div><table class="table"><thead><tr><th>Calle</th><th>Viviendas</th><th>Al corriente</th><th>Pendientes</th></tr></thead><tbody><tr><td>Atotonilco</td><td>58</td><td>49</td><td>9</td></tr><tr><td>Valle de México</td><td>61</td><td>50</td><td>11</td></tr><tr><td>Guadalajara</td><td>54</td><td>45</td><td>9</td></tr><tr><td>Jardines</td><td>55</td><td>40</td><td>15</td></tr></tbody></table></article></section>
         <section class="view" id="view-visitas"><div class="welcome"><div><h1>Visitas programadas</h1><p>Autorizaciones, horarios y control de acceso.</p></div></div><article class="card"><div class="head"><h2>Visitas de hoy</h2><span>Datos ficticios</span></div><table class="table"><thead><tr><th>Visitante</th><th>Destino</th><th>Hora</th><th>Medio</th><th>Estado</th></tr></thead><tbody><tr><td>María López</td><td>Atotonilco 24</td><td>11:00</td><td>QR</td><td><span class="badge">Esperada</span></td></tr><tr><td>Mensajería</td><td>Valle de México 18</td><td>12:30</td><td>Placa</td><td><span class="badge orange">Temporal</span></td></tr><tr><td>Proveedor jardinería</td><td>Casa Club</td><td>15:00</td><td>QR</td><td><span class="badge">Autorizada</span></td></tr></tbody></table></article></section>
-      </main>
+      <section class="view" id="view-tags"></section><section class="view" id="view-viviendas"></section><section class="view" id="view-club"></section></main>
     </div>
   </div>
   <script>
@@ -55,5 +55,5 @@
       });
     });
   </script>
-</body>
+<script src="fraccionamiento-sim.js?v=2"></script></body>
 </html>
