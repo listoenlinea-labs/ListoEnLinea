@@ -134,7 +134,7 @@ function extraCharges(c){
  });
 }
 const extraDue=c=>cap(extraCharges(c).filter(x=>x.estado!=='PAGADO'&&x.periodoIndice<=curr).reduce((sum,x)=>sum+x.monto,0));
-const clubCharges=c=>state.reservas.filter(r=>r.casaId===c.id&&r.estado==='APROBADA'&&!r.pagado).map(r=>({id:r.id,periodo:r.fecha,
+const clubCharges=c=>state.reservas.filter(r=>r.casaId===c.id&&(r.estatus||r.estado)==='APROBADA'&&!r.pagado).map(r=>({id:r.id,periodo:r.fecha,
  monto:cap(Number(r.cuotaRecuperacion||0)+Number(r.depositoGarantia||0)+Number(r.limpieza||0)),concepto:'Casa club '+r.fecha,fechaLimitePago:r.fechaLimitePago}));
 
 function movements(month,year=yyyy,ledger=state.pagos){
