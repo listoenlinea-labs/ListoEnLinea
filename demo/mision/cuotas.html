@@ -11,7 +11,7 @@
   <script src="assets/js/page-access.js?v=20261012-seguridad"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cuotas | Misión Jardines</title>
+  <title>Cuotas | Fraccionamiento Demo</title>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
@@ -599,7 +599,7 @@ body.page-cuotas .cuotas-shell{
     </section>
 
     <footer class="cuotas-footer">
-      <div>Misión Jardines Residencial · Zapopan, Jalisco</div>
+      <div>Fraccionamiento Demo · Modo demostración</div>
       <div class="powered-by">
         Plataforma desarrollada por
         <a href="https://listoenlinea.com" target="_blank" rel="noopener noreferrer">
@@ -2194,8 +2194,8 @@ body.page-cuotas .cuotas-shell{
         const formasPago = [...mapaFormas.values()].sort((a, b) => b.monto - a.monto);
 
         const workbook = new ExcelJS.Workbook();
-        workbook.creator = 'Misión Jardines · ListoEnLinea.com';
-        workbook.lastModifiedBy = usuarioActual?.nombre || 'Administración Misión Jardines';
+        workbook.creator = 'Fraccionamiento Demo · ListoEnLinea.com';
+        workbook.lastModifiedBy = usuarioActual?.nombre || 'Administración Fraccionamiento Demo';
         workbook.created = new Date();
         workbook.modified = new Date();
         workbook.calcProperties.fullCalcOnLoad = true;
@@ -2211,7 +2211,7 @@ body.page-cuotas .cuotas-shell{
           { width: 20 }, { width: 18 }, { width: 18 }
         ];
         resumen.mergeCells('A1:M2');
-        resumen.getCell('A1').value = 'MISIÓN JARDINES · REPORTE EJECUTIVO DE CUOTAS';
+        resumen.getCell('A1').value = 'FRACCIONAMIENTO DEMO · REPORTE EJECUTIVO DE CUOTAS';
         resumen.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#27324A') } };
         resumen.getCell('A1').font = { name: 'Aptos Display', size: 22, bold: true, color: { argb: 'FFFFFFFF' } };
         resumen.getCell('A1').alignment = { vertical: 'middle', horizontal: 'left' };
@@ -2407,7 +2407,7 @@ body.page-cuotas .cuotas-shell{
 
         workbook.worksheets.forEach(sheet => {
           sheet.properties.defaultRowHeight = 20;
-          sheet.headerFooter.oddFooter = '&LMisión Jardines Residencial&CReporte confidencial&RListoEnLinea.com';
+          sheet.headerFooter.oddFooter = '&LFraccionamiento Demo Residencial&CReporte confidencial&RListoEnLinea.com';
         });
 
         const buffer = await workbook.xlsx.writeBuffer();
