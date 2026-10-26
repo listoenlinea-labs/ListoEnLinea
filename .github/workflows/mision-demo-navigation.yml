@@ -9,6 +9,7 @@ on:
       - 'demo/tests/mision-navigation-finance.cjs'
       - 'demo/tests/mision-conmutador-finance-ui.cjs'
       - 'demo/tests/mision-casa-club-calendar.cjs'
+      - 'demo/tests/mision-maintenance-history.cjs'
       - '.github/workflows/mision-demo-navigation.yml'
 permissions:
   contents: read
@@ -27,3 +28,4 @@ jobs:
       - run: node demo/tests/mision-navigation-finance.cjs
       - run: node demo/tests/mision-conmutador-finance-ui.cjs
       - run: node demo/tests/mision-casa-club-calendar.cjs
+      - run: node demo/tests/mision-maintenance-history.cjs
