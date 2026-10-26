@@ -354,6 +354,38 @@ function handle(uri,method,body,query){
     actividad:activity,operativo:{visitas:state.visitas,accesos:state.accesos},
     generadoEn:new Date().toISOString(),modo:'DEMO_FICTICIO'};
  }
+ if(uri==='/seguridad-cuotas/cuotas-viviendas'&&method==='GET'){
+  // Misma fuente y criterio de pago que Análisis de cuotas.
+  // Nunca inferir morosidad del estado de los TAGs ni de una API productiva.
+  const summary=analisis();
+  const street=String(query.get('calle')||'').trim().toLocaleLowerCase('es-MX').slice(0,100);
+  const number=String(query.get('numero')||'').trim().slice(0,20);
+  const requestedStatus=String(query.get('estado')||'').trim().toUpperCase();
+  if(requestedStatus&&!['AL_CORRIENTE','DEUDOR','SIN_DATOS'].includes(requestedStatus)){
+   return {ok:false,message:'Estado de mantenimiento inválido'};
+  }
+  const collation=(a,b)=>String(a).localeCompare(String(b),'es-MX',{numeric:true,sensitivity:'base'});
+  const rows=summary.viviendas.map(h=>{
+   const last=h.ultimoPago||{};
+   const lastMonth=h.ultimoMesPagado||{};
+   const name=String(lastMonth.mes||'').toUpperCase();
+   return {
+    calle:String(h.calle||''),numero:String(h.numero||''),
+    estado:h.estatus==='PAGADO'?'AL_CORRIENTE':'DEUDOR',
+    ultimaFechaPago:last.fecha?String(last.fecha).slice(0,10):null,
+    ultimoMesPagado:monthName.includes(name)&&Number(lastMonth.anio)>0
+     ?name+' '+lastMonth.anio:null
+   };
+  }).filter(h=>(!street||h.calle.toLocaleLowerCase('es-MX').includes(street))&&
+   (!number||h.numero.includes(number))&&
+   (!requestedStatus||h.estado===requestedStatus))
+  .sort((a,b)=>collation(a.calle,b.calle)||collation(a.numero,b.numero));
+  const page=Math.max(1,Math.min(10000,Number.parseInt(query.get('pagina'),10)||1));
+  const pageSize=15;
+  const pages=Math.max(1,Math.ceil(rows.length/pageSize));
+  return {ok:true,periodo:monthName[mm-1]+' '+yyyy,total:rows.length,
+   pagina:page,paginas:pages,viviendas:rows.slice((page-1)*pageSize,page*pageSize)};
+ }
  if(uri==='/finanzas/analisis')return ok(analisis());
  if(uri==='/finanzas/egresos'&&method==='POST'){const e={id:++state.lastId,concepto:body.concepto||'Egreso demostrativo',categoria:body.categoria||'OPERACION',monto:cap(body.monto),fecha:body.fecha||longDate,referencia:body.referencia||'DEMO'};state.egresos.push(e);save();return ok(e)}
  if(uri.startsWith('/finanzas/egresos/')&&uri.endsWith('/activar-cuota')){
