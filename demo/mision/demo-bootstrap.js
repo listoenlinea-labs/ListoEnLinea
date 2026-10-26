@@ -113,7 +113,8 @@ const card=t=>({id:t.id,numeroTarjeta:t.numeroTarjeta,numero:t.numeroTarjeta,num
  estado:t.activo?'ACTIVO':'INACTIVO',sincronizado:Boolean(t.sincronizado),
  enControlador:Boolean(t.enControlador),fisicamenteObservado:Boolean(t.fisicamenteObservado),
  ultimaLectura:t.ultimaLectura||null,casaId:t.casaId,nombreDispositivo:t.nombreDispositivo,
- puertas:t.puertas||[]});
+ puertas:t.puertas||[],puertasAutorizadas:t.enControlador?3:0,bloqueado:!t.activo,
+ estadoSincronizacion:t.enControlador?'SINCRONIZADO':'PENDIENTE'});
 
 /* Cargos exactos por vivienda y periodo: centavos distribuidos sin perder saldo. */
 function extraCharges(c){
@@ -261,7 +262,11 @@ function handle(uri,method,body,query){
   save();return ok(payment,{message:'Pago ficticio registrado sin tocar TAGs ni mantenimiento'});
  }
  if(uri.startsWith('/zkteco/estado'))return ok({modelo:'C3-200 (simulado)',deviceName:'C3-200 · Demo',lockCount:2,firmware:'DEMO',tarjetas:state.tags.length,escrituraUsuarios:'SIMULADO',inventarioAuto:{lastError:null}});
- if(uri==='/zkteco/sincronizar')return ok({noObservados:0,noObservadosDetalle:[],sincronizado:true,message:message});
+ if(uri==='/zkteco/sincronizar'){
+  // Conserva la lectura simulada: no hace ninguna solicitud TCP al C3-200.
+  state.tags.filter(t=>t.enControlador).forEach(t=>t.ultimaLectura=new Date().toISOString());
+  save();return ok({noObservados:0,noObservadosDetalle:[],sincronizado:true,simulado:true,message:message});
+ }
  if(uri.startsWith('/zkteco/viviendas/')&&uri.endsWith('/vigencia-tags')){const c=byId(parts[2]);const tags=state.tags.filter(t=>t.casaId===c.id);if(method==='POST'||method==='PATCH'||method==='PUT'){tags.forEach(t=>t.fechaFin=body.fechaFin||body.fechaFinNueva||t.fechaFin);save()}return ok({vigenciaMantenimiento:dueEnd(c),tarjetas:tags.map(card)})}
  if(uri.startsWith('/zkteco/viviendas/')&&uri.endsWith('/tarjetas')&&method==='POST'){const c=byId(parts[2]),tag={id:++state.lastId,casaId:c.id,numeroTarjeta:body.numeroTarjeta||body.numero||'DEMO'+state.lastId,fechaInicio:body.fechaInicio||longDate,fechaFin:body.fechaFin||dueEnd(c),activo:true,nombreDispositivo:body.nombreDispositivo||'TAG de prueba'};state.tags.push(tag);save();return ok(card(tag))}
  if(uri==='/zkteco/viviendas'){let cs=state.casas.slice();if(query.get('calle'))cs=cs.filter(c=>c.calle===query.get('calle'));if(query.get('numero'))cs=cs.filter(c=>String(c.numero).includes(query.get('numero')));if(query.get('casaId'))cs=cs.filter(c=>String(c.id)===query.get('casaId'));const tag=query.get('tag');if(tag)cs=cs.filter(c=>state.tags.some(t=>t.casaId===c.id&&t.numeroTarjeta.includes(tag)));const total=cs.length,page=Math.max(1,Number(query.get('pagina'))||1),limit=Math.max(1,Number(query.get('limite'))||50);const data=cs.slice((page-1)*limit,page*limit).map(c=>({...c,tarjetas:state.tags.filter(t=>t.casaId===c.id).map(card),controlesNoEnlazados:[]}));return ok({rows:data,pagination:{page,limit,total,totalPages:Math.ceil(total/limit),hasPrev:page>1,hasNext:page*limit<total}})}
