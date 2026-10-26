@@ -40,17 +40,18 @@ test('Portal residencial usa administrador ficticio sin salir a producción',asy
 });
 test('Pago de mantenimiento liquida deuda y actualiza TAG pero cuotas extra no lo alteran',async()=>{
  const {request}=residential();
- const before=await request('/finanzas/analisis?anio=2026&mes=10'),house=before.data.viviendas.find(h=>h.casaId===6);
- assert.ok(house.saldoPendiente>0);
- const paid=await request('/finanzas/pagos-vivienda','POST',{casaId:6,montoTotal:house.saldoPendiente,anio:new Date().getFullYear(),mes:new Date().getMonth()+1});
+ const before=await request('/finanzas/analisis?anio=2026&mes=10'),house=before.data.viviendas.find(h=>h.saldoPendiente>0);
+ assert.ok(house&&house.saldoPendiente>0);
+ const id=house.casaId;
+ const paid=await request('/finanzas/pagos-vivienda','POST',{casaId:id,montoTotal:house.saldoPendiente,anio:new Date().getFullYear(),mes:new Date().getMonth()+1});
  assert.equal(paid.ok,true);
  assert.ok(paid.data.referencia.startsWith('PAGO-DEMO-'));
  const after=await request('/finanzas/analisis?anio=2026&mes=10');
- assert.equal(after.data.viviendas.find(h=>h.casaId===6).saldoPendiente,0);
- const tags=await request('/zkteco/viviendas/6/vigencia-tags'),expires=tags.data.tarjetas[0].fechaFin;
- await request('/finanzas/egresos','POST',{monto:10000,categoria:'PROYECTOS',concepto:'Jardín ficticio'});
- await request('/finanzas/egresos/101/activar-cuota','POST',{meses:2});
- const tags2=await request('/zkteco/viviendas/6/vigencia-tags');
+ assert.equal(after.data.viviendas.find(h=>h.casaId===id).saldoPendiente,0);
+ const tags=await request('/zkteco/viviendas/'+id+'/vigencia-tags'),expires=tags.data.tarjetas[0].fechaFin;
+ const expense=await request('/finanzas/egresos','POST',{monto:10000,categoria:'PROYECTOS',concepto:'Jardín ficticio'});
+ await request('/finanzas/egresos/'+expense.data.id+'/activar-cuota','POST',{meses:2});
+ const tags2=await request('/zkteco/viviendas/'+id+'/vigencia-tags');
  assert.equal(tags2.data.tarjetas[0].fechaFin,expires);
 });
 test('Clínica: pacientes, agenda, odontograma y periodontograma funcionan como administrador',async()=>{
@@ -113,4 +114,62 @@ test('Proyecto extraordinario reparte centavos exactos y no altera vigencias de 
  assert.equal(after,tagBefore);
  const allowed=await request('/casa-club/reservas','POST',{casaId:houseId,fecha:'2030-06-15'});
  assert.equal(allowed.ok,true,'Una cuota futura no debe bloquear una reserva actual');
+});
+
+
+test('Toda cifra del Inicio, análisis, calles y reporte Excel coincide con el mismo padrón ficticio',async()=>{
+ const {request,win}=residential();
+ const analysis=(await request('/finanzas/analisis')).data;
+ const home=await request('/dashboard');
+ const Excel=require('../mision/assets/js/analisis-excel.js');
+ const report=Excel.prepararReporte(analysis,'padron');
+ assert.equal(analysis.casas,231);
+ assert.equal(analysis.viviendas.length,231);
+ assert.equal(analysis.viviendas.filter(x=>x.pagada).length,analysis.pagadas);
+ assert.equal(analysis.viviendas.filter(x=>!x.pagada).length,analysis.pendientes);
+ assert.equal(analysis.pagadas+analysis.pendientes,analysis.casas);
+ assert.equal(Math.round(analysis.pagadas/analysis.casas*100),analysis.porcentaje);
+ assert.equal(home.kpis.cuotas.alCorriente,analysis.pagadas);
+ assert.equal(home.kpis.cuotas.porcentajeAlCorriente,analysis.porcentaje);
+ assert.equal(home.kpis.cuotas.total,analysis.casas);
+ assert.equal(analysis.calles.reduce((s,c)=>s+c.total,0),231);
+ assert.equal(analysis.calles.reduce((s,c)=>s+c.pagadas,0),analysis.pagadas);
+ assert(analysis.calles.some((c,i,a)=>c.porcentaje!==a[0].porcentaje),'Las tasas por calle deben ser distintas');
+ assert.equal(report.hojas.find(x=>x.nombre==='Desglose por calle').filas.length,analysis.calles.length);
+ const streetSheet=report.hojas.find(x=>x.nombre==='Desglose por calle');
+ for(const [street,paid,pending,total,pct] of streetSheet.filas){
+  const summary=analysis.calles.find(c=>c.calle===street);
+  assert.equal(paid,summary.pagadas);assert.equal(pending,summary.pendientes);
+  assert.equal(total,summary.total);assert.equal(pct,Math.round(10000*paid/total)/100);
+ }
+ const pending=analysis.viviendas.find(h=>h.ultimoMesPagado.mes==='Junio'&&h.saldoPendiente>0&&h.tarifaMensual===300);
+ assert(pending,'Debe existir una vivienda con adeudo desde julio');
+ const year=new Date().getFullYear(),month=new Date().getMonth()+1;
+ const expected=Array.from({length:month-6},(_,i)=>7+i).reduce((s,m)=>s+300+((m<month||new Date().getDate()>10)?50:0),0);
+ assert.equal(pending.saldoPendiente,expected);
+ const current=home.recaudacion.serie.at(-1);
+ const state=win.MISION_DEMO.getState();
+ const receipts=state.pagos.filter(p=>p.fecha.slice(0,7)===year+'-'+String(month).padStart(2,'0')).reduce((a,p)=>a+p.monto,0);
+ const expenses=state.egresos.filter(p=>p.fecha.slice(0,7)===year+'-'+String(month).padStart(2,'0')).reduce((a,p)=>a+p.monto,0);
+ assert.equal(current.cuotas,receipts);
+ assert.equal(current.egresos,expenses);
+ assert.equal(home.recaudacion.totalMes,analysis.ingresosParaBalance);
+ assert.equal(home.recaudacion.totalMes,receipts);
+ assert.equal(analysis.totalEgresos,expenses);
+ assert.equal(current.disponible,analysis.balanceReportado);
+ const lastPaid=analysis.viviendas.filter(x=>x.ultimoPago?.monto===300);
+ assert(lastPaid.length>60,'Deben aparecer importes $300 en la columna Pagado');
+ assert(lastPaid.some(x=>x.estatus==='PAGADO')&&lastPaid.some(x=>x.estatus==='PENDIENTE'));
+ const snapshots=home.recaudacion.serie.map(x=>x.cuotas);
+ assert(new Set(snapshots).size>=4,'La gráfica de ingresos no puede ser lineal o constante');
+});
+test('TAGs del simulador muestran estados sincronizados y jamás contactan el C3 real',async()=>{
+ const {request,requests}=residential();
+ const tags=(await request('/zkteco/tarjetas')).data;
+ assert(tags.some(t=>t.enControlador===true&&t.sincronizado===true&&t.puertasAutorizadas===3&&!t.bloqueado));
+ assert(tags.some(t=>t.enControlador===false));
+ assert(tags.some(t=>t.bloqueado===true));
+ const sync=await request('/zkteco/sincronizar','POST',{});
+ assert.equal(sync.data.simulado,true);
+ assert.equal(requests.length,0);
 });

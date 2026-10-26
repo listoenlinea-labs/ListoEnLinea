@@ -76,6 +76,7 @@
       .house-btn.exterior{grid-column:span 3;min-height:76px}
       .statusbar{margin-top:12px}
     }
+    .house-btn.is-calling{background:#fff5e8;border-color:#ec902d;box-shadow:0 0 0 3px #ef9d4930}
   </style>
   <script src="assets/js/date-display.js?v=20261019"></script>
 </head>
@@ -85,7 +86,7 @@
       <div>
         <span class="eyebrow">Control de acceso · Conmutador de caseta</span>
         <h1>Conmutador</h1>
-        <p data-call-description>Selecciona la calle y después la casa. No se muestran nombres ni teléfonos en el conmutador; al elegir el domicilio se abre WhatsApp con el residente correcto.</p>
+        <p data-call-description>Selecciona una calle y una casa para simular la llamada desde la línea telefónica local de caseta. Esta demostración no marca números reales ni utiliza WhatsApp.</p>
       </div>
       <div class="heading-icon" aria-hidden="true">☎</div>
     </div>
@@ -99,8 +100,8 @@
       <div id="houseGrid" class="house-grid" aria-live="polite"></div>
     </section>
 
-    <div id="callStatus" class="statusbar">Preparando WhatsApp de caseta…</div>
-    <p class="privacy-note" data-whatsapp-only>Cuenta autorizada de caseta: <strong>33••••8609</strong>. La cuadrícula no muestra nombres ni teléfonos; WhatsApp puede mostrar la identidad del contacto dentro de su propia interfaz.</p>
+    <div id="callStatus" class="statusbar">Conmutador de línea local · DEMO sin llamadas reales</div>
+    <p class="privacy-note">Sistema original: conmutador conectado a <strong>línea telefónica local de caseta</strong>. Demo público: llamadas ficticias sin conexión a centrales telefónicas, servicios externos, WhatsApp ni dispositivos físicos.</p>
   </main>
 
   <div id="phoneChoiceModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="phoneChoiceTitle">
@@ -117,7 +118,7 @@
   </div>
 
   <script src="assets/js/telefonia-engine.js?v=20261006"></script>
-  <script src="assets/js/conmutador.js?v=20261006"></script>
+  <script src="assets/js/conmutador.js?v=20261026-linea-local-demo"></script>
   <script src="assets/js/site-sidebar.js?v=20261021-refresco-scroll"></script>
 </body>
 </html>

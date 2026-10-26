@@ -170,7 +170,7 @@
           <div><span>Disponible anterior</span><b>${money.format(anterior)}</b></div>
         </div>
         <div class="hl-detail-closing"><small>Disponible al cierre</small><strong class="${disponible < 0 ? 'hl-negative' : 'hl-positive'}">${money.format(disponible)}</strong></div>
-        <p>Selecciona otro punto de la gráfica para cambiar de mes. Los importes provienen del dashboard conectado a MySQL.</p>
+        <p>Selecciona otro punto de la gráfica para cambiar de mes. Los importes pertenecen exclusivamente a la simulación financiera de esta demostración.</p>
       </div>`;
   }
 
@@ -1109,7 +1109,7 @@
   function renderLoading() {
     const container = document.querySelector('.dashboard');
     if (!container) return;
-    container.innerHTML = `<div class="hl-loading"><span></span><strong>Consultando la base de datos…</strong><small>${['SUPER_ADMIN','ADMINISTRADOR'].includes(currentRole()) ? 'Cuotas, visitas, accesos, residentes y eventos' : 'Visitas y accesos de tus viviendas o del fraccionamiento'}</small></div>`;
+    container.innerHTML = `<div class="hl-loading"><span></span><strong>Calculando movimientos ficticios del demo…</strong><small>${['SUPER_ADMIN','ADMINISTRADOR'].includes(currentRole()) ? 'Pagos simulados, visitas, accesos y residentes ficticios' : 'Visitas y accesos de tus viviendas o del fraccionamiento'}</small></div>`;
   }
 
   function renderError(message) {
@@ -1153,7 +1153,8 @@
         headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'
       });
-      const data = await response.json().catch(() => ({}));
+      const payload = await response.json().catch(() => ({}));
+      const data = payload.data?.kpis ? {...payload.data,ok:payload.ok} : payload;
       if (response.status === 401) {
         clearSession();
         location.replace('login.html');

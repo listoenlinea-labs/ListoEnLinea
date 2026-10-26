@@ -345,7 +345,7 @@
   function loadHomeDashboard() {
     if (window.MJ_SHELL_MODE || page() !== 'index.html' || document.querySelector('script[data-mj-home-dashboard]')) return;
     const script = document.createElement('script');
-    script.src = 'assets/js/home-dashboard.js?v=20261021-news-images';
+    script.src = 'assets/js/home-dashboard.js?v=20261026-historial-coherente';
     script.defer = true;
     script.dataset.mjHomeDashboard = 'true';
     document.body.appendChild(script);
