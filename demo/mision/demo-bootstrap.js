@@ -194,6 +194,71 @@ const clubCharges=c=>state.reservas.filter(r=>r.casaId===c.id&&(r.estatus||r.est
 function movements(month,year=yyyy,ledger=state.pagos){
  return ledger.filter(item=>String(item.fecha||'').slice(0,7)===year+'-'+pad(month));
 }
+
+/**
+ * Historial ficticio: adapta el mismo libro de pagos y el cálculo de adeudos
+ * utilizados por Análisis de cuotas al contrato exacto del modal productivo.
+ * Nada se guarda dos veces y no existe comunicación con bancos ni dispositivos.
+ */
+function maintenanceHistory(c){
+ const source=state.pagos.filter(p=>Number(p.casaId)===c.id);
+ const asPeriod=value=>{
+  const found=/^(\d{4})-(\d{2})$/.exec(String(value||''));
+  if(!found)return null;
+  const month=Number(found[2]);if(month<1||month>12)return null;
+  return {mes:monthName[month-1],anio:Number(found[1])};
+ };
+ const rows=source.map(p=>{
+  const supplied=Array.isArray(p.periodos)?p.periodos:[];
+  const periods=supplied.map(x=>{
+   const year=Number(x.anio),name=String(x.mes||'').toUpperCase();
+   return year>2000&&monthName.includes(name)?
+    {mes:name,anio:year,monto:cap(x.monto||0)}:null;
+  }).filter(Boolean);
+  if(!periods.length){
+   const single=asPeriod(p.periodo);
+   if(single)periods.push({...single,monto:cap(p.monto)});
+  }
+  return {referencia:p.referencia||'MOV-DEMO-'+p.id,
+   fecha:String(p.fecha||longDate),monto:cap(p.monto),recargo:cap(p.recargo),
+   meses:periods.length,periodos:periods,formaPago:p.formaPago||'TRANSFERENCIA',
+   fuente:p.origen==='DEMO'?'COMPROBANTE_VALIDADO':'REGISTRO_MANUAL',
+   pagoAnual:Boolean(p.pagoAnual),id:p.id};
+ }).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha))||b.id-a.id)
+ .map(({id,...rest})=>rest);
+ let remaining=cap(c.credito||0);
+ const outstanding=[];
+ for(let i=c.paidThrough+1;i<=curr;i++){
+  const cost=periodCost(c,i),applied=Math.min(remaining,cost);
+  remaining=cap(remaining-applied);
+  const amount=cap(cost-applied);
+  if(!amount)continue;
+  outstanding.push({
+   categoria:'MANTENIMIENTO',concepto:'Mantenimiento',periodo:yearMonth(i),
+   monto:amount,recargo:overdue(i)&&!c.exento?50:0,
+   estado:applied>0?'PAGO_PARCIAL':'PENDIENTE'
+  });
+ }
+ const pending=cap(outstanding.reduce((sum,x)=>sum+x.monto,0));
+ return {casaId:c.id,calle:c.calle,numero:c.numero,nombre:c.nombre,tipoPago:'MANTENIMIENTO',
+  movimientos:rows,deudas:outstanding,saldoFavor:pending===0?remaining:0,
+  saldoPendiente:pending};
+}
+function conceptsHistory(c,concept){
+ const rows=(state.pagosConcepto||[]).filter(x=>x.casaId===c.id&&x.tipoPago===concept)
+  .map(p=>({referencia:p.referencia||'MOV-DEMO-'+p.id,
+   fecha:p.fecha||longDate,monto:cap(p.monto),recargo:0,meses:0,periodos:[],
+   formaPago:p.formaPago||'TRANSFERENCIA',fuente:'REGISTRO_MANUAL',pagoAnual:false}))
+  .sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha))||
+   String(b.referencia).localeCompare(String(a.referencia)));
+ const outstanding=(concept==='EXTRAORDINARIO'?extraCharges(c).filter(x=>x.estado!=='PAGADO'):
+  clubCharges(c)).map(x=>({categoria:concept,concepto:x.concepto||'Reserva de casa club',
+   periodo:x.periodo||x.fecha,monto:cap(x.monto),estado:'PENDIENTE'}));
+ return {casaId:c.id,calle:c.calle,numero:c.numero,nombre:c.nombre,tipoPago:concept,
+  movimientos:rows,deudas:outstanding,saldoFavor:0,
+  saldoPendiente:cap(outstanding.reduce((sum,x)=>sum+x.monto,0))};
+}
+
 function financeLedger(){
  let balance=Number(state.saldoInicial||0);
  const initials=Number(state.saldoInicial||0);
@@ -298,10 +363,23 @@ function handle(uri,method,body,query){
   save();return ok({creada:true,conceptos:state.casas.length*months,importe:egreso.monto});
  }
  if(uri.startsWith('/finanzas/viviendas/')&&uri.endsWith('/cuota-por-cobrar')){const c=byId(parts[2]);c.cuota=cap(body.cuotaPorCobrar);c.exento=Boolean(body.sinRecargo);save();return ok(c)}
- if(uri.startsWith('/finanzas/pagos-vivienda/')&&uri.endsWith('/historial'))return ok(state.pagos.filter(p=>p.casaId===Number(parts[2])));
+ if(uri.startsWith('/finanzas/pagos-vivienda/')&&uri.endsWith('/historial')){
+  const c=byId(parts[2]),concept=String(query.get('concepto')||'MANTENIMIENTO').toUpperCase();
+  if(!c)return {ok:false,message:'La vivienda ficticia no existe'};
+  if(!['MANTENIMIENTO','EXTRAORDINARIO','CASA_CLUB'].includes(concept))
+   return {ok:false,message:'Concepto de pago inválido'};
+  return ok(concept==='MANTENIMIENTO'?maintenanceHistory(c):conceptsHistory(c,concept));
+ }
  if(uri.startsWith('/finanzas/pagos-vivienda/')&&uri.endsWith('/estado-c3')){const t=state.tags.filter(x=>x.casaId===Number(parts[2]));return ok({tags:t.length,sincronizacion:'COMPLETADO',fechaFinal:t[0]?.fechaFin,fechasTags:t.map(x=>({fechaFinal:x.fechaFin}))})}
  if(uri.startsWith('/finanzas/pagos-vivienda/')&&uri.endsWith('/cotizar')){const c=byId(parts[2]),targetYear=+query.get('anio')||yyyy,targetMonth=+query.get('mes')||mm,desired=period(targetYear,targetMonth),months=Math.max(1,desired-c.paidThrough);const periods=Array.from({length:months},(_,i)=>({mes:monthName[(c.paidThrough+i+1)%12],anio:Math.floor((c.paidThrough+i+1)/12),registrable:true}));return ok({tarifaMensual:c.cuota,ultimoMesPagado:{mes:monthName[c.paidThrough%12],anio:Math.floor(c.paidThrough/12)},meses:months,desde:periods[0]&&{nombre:periods[0].mes,anio:periods[0].anio},hasta:periods.at(-1)&&{nombre:periods.at(-1).mes,anio:periods.at(-1).anio},periodos:periods,montoSugerido:periods.reduce((sum,_,i)=>sum+periodCost(c,c.paidThrough+i+1),0),montoMinimo:periods.reduce((sum,_,i)=>sum+periodCost(c,c.paidThrough+i+1),0),montoMaximo:periods.reduce((sum,_,i)=>sum+periodCost(c,c.paidThrough+i+1),0),fechaFinObjetivo:date(new Date(targetYear,targetMonth,10)),bloqueado:false,requiereRevision:false,requiereConciliacionTarifa:false})}
- if(uri==='/finanzas/pagos-vivienda'&&method==='POST'){const c=byId(body.casaId);if(!c)return {ok:false,message:'Casa inexistente'};const monto=cap(body.montoTotal??body.monto??body.importe);if(!(monto>0))return {ok:false,message:'El importe debe ser positivo.'};const previo=c.paidThrough;if(body.pagoAnual&&body.anio){const last=period(Number(body.anio),12);let required=0;for(let i=c.paidThrough+1;i<=last;i++)required+=periodCost(c,i);if(monto+(c.credito||0)+0.00001<required)return {ok:false,message:'El monto no alcanza para cubrir los meses pendientes del pago anual.'};}advance(c,monto);const p={id:++state.lastId,casaId:c.id,monto,fecha:longDate,referencia:'PAGO-DEMO-'+state.lastId,concepto:'MANTENIMIENTO',pagoAnual:Boolean(body.pagoAnual)};state.pagos.push(p);save();return {ok:true,data:{referencia:p.referencia,pago:p,fechaFinObjetivo:dueEnd(c),meses:c.paidThrough-previo},message:'Pago ficticio registrado. TAGs actualizados únicamente en el simulador.'}}
+ if(uri==='/finanzas/pagos-vivienda'&&method==='POST'){const c=byId(body.casaId);if(!c)return {ok:false,message:'Casa inexistente'};const monto=cap(body.montoTotal??body.monto??body.importe);if(!(monto>0))return {ok:false,message:'El importe debe ser positivo.'};const previo=c.paidThrough;if(body.pagoAnual&&body.anio){const last=period(Number(body.anio),12);let required=0;for(let i=c.paidThrough+1;i<=last;i++)required+=periodCost(c,i);if(monto+(c.credito||0)+0.00001<required)return {ok:false,message:'El monto no alcanza para cubrir los meses pendientes del pago anual.'};}advance(c,monto);
+  const covered=Array.from({length:c.paidThrough-previo},(_,i)=>{
+   const p=previo+i+1;return {mes:monthName[p%12],anio:Math.floor(p/12),monto:periodCost(c,p)};
+  });
+  const p={id:++state.lastId,casaId:c.id,monto,fecha:longDate,
+   referencia:'PAGO-DEMO-'+state.lastId,concepto:'MANTENIMIENTO',
+   formaPago:String(body.formaPago||'TRANSFERENCIA').toUpperCase(),
+   periodos:covered,pagoAnual:Boolean(body.pagoAnual)};state.pagos.push(p);save();return {ok:true,data:{referencia:p.referencia,pago:p,fechaFinObjetivo:dueEnd(c),meses:c.paidThrough-previo},message:'Pago ficticio registrado. TAGs actualizados únicamente en el simulador.'}}
  if(uri.startsWith('/finanzas/pagos-concepto/')&&method==='GET'){const c=byId(parts[2]);if(!c)return {ok:false,message:'Casa inexistente'};return ok({EXTRAORDINARIO:extraCharges(c).filter(x=>x.estado!=='PAGADO'),CASA_CLUB:clubCharges(c)})}
  if(uri==='/finanzas/pagos-concepto'&&method==='POST'){
   const c=byId(body.casaId),tipo=String(body.tipoPago||''),id=Number(body.conceptoId),amount=cap(body.monto);
