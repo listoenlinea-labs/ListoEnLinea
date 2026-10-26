@@ -71,7 +71,7 @@ window.fetch=async function(input,init={}){
     try{archive=await window.JSZip.loadAsync(file,{checkCRC32:false})}catch{return response({error:'El ZIP está dañado o usa una compresión no admitida.'},400)}
     const entries=Object.values(archive.files);
     if(entries.length>1200)return response({error:'El ZIP contiene más de 1200 entradas.'},400);
-    const slices=entries.filter(e=>!e.dir&&/\\.(dcm|dicom|ima)$/i.test(e.name));
+    const slices=entries.filter(e=>!e.dir&&/\.(dcm|dicom|ima)$/i.test(e.name));
     if(slices.length<12||slices.length>400)return response({error:'El ZIP necesita entre 12 y 400 cortes DICOM.'},400);
     let totalUncompressed=0;
     for(const entry of slices){
