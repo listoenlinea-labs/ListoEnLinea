@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
   try {
     const page = await browser.newPage();
     await page.goto('http://127.0.0.1:8765/index.html#portfolio', { waitUntil: 'domcontentloaded' });
-    const expected = ['Floristería Magno', 'Dra. Yerena Riso', 'Misión Jardines'];
+    const expected = ['Floristería Magno', 'Dra. Yerena Riso', 'Fraccionamiento Demo'];
 
     for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
       await page.setViewportSize(viewport);
