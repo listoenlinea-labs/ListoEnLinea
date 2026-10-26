@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head><script src="demo-bootstrap.js"></script><meta name="robots" content="noindex,nofollow">
+  <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico?v=20261005">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png?v=20261005">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png?v=20261005">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png?v=20261005">
+
+  <script src="assets/js/permissions.js?v=20261012-seguridad"></script>
+  <script src="assets/js/page-access.js?v=20261012-seguridad"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reportes | Misión Jardines</title>
+  <style>
+    :root {
+      color-scheme: light
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body.reports-page {
+      --o: #ef7d0b;
+      --ink: #20283d;
+      --muted: #71809a;
+      --line: #e2e7ef;
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 92% 2%, #f2ecff 0, transparent 30%), #fafbff;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+    }
+
+    .reports-page button,
+    .reports-page input,
+    .reports-page select,
+    .reports-page textarea {
+      font: inherit
+    }
+
+    .reports-page svg {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .rep-shell {
+      width: min(1320px, calc(100% - 44px));
+      margin: auto;
+      padding: 25px 0 68px
+    }
+
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .kicker,
+    .eyebrow {
+      display: block;
+      color: #d76500;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .11em;
+      text-transform: uppercase
+    }
+
+    .topline strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 14px
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap
+    }
+
+    .local-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border: 1px solid #e8dfca;
+      border-radius: 999px;
+      color: #7d6530;
+      background: #fffaf0;
+      font-size: 10px;
+      font-weight: 800
+    }
+
+    .local-pill:before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e7b43b;
+      box-shadow: 0 0 0 4px rgba(231, 180, 59, .12)
+    }
+
+    .hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      margin: 24px 0 16px;
+      padding: 32px 36px;
+      border: 1px solid #eaded6;
+      border-radius: 23px;
+      background: linear-gradient(118deg, #fff9f3, #fff 50%, #f1f5ff);
+      box-shadow: 0 15px 38px rgba(49, 57, 79, .055)
+    }
+
+    .hero-copy {
+      max-width: 760px
+    }
+
+    .hero h1 {
+      margin: 9px 0;
+      color: var(--ink);
+      font-size: clamp(30px, 3.5vw, 45px);
+      line-height: 1.04;
+      letter-spacing: -.045em
+    }
+
+    .hero h1 span {
+      color: var(--o)
+    }
+
+    .hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65
+    }
+
+    .hero-card {
+      min-width: 235px;
+      padding: 17px;
+      border: 1px solid #e9e2f4;
+      border-radius: 17px;
+      background: rgba(255, 255, 255, .9)
+    }
+
+    .hero-card small {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750
+    }
+
+    .hero-card strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 14px
+    }
+
+    .hero-card span {
+      display: block;
+      margin-top: 5px;
+      color: #8791a4;
+      font-size: 9px;
+      line-height: 1.45
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 13px;
+      margin-bottom: 18px
+    }
+
+    .metric {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-height: 100px;
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      box-shadow: 0 9px 24px rgba(49, 57, 79, .04)
+    }
+
+    .metric:nth-child(1) {
+      background: #fff8ea;
+      border-color: #f0dfbc
+    }
+
+    .metric:nth-child(2) {
+      background: #eef8ff;
+      border-color: #d5e9f7
+    }
+
+    .metric:nth-child(3) {
+      background: #effaf3;
+      border-color: #d4eadc
+    }
+
+    .metric:nth-child(4) {
+      background: #fff1f2;
+      border-color: #f0d1d5
+    }
+
+    .metric-icon {
+      display: grid;
+      place-items: center;
+      width: 45px;
+      height: 45px;
+      flex: 0 0 45px;
+      border-radius: 13px;
+      color: var(--o);
+      background: rgba(255, 255, 255, .82)
+    }
+
+    .metric small {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 750
+    }
+
+    .metric strong {
+      display: block;
+      margin: 3px 0;
+      font-size: 23px
+    }
+
+    .metric span {
+      color: #8994a7;
+      font-size: 9px
+    }
+
+    .panel {
+      margin-top: 15px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: #fff;
+      box-shadow: 0 11px 30px rgba(49, 57, 79, .05)
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 21px 21px 0
+    }
+
+    .panel-head h2 {
+      margin: 4px 0 3px;
+      font-size: 20px
+    }
+
+    .panel-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(230px, 1.4fr) repeat(3, minmax(145px, .65fr)) auto;
+      gap: 9px;
+      align-items: end;
+      padding: 18px 21px
+    }
+
+    .reports-page label {
+      display: block;
+      margin-bottom: 6px;
+      color: #59657a;
+      font-size: 10px;
+      font-weight: 800
+    }
+
+    .reports-page input,
+    .reports-page select,
+    .reports-page textarea {
+      width: 100%;
+      min-height: 41px;
+      padding: 9px 11px;
+      border: 1px solid #dce3ed;
+      border-radius: 10px;
+      color: #263148;
+      background: #fff;
+      font-size: 10px;
+      outline: 0
+    }
+
+    .reports-page textarea {
+      min-height: 90px;
+      resize: vertical
+    }
+
+    .reports-page input:focus,
+    .reports-page select:focus,
+    .reports-page textarea:focus {
+      border-color: #ed9c4d;
+      box-shadow: 0 0 0 4px rgba(239, 125, 11, .09)
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 40px;
+      padding: 9px 14px;
+      border: 1px solid #dfe4ec;
+      border-radius: 10px;
+      color: #5d6880;
+      background: #fff;
+      font-size: 10px;
+      font-weight: 850;
+      cursor: pointer;
+      text-decoration: none
+    }
+
+    .btn:hover {
+      border-color: #efb579;
+      background: #fffaf6
+    }
+
+    .btn-primary {
+      color: #fff;
+      border-color: var(--o);
+      background: linear-gradient(135deg, #f58b1c, #e87100);
+      box-shadow: 0 7px 18px rgba(232, 113, 0, .17)
+    }
+
+    .table-card {
+      padding: 0 21px 21px
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px
+    }
+
+    .reports-page table {
+      width: 100%;
+      min-width: 1080px;
+      border-collapse: collapse
+    }
+
+    .reports-page th {
+      padding: 11px 12px;
+      color: #7d718b;
+      background: #faf8fc;
+      font-size: 9px;
+      letter-spacing: .05em;
+      text-align: left;
+      text-transform: uppercase
+    }
+
+    .reports-page td {
+      padding: 12px;
+      border-top: 1px solid #e8ebf1;
+      color: #3c485e;
+      font-size: 10px;
+      vertical-align: middle
+    }
+
+    .reports-page tbody tr.report-row {
+      cursor: pointer
+    }
+
+    .reports-page tbody tr.report-row:hover {
+      background: #fff8f1
+    }
+
+    .folio {
+      font-weight: 900;
+      color: #35415a
+    }
+
+    .report-type {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 750
+    }
+
+    .type-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef7d0b
+    }
+
+    .priority {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .priority:before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #82a7c8
+    }
+
+    .priority.high:before {
+      background: #df5864
+    }
+
+    .priority.medium:before {
+      background: #e9ae32
+    }
+
+    .status {
+      display: inline-flex;
+      padding: 6px 8px;
+      border-radius: 999px;
+      font-size: 9px;
+      font-weight: 850;
+      white-space: nowrap
+    }
+
+    .status.open {
+      color: #9a6a12;
+      background: #fff4d9
+    }
+
+    .status.process {
+      color: #2d6e9c;
+      background: #eaf5fd
+    }
+
+    .status.resolved {
+      color: #277849;
+      background: #eaf8ef
+    }
+
+    .status.rejected {
+      color: #a34b55;
+      background: #fff0f2
+    }
+
+    .updates-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: #69758b;
+      font-weight: 800
+    }
+
+    .updates-count b {
+      display: grid;
+      place-items: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 999px;
+      background: #f3f5f8
+    }
+
+    .open-btn {
+      min-height: 31px;
+      padding: 6px 9px;
+      color: #a95506;
+      border-color: #f0c79f;
+      background: #fff8f1
+    }
+
+    .empty {
+      padding: 44px 20px !important;
+      text-align: center;
+      color: #8893a5 !important
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 25px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: #8a94a6;
+      font-size: 9px
+    }
+
+    .footer a {
+      color: #d76500;
+      text-decoration: none;
+      font-weight: 800
+    }
+
+    .modal[hidden] {
+      display: none !important
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 4000;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background: rgba(27, 35, 51, .62);
+      backdrop-filter: blur(7px)
+    }
+
+    .modal-box {
+      width: min(880px, 100%);
+      max-height: calc(100vh - 44px);
+      overflow: auto;
+      border: 1px solid rgba(255, 255, 255, .7);
+      border-radius: 22px;
+      background: #fff;
+      box-shadow: 0 30px 80px rgba(20, 27, 42, .3)
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 21px 23px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(110deg, #fffaf5, #f5f7ff)
+    }
+
+    .modal-head h2 {
+      margin: 4px 0;
+      font-size: 22px
+    }
+
+    .modal-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .close {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border: 1px solid #dfe4ec;
+      border-radius: 11px;
+      color: #606b80;
+      background: #fff;
+      font-size: 20px;
+      cursor: pointer
+    }
+
+    .modal-body {
+      padding: 21px 23px
+    }
+
+    .type-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+      margin-bottom: 18px
+    }
+
+    .type-card {
+      min-height: 75px;
+      padding: 12px;
+      border: 1px solid #e1e6ed;
+      border-radius: 13px;
+      color: #5b667b;
+      background: #fff;
+      cursor: pointer;
+      text-align: left
+    }
+
+    .type-card:hover,
+    .type-card.active {
+      color: #ac5807;
+      border-color: #efb374;
+      background: #fff8f1
+    }
+
+    .type-card b {
+      display: block;
+      font-size: 11px
+    }
+
+    .type-card small {
+      display: block;
+      margin-top: 4px;
+      color: #8791a4;
+      font-size: 8px;
+      line-height: 1.4
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 11px
+    }
+
+    .photo-preview {
+      display: grid;
+      place-items: center;
+      min-height: 90px;
+      margin-top: 8px;
+      padding: 10px;
+      border: 1px dashed #d8dfe8;
+      border-radius: 11px;
+      color: #929bab;
+      background: #fafbfc;
+      font-size: 9px;
+      text-align: center
+    }
+
+    .photo-preview img {
+      max-width: 100%;
+      max-height: 220px;
+      border-radius: 9px
+    }
+
+    .modal-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 9px;
+      padding: 15px 23px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfe
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 5000;
+      display: none;
+      max-width: 360px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      color: #fff;
+      background: #29344b;
+      box-shadow: 0 16px 40px rgba(27, 37, 55, .2);
+      font-size: 11px;
+      font-weight: 700
+    }
+
+    @media(max-width:1050px) {
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .type-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+    }
+
+    @media(max-width:720px) {
+      .rep-shell {
+        width: min(100% - 28px, 1320px);
+        padding-top: 18px
+      }
+
+      .topline,
+      .hero,
+      .footer {
+        align-items: flex-start;
+        flex-direction: column
+      }
+
+      .hero {
+        padding: 25px 22px
+      }
+
+      .hero-card {
+        width: 100%;
+        min-width: 0
+      }
+
+      .metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .filters,
+      .form-row,
+      .type-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metric {
+        min-width: 0;
+        min-height: 112px;
+        padding: 13px;
+        gap: 10px;
+      }
+
+      .metric-icon {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+      }
+
+      .metric-icon svg {
+        width: 19px;
+        height: 19px;
+      }
+
+      .metric small {
+        font-size: 9px;
+      }
+
+      .metric strong {
+        font-size: 20px;
+        line-height: 1.05;
+        white-space: nowrap;
+      }
+
+      .metric span {
+        font-size: 8px;
+      }
+
+      .panel-head {
+        padding: 18px 18px 0;
+        flex-direction: column
+      }
+
+      .filters {
+        padding: 16px 18px
+      }
+
+      .table-card {
+        padding: 0 18px 18px
+      }
+
+      .modal {
+        padding: 10px
+      }
+
+      .modal-body {
+        padding: 18px
+      }
+
+      .modal-head {
+        padding: 18px
+      }
+
+      .modal-foot {
+        padding: 13px 18px
+      }
+    }
+  </style>
+  <script src="assets/js/date-display.js?v=20261019"></script>
+</head>
+
+<body class="reports-page"><div style="position:fixed;z-index:2147483000;right:12px;bottom:10px;background:#183e4f;color:white;border-radius:17px;padding:9px 13px;font:700 12px system-ui;pointer-events:none">DEMO · Datos ficticios · Administrador</div>
+  <main class="rep-shell">
+    <div class="topline">
+      <div><span class="kicker">ATENCIÓN VECINAL</span><strong>Reportes e incidencias</strong></div>
+      <div class="top-actions">
+        <div class="local-pill">Datos guardados en este dispositivo</div><button class="btn btn-primary"
+          onclick="openModal()"><svg viewBox="0 0 24 24">
+            <path d="M12 5v14M5 12h14"></path>
+          </svg>Nuevo reporte</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-copy"><span class="eyebrow">COMUNIDAD</span>
+        <h1>Reporta, da seguimiento <span>y resuelve.</span></h1>
+        <p>Registra incidencias y consulta el seguimiento de cada reporte.</p>
+      </div>
+    </section>
+
+    <section class="metrics">
+      <article class="metric">
+        <div class="metric-icon"><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M12 7v6M12 17h.01"></path>
+          </svg></div>
+        <div><small>Reportes abiertos</small><strong id="metricOpen">0</strong><span>Pendientes de revisar</span></div>
+      </article>
+      <article class="metric">
+        <div class="metric-icon"><svg viewBox="0 0 24 24">
+            <path d="M12 3a9 9 0 1 0 9 9"></path>
+            <path d="M12 7v5l3 2M16 3h5v5"></path>
+          </svg></div>
+        <div><small>En proceso</small><strong id="metricProcess">0</strong><span>Con atención activa</span></div>
+      </article>
+      <article class="metric">
+        <div class="metric-icon"><svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="m8 12 3 3 5-6"></path>
+          </svg></div>
+        <div><small>Resueltos</small><strong id="metricResolved">0</strong><span>Incidencias cerradas</span></div>
+      </article>
+      <article class="metric">
+        <div class="metric-icon"><svg viewBox="0 0 24 24">
+            <path d="M12 3 2 21h20Z"></path>
+            <path d="M12 9v5M12 18h.01"></path>
+          </svg></div>
+        <div><small>Alta prioridad</small><strong id="metricHigh">0</strong><span>Requieren atención rápida</span></div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><span class="eyebrow">BITÁCORA</span>
+          <h2>Reportes de la comunidad</h2>
+          <p>Haz clic en una fila o en “Abrir ticket” para revisar el detalle y su historial.</p>
+        </div><button class="btn btn-primary" onclick="openModal()">+ Registrar incidencia</button>
+      </div>
+      <div class="filters">
+        <div><label for="filterText">Buscar</label><input id="filterText" placeholder="Folio, ubicación, casa o persona"
+            oninput="renderReports()"></div>
+        <div><label for="filterType">Tipo</label><select id="filterType" onchange="renderReports()">
+            <option value="">Todos</option>
+          </select></div>
+        <div><label for="filterPriority">Prioridad</label><select id="filterPriority" onchange="renderReports()">
+            <option value="">Todas</option>
+            <option>Baja</option>
+            <option>Media</option>
+            <option>Alta</option>
+          </select></div>
+        <div><label for="filterStatus">Estatus</label><select id="filterStatus" onchange="renderReports()">
+            <option value="">Todos</option>
+            <option>Abierto</option>
+            <option>En proceso</option>
+            <option>Resuelto</option>
+            <option>Rechazado</option>
+          </select></div>
+        <button class="btn" onclick="clearFilters()">Limpiar</button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Folio</th>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Casa</th>
+                <th>Ubicación</th>
+                <th>Prioridad</th>
+                <th>Área</th>
+                <th>Estatus</th>
+                <th>Actualizaciones</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="reportsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer"><span>Misión Jardines Residencial · Zapopan, Jalisco</span><span>Plataforma desarrollada por
+        <a href="https://listoenlinea.com" target="_blank" rel="noopener">ListoEnLinea.com</a></span></footer>
+  </main>
+
+  <section id="reportModal" class="modal" hidden aria-modal="true" role="dialog">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div><span class="eyebrow">NUEVA INCIDENCIA</span>
+          <h2>Registrar reporte</h2>
+          <p>Agrega ubicación, descripción y evidencia para facilitar la atención.</p>
+        </div><button class="close" onclick="closeModal()" aria-label="Cerrar">×</button>
+      </div>
+      <div class="modal-body">
+        <input id="reportType" type="hidden" value="Alumbrado">
+        <div id="typeGrid" class="type-grid"></div>
+        <div class="form-grid">
+          <div class="form-row">
+            <div><label for="reportStreet">Calle</label><select id="reportStreet"></select></div>
+            <div><label for="reportNumber">Número de casa</label><input id="reportNumber" placeholder="Ej. 101"></div>
+          </div>
+          <div class="form-row">
+            <div><label for="reportedBy">Reportado por</label><input id="reportedBy" placeholder="Nombre del residente">
+            </div>
+            <div><label for="reportLocation">Ubicación / referencia</label><input id="reportLocation"
+                placeholder="Ej. frente al parque"></div>
+          </div>
+          <div class="form-row">
+            <div><label for="reportPriority">Prioridad</label><select id="reportPriority">
+                <option>Baja</option>
+                <option selected>Media</option>
+                <option>Alta</option>
+              </select></div>
+            <div><label for="responsibleArea">Canalizar a</label><select id="responsibleArea">
+                <option>Administración</option>
+                <option>Mantenimiento</option>
+                <option>Seguridad</option>
+                <option>Jardinería</option>
+                <option>Proveedor externo</option>
+              </select></div>
+          </div>
+          <div><label for="reportDescription">Descripción</label><textarea id="reportDescription"
+              placeholder="Describe qué ocurrió y qué se necesita atender..."></textarea></div>
+          <div><label for="reportPhoto">Foto o evidencia</label><input id="reportPhoto" type="file" accept="image/*"
+              onchange="previewPhoto(event)">
+            <div id="photoPreview" class="photo-preview">Puedes adjuntar una fotografía del problema.</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot"><button class="btn" onclick="closeModal()">Cancelar</button><button
+          class="btn btn-primary" onclick="addReport()">Registrar reporte</button></div>
+    </div>
+  </section>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API_URL = 'https://demo.invalid/api', STORAGE_KEY = 'mision_jardines_reportes';
+    const token = localStorage.getItem('misionJardinesToken') || sessionStorage.getItem('misionJardinesToken');
+    const TYPES = [['Alumbrado', '💡', 'Luminarias o zonas oscuras'], ['Agua / Fuga', '💧', 'Fugas, presión o tuberías'], ['Vialidad', '🚧', 'Baches, banquetas o accesos'], ['Limpieza', '🧹', 'Basura, maleza o escombro'], ['Jardinería', '🌳', 'Poda, riego y áreas verdes'], ['Mascota perdida', '🐾', 'Mascotas extraviadas o encontradas'], ['Seguridad', '🛡️', 'Situaciones que requieren vigilancia'], ['Otro', '📌', 'Cualquier otra incidencia']];
+    const STREETS = ['Jardines', 'Gardenias', 'Magnolias', 'Rosas', 'Lirios', 'Valle de México', 'Guadalajara', 'Atotonilco'].sort((a,b)=>a.localeCompare(b,'es-MX',{numeric:true,sensitivity:'base'}));
+    const DEFAULT_REPORTS = [{ folio: 'REP-1001', date: '2026-06-04 18:20', type: 'Alumbrado', house: 'Misión Jardines · 101', location: 'Frente a casa 101', reportedBy: 'Laura Gómez', priority: 'Alta', area: 'Mantenimiento', status: 'En proceso', description: 'Luminaria parpadeando y zona oscura por la noche.', photo: '', updates: [] }, { folio: 'REP-1002', date: '2026-06-03 09:15', type: 'Jardinería', house: 'Misión Gardenias · 28', location: 'Área común', reportedBy: 'Martín Pérez', priority: 'Media', area: 'Jardinería', status: 'Abierto', description: 'Se requiere poda y limpieza de maleza cerca del jardín.', photo: '', updates: [] }];
+    let selectedPhoto = '', currentUser = null, reports = [];
+    if (!token) location.replace('login.html');
+    const $ = id => document.getElementById(id), esc = v => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;'), norm = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    function toast(m) { const e = $('toast'); e.textContent = m; e.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => e.style.display = 'none', 3000) }
+    function normalizeReport(r) { return { ...r, updates: Array.isArray(r?.updates) ? r.updates : [] } }
+    function loadData() { try { const saved = localStorage.getItem(STORAGE_KEY); if (saved) { const parsed = JSON.parse(saved); reports = Array.isArray(parsed) ? parsed.map(normalizeReport) : [] } else { reports = DEFAULT_REPORTS.map(normalizeReport); saveData() } } catch (e) { console.warn(e); reports = DEFAULT_REPORTS.map(normalizeReport) } }
+    function saveData() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(reports)); return true } catch (e) { toast('No fue posible guardar. La imagen puede ser demasiado grande.'); return false } }
+    function nowText() { const d = new Date(), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}` }
+    function generateFolio() { return 'REP-' + String(Date.now()).slice(-6) }
+    function setupForm() { reportStreet.innerHTML = '<option value="">Selecciona una calle</option>' + STREETS.map(s => `<option>${esc(s)}</option>`).join(''); filterType.innerHTML = '<option value="">Todos</option>' + TYPES.map(([t]) => `<option>${esc(t)}</option>`).join(''); typeGrid.innerHTML = TYPES.map(([t, i, d], n) => `<button type="button" class="type-card ${n === 0 ? 'active' : ''}" onclick="selectType(this,'${esc(t).replaceAll("'", '&#039;')}')"><b>${i} ${esc(t)}</b><small>${esc(d)}</small></button>`).join('') }
+    function selectType(el, type) { document.querySelectorAll('.type-card').forEach(x => x.classList.remove('active')); el.classList.add('active'); reportType.value = type }
+    function openModal() { reportModal.hidden = false; setTimeout(() => reportStreet.focus(), 0) }
+    function closeModal() { reportModal.hidden = true }
+    function previewPhoto(event) { const file = event.target.files[0]; if (!file) { selectedPhoto = ''; photoPreview.textContent = 'Puedes adjuntar una fotografía del problema.'; return } if (file.size > 2.5 * 1024 * 1024) { event.target.value = ''; toast('La imagen debe pesar menos de 2.5 MB.'); return } const reader = new FileReader(); reader.onload = e => { selectedPhoto = e.target.result; photoPreview.innerHTML = `<img src="${selectedPhoto}" alt="Vista previa">` }; reader.readAsDataURL(file) }
+    function clearForm() { reportStreet.value = ''; reportNumber.value = ''; reportLocation.value = ''; reportPriority.value = 'Media'; responsibleArea.value = 'Administración'; reportDescription.value = ''; reportPhoto.value = ''; selectedPhoto = ''; photoPreview.textContent = 'Puedes adjuntar una fotografía del problema.'; document.querySelectorAll('.type-card').forEach((x, i) => x.classList.toggle('active', i === 0)); reportType.value = 'Alumbrado'; prefillUser() }
+    function prefillUser() { if (!currentUser) return; const name = [currentUser.nombre, currentUser.apellidoPaterno, currentUser.apellidoMaterno].filter(Boolean).join(' '); if (name) reportedBy.value = name; const casa = currentUser.casa; if (casa) { if (STREETS.includes(casa.calleCorrecta || casa.calle)) reportStreet.value = casa.calleCorrecta || casa.calle; if (casa.numero) reportNumber.value = casa.numero } }
+    function addReport() { const street = reportStreet.value, number = reportNumber.value.trim(), description = reportDescription.value.trim(), who = reportedBy.value.trim(), locationText = reportLocation.value.trim(); if (!street || !number || !who || !locationText || !description) return toast('Completa calle, número, reportado por, ubicación y descripción.'); const report = { folio: generateFolio(), date: nowText(), type: reportType.value, house: `${street} · ${number}`, location: locationText, reportedBy: who, priority: reportPriority.value, area: responsibleArea.value, status: 'Abierto', description, photo: selectedPhoto, updates: [] }; reports.unshift(report); if (!saveData()) return; closeModal(); clearForm(); openTicket(report.folio) }
+    function statusClass(s) { return s === 'En proceso' ? 'process' : s === 'Resuelto' ? 'resolved' : s === 'Rechazado' ? 'rejected' : 'open' }
+    function priorityClass(p) { return p === 'Alta' ? 'high' : p === 'Media' ? 'medium' : '' }
+    function filtered() { const q = norm(filterText.value), type = filterType.value, priority = filterPriority.value, status = filterStatus.value; return reports.filter(r => (!q || norm(`${r.folio} ${r.type} ${r.house} ${r.location} ${r.reportedBy} ${r.description}`).includes(q)) && (!type || r.type === type) && (!priority || r.priority === priority) && (!status || r.status === status)).sort((a,b)=>String(a.house||'').localeCompare(String(b.house||''),'es-MX',{numeric:true,sensitivity:'base'})||String(b.date||'').localeCompare(String(a.date||''))) }
+    function openTicket(folio) { location.href = `reporte.html?id=${encodeURIComponent(folio)}` }
+    function renderReports() { const rows = filtered(); reportsTable.innerHTML = rows.length ? rows.map(r => `<tr class="report-row" title="Abrir ticket ${esc(r.folio)}" onclick="openTicket('${esc(r.folio)}')"><td class="folio">${esc(r.folio)}</td><td>${esc(r.date)}</td><td><span class="report-type"><i class="type-dot"></i>${esc(r.type)}</span></td><td>${esc(r.house)}</td><td>${esc(r.location)}</td><td><span class="priority ${priorityClass(r.priority)}">${esc(r.priority)}</span></td><td>${esc(r.area)}</td><td><span class="status ${statusClass(r.status)}">${esc(r.status)}</span></td><td><span class="updates-count"><b>${Array.isArray(r.updates) ? r.updates.length : 0}</b> notas</span></td><td><button class="btn open-btn" onclick="event.stopPropagation();openTicket('${esc(r.folio)}')">Abrir ticket →</button></td></tr>`).join('') : '<tr><td class="empty" colspan="10">No hay reportes que coincidan con los filtros.</td></tr>'; updateMetrics() }
+    function updateMetrics() { metricOpen.textContent = reports.filter(r => r.status === 'Abierto').length; metricProcess.textContent = reports.filter(r => r.status === 'En proceso').length; metricResolved.textContent = reports.filter(r => r.status === 'Resuelto').length; metricHigh.textContent = reports.filter(r => r.priority === 'Alta' && r.status !== 'Resuelto').length }
+    function clearFilters() { filterText.value = ''; filterType.value = ''; filterPriority.value = ''; filterStatus.value = ''; renderReports() }
+    function clearSession() { ['misionJardinesToken', 'misionJardinesUsuario'].forEach(k => { localStorage.removeItem(k); sessionStorage.removeItem(k) }) }
+    async function validate() { try { const r = await fetch(`${API_URL}/auth/perfil`, { headers: { Authorization: `Bearer ${token}` } }), d = await r.json(); if (!r.ok || !d.ok) throw Error(d.message || 'Sesión inválida'); currentUser = d.usuario; prefillUser() } catch (e) { console.error(e); clearSession(); location.replace('login.html') } }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !reportModal.hidden) closeModal() });
+    setupForm(); loadData(); renderReports(); validate();
+  </script>
+  <script src="assets/js/site-sidebar.js?v=20261021-refresco-scroll"></script>
+</body>
+
+</html>

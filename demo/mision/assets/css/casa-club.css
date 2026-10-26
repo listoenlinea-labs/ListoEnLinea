@@ -1,0 +1,122 @@
+:root{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#f5f7fb;color:#26344e}
+*{box-sizing:border-box}body{margin:0;padding:26px 25px 26px 30px;min-height:100vh}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}
+.club-wrap{max-width:1500px;margin:auto}.club-hero{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:28px 32px;margin-bottom:15px;background:linear-gradient(110deg,#fff8f1,#fbfaff 52%,#f0fbf5);border:1px solid #e7e5e6;border-radius:23px;box-shadow:0 8px 25px #2c3c4c06}
+.eyebrow{font-size:10px;letter-spacing:.13em;color:#d16d15;font-weight:900}.club-hero h1{font-size:clamp(28px,4vw,43px);margin:9px 0}.club-hero em{font-style:normal;color:#eb8b2f}.club-hero p,.section-header p{color:#8390a5;font-size:13px;line-height:1.6;margin:3px 0}.hero-mark{padding:16px;border-radius:14px;border:1px solid #e7d9f0;background:#fdfaff;color:#78658f;font-size:12px;font-weight:750}
+.club-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;background:#fff;border:1px solid #e3e9f0;padding:7px;border-radius:16px}
+.club-tabs button{border:none;background:transparent;border-radius:11px;padding:13px 18px;color:#708096;font-weight:750;font-size:12px}
+.club-tabs button[aria-current=page]{color:#b76821;background:#fff1e5;border:1px solid #f1d6bf}
+.club-card{min-width:0;padding:23px;border-radius:19px;border:1px solid #e1e8f0;background:#fff;box-shadow:0 6px 18px #33465b09}
+.club-card h2{font-size:21px;margin:7px 0 10px}.two-col{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(330px,.9fr);gap:17px}
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:16px}.legend{display:flex;flex-wrap:wrap;gap:9px;justify-content:end}.legend span{display:flex;align-items:center;gap:6px;color:#758296;font-size:10px}.legend i{width:11px;height:11px;border-radius:4px}.available{background:#d6f2df;border:1px solid #acd8bb}.busy{background:#fae1e3;border:1px solid #efb2b6}.waiting{background:#ffedcf;border:1px solid #f0cb91}
+.calendar-nav{display:flex;justify-content:space-between;align-items:center;margin:17px 0;padding:8px;background:#f7f9fb;border-radius:13px}.calendar-nav button{height:32px;width:36px;background:#fff;border:1px solid #e2e7ef;color:#a97940;font-size:23px;border-radius:9px}.calendar-nav strong{font-size:13px;text-transform:capitalize}
+.weekdays,.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center}.weekdays b{font-size:10px;color:#9aa4b4;margin-bottom:9px}.calendar-days button,.calendar-blank{min-height:64px;border-radius:11px;border:1px solid #d0e7d7;background:#f0fbf4;color:#266748;font-size:14px;font-weight:850}
+.calendar-days button small{display:block;font-size:8px;font-weight:750;margin-top:3px}.calendar-days button.booked{color:#af434c;background:#fff0f1;border-color:#f2d4d7}.calendar-days button.waiting{color:#b0761f;background:#fff6e9;border-color:#efdbbb}.calendar-days button.past{opacity:.4;color:#8991a0;border-color:#e0e5ed;background:#f8f9fa}.calendar-days button.selected{box-shadow:0 0 0 2px #db872e inset,0 3px 12px #f6ba7a55}.calendar-blank{border-color:transparent;background:transparent}.club-hint{font-size:11px;color:#8793a6;line-height:1.6;margin-bottom:0}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.form-grid label{font-size:11px;color:#5a6881;font-weight:750;min-width:0}.form-grid label.wide{grid-column:1/-1}
+.form-grid input:not([type=checkbox]),.form-grid select,.form-grid textarea{display:block;width:100%;margin-top:6px;padding:11px;border:1px solid #dbe3ef;border-radius:10px;background:#fff;color:#2b3850;min-height:40px}
+.form-grid input[readonly]{background:#f8fafc}.form-grid select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238276ab' stroke-width='2.1'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:35px}
+.primary{margin-top:18px;border:0;background:linear-gradient(110deg,#eb8d32,#db710b);color:white;border-radius:11px;padding:12px 18px;font-size:12px;font-weight:850}.soft{border:1px solid #e7dbf1;color:#69568c;background:#faf6ff;border-radius:11px;padding:10px 14px;font-size:11px;font-weight:750}
+.danger{border:1px solid #f2d4d8;color:#ae4759;background:#fff4f5;border-radius:10px;padding:10px 15px;font-size:11px;font-weight:800}
+#clubNotice{margin-bottom:15px;border:1px solid #d9e9dd;border-radius:11px;padding:12px;background:#f1faf4;color:#396a4d;font-size:12px}
+.reservation-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.reserve-card{padding:15px;border:1px solid #e4e8f0;border-radius:14px;background:linear-gradient(145deg,#fff,#fdfbf9)}.reserve-card h3{font-size:15px;margin:4px 0}.reserve-card p{margin:8px 0;color:#718099;font-size:11px;line-height:1.5}.reserve-card footer{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:12px}
+.state-pill{display:inline-block;font-size:9px;font-weight:800;border-radius:999px;padding:6px 9px;color:#986e24;background:#fff1d6}.state-pill.APROBADA{background:#e4f6e9;color:#287747}.state-pill.CANCELADA,.state-pill.RECHAZADA{color:#a04a57;background:#ffeaed}
+.table-scroll{overflow:auto;border:1px solid #e9e8ef;border-radius:13px;max-height:650px}.club-table{border-collapse:collapse;min-width:1550px;width:100%;font-size:11px}.club-table th{text-transform:uppercase;position:sticky;top:0;background:#f9f5fc;color:#786b94;letter-spacing:.03em;text-align:left;padding:12px 10px;border-bottom:1px solid #e6ddea}.club-table td{padding:12px 10px;border-bottom:1px solid #eef1f5;white-space:nowrap;color:#40516b}.club-table select,.club-table input{border:1px solid #dce4ef;border-radius:8px;padding:6px;max-width:140px}.stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:15px}.stat{padding:16px;border:1px solid #dcebe3;border-radius:13px;background:#f5fcf7}.stat small{color:#71869a;font-size:10px;display:block;margin-bottom:7px}.stat strong{font-size:21px;color:#2c604d}
+.club-dialog{width:min(670px,calc(100vw - 20px));max-height:90dvh;border:1px solid #e3e7ef;border-radius:19px;padding:22px;background:white;box-shadow:0 35px 120px #29344744;color:#28374f}.club-dialog[open]{position:fixed;inset:0;margin:auto}.club-dialog::backdrop{background:#1927389c;backdrop-filter:blur(3px)}.dialog-head,.dialog-actions{display:flex;align-items:center;justify-content:space-between;gap:14px}.dialog-head h2{margin:6px 0 12px}.xbtn{border:1px solid #e9eaf0;border-radius:10px;width:36px;height:36px;font-size:23px;color:#768399;background:#f8f9fb}.review-details{padding:14px;margin-bottom:16px;border-radius:13px;background:#f7fbf9;font-size:12px;line-height:1.8}.dialog-actions{justify-content:flex-end}.check{display:flex!important;align-items:center;gap:8px}.check input{accent-color:#85bda4}
+[hidden]{display:none!important}@media(max-width:1100px){.two-col{grid-template-columns:1fr}.reservation-grid{grid-template-columns:1fr}}@media(max-width:700px){body{padding:15px}.club-hero{padding:18px}.hero-mark{display:none}.club-card{padding:15px}.stat-grid{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.form-grid label.wide{grid-column:auto}.calendar-days button,.calendar-blank{min-height:53px}.club-tabs button{flex:1 1 42%}.section-header{flex-wrap:wrap}.legend{justify-content:flex-start}}
+.club-table-toggle{display:flex;align-items:center;gap:8px;margin:12px 0;color:#76668b;font-size:11px;font-weight:800}.club-table-toggle input{accent-color:#9fc8ac}
+
+
+/* Las cinco métricas administrativas comparten una sola fila en escritorio. */
+#tab-administracion #clubTotals.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  align-items:stretch;
+  gap:12px;
+  width:100%;
+  min-width:0;
+  margin:16px 0 18px;
+}
+#tab-administracion #clubTotals.stat-grid .stat{
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  gap:12px;
+  min-width:0;
+  min-height:120px;
+  height:100%;
+  padding:17px 16px;
+  border:1px solid #dcebe3;
+  border-radius:15px;
+  background:linear-gradient(145deg,#f6fcf8,#f1f9f5);
+  box-shadow:0 4px 14px rgba(41,77,61,.035);
+}
+#tab-administracion #clubTotals.stat-grid .stat:nth-child(even){
+  border-color:#e5dcef;
+  background:linear-gradient(145deg,#fcf9ff,#f8f3fc);
+}
+#tab-administracion #clubTotals.stat-grid .stat:nth-child(3){
+  border-color:#e9ddc9;
+  background:linear-gradient(145deg,#fff9f1,#fdf4e8);
+}
+#tab-administracion #clubTotals.stat-grid .stat small{
+  display:block;
+  margin:0;
+  color:#748399;
+  font-size:11px;
+  font-weight:750;
+  line-height:1.4;
+  overflow-wrap:break-word;
+}
+#tab-administracion #clubTotals.stat-grid .stat strong{
+  display:block;
+  margin-top:auto;
+  color:#295b49;
+  font-size:clamp(17px,1.55vw,23px);
+  line-height:1.15;
+  font-weight:850;
+  letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+  overflow-wrap:anywhere;
+}
+@media(max-width:1040px){
+  #tab-administracion #clubTotals.stat-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+@media(max-width:700px){
+  #tab-administracion #clubTotals.stat-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+  #tab-administracion #clubTotals.stat-grid .stat{
+    min-height:110px;
+    padding:14px 13px;
+  }
+}
+@media(max-width:380px){
+  #tab-administracion #clubTotals.stat-grid{
+    grid-template-columns:1fr;
+  }
+  #tab-administracion #clubTotals.stat-grid .stat{
+    min-height:90px;
+  }
+}
+.club-bill{margin:12px 0;padding:14px;border:1px solid #e5d7f4;border-radius:12px;background:#faf6ff;color:#374056}.club-bill p{margin:5px 0;font-size:12px}.club-bill strong{display:block;margin-bottom:5px;color:#6c398e}
+
+/* Alerta de elegibilidad de reservación con desglose sin alterar TAGs. */
+.club-debt-dialog{width:min(640px,calc(100vw - 22px));padding:23px;max-height:90dvh;overflow-y:auto}
+.club-debt-dialog .dialog-head h2{margin:7px 0 5px;font-size:21px}
+.club-debt-explanation{font-size:13px;line-height:1.6;color:#6c7890;margin:10px 0 17px}
+.club-debt-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.club-debt-stat{display:flex;flex-direction:column;gap:8px;padding:15px;border-radius:14px;border:1px solid #dce8e0;background:#f2faf5}
+.club-debt-stat.extra{border-color:#e6def1;background:#faf6ff}
+.club-debt-stat small{color:#65788b;font-size:11px;font-weight:750}
+.club-debt-stat strong{color:#315b47;font-size:20px;font-variant-numeric:tabular-nums}
+.club-debt-stat.extra strong{color:#73548a}
+.club-debt-total{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px;border-radius:13px;background:#fff4e7;border:1px solid #f0d7bb}
+.club-debt-total span{font-size:12px;font-weight:750;color:#9b6b43}.club-debt-total strong{font-size:23px;color:#965a2c}
+.club-debt-details{margin-top:17px;max-height:240px;overflow-y:auto}.club-debt-details h3{font-size:13px;margin:0 0 10px;color:#40536c}
+.club-debt-item{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:11px 12px;border:1px solid #e8eaf0;border-radius:11px;margin:8px 0;background:#fdfdff}
+.club-debt-item>div{display:flex;flex-direction:column;gap:5px;min-width:0}.club-debt-item>div:last-child{text-align:right;flex-shrink:0}
+.club-debt-item b{font-size:12px;color:#4d6078}.club-debt-item strong{font-size:13px;color:#a45b2e}.club-debt-item small{font-size:11px;line-height:1.4;color:#8390a2}
+.club-debt-actions{display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:20px}.club-debt-actions .primary{display:inline-flex;text-decoration:none;margin:0;justify-content:center;align-items:center;min-height:42px}.club-debt-actions .soft{min-height:42px}
+@media(max-width:520px){.club-debt-dialog{padding:17px}.club-debt-stat{padding:12px}.club-debt-stat strong{font-size:17px}.club-debt-total strong{font-size:19px}.club-debt-actions>*{flex:1}.club-debt-item{flex-wrap:wrap}.club-debt-item>div:last-child{text-align:left}}

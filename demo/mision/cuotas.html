@@ -1,0 +1,2586 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head><script src="demo-bootstrap.js"></script><meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico?v=20261005">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png?v=20261005">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png?v=20261005">
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/images/apple-touch-icon.png?v=20261005">
+
+  <script src="assets/js/permissions.js?v=20261012-seguridad"></script>
+  <script src="assets/js/page-access.js?v=20261012-seguridad"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cuotas | Misión Jardines</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .page-cuotas .cuotas-online-status.is-offline {
+      color: #9a4d00;
+      background: #fff4e8;
+      border-color: #ffd3aa;
+    }
+
+    .page-cuotas .cuotas-online-status.is-offline i {
+      background: #f28a2a;
+      box-shadow: 0 0 0 4px rgba(242, 138, 42, .14);
+    }
+
+    .page-cuotas #saveNowButton:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .page-cuotas .cuotas-feature-modal .edit-modal-dialog {
+      width: min(1240px, calc(100vw - 48px));
+      max-width: 1240px;
+      padding: 0;
+      overflow: hidden;
+      text-align: left;
+      border: 1px solid #ebe5ef;
+      box-shadow: 0 28px 80px rgba(42, 48, 69, .24);
+    }
+
+    .page-cuotas .feature-modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 24px 28px 20px;
+      background: linear-gradient(135deg, #fff8f2 0%, #f8f4fc 55%, #eef8fb 100%);
+      border-bottom: 1px solid #ece7f0;
+    }
+
+    .page-cuotas .feature-modal-header h3 {
+      margin: 5px 0 5px;
+      color: #27324a;
+      font-size: 23px;
+    }
+
+    .page-cuotas .feature-modal-header p {
+      margin: 0;
+      color: #707a90;
+    }
+
+    .page-cuotas .feature-modal-eyebrow {
+      color: #d96b0b;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+    }
+
+    .page-cuotas .feature-modal-close {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      border: 1px solid #e1dce7;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .86);
+      color: #667086;
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .page-cuotas .feature-modal-body {
+      padding: 22px 28px 26px;
+      background: #fff;
+    }
+
+    .page-cuotas .receipt-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .page-cuotas .receipt-summary-card {
+      padding: 14px 16px;
+      border: 1px solid #e5e8ef;
+      border-radius: 14px;
+      background: #fbfcfe;
+    }
+
+    .page-cuotas .receipt-summary-card span {
+      display: block;
+      color: #7b8497;
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+
+    .page-cuotas .receipt-summary-card strong {
+      color: #27324a;
+      font-size: 20px;
+    }
+
+    .page-cuotas .receipt-list-wrap {
+      max-height: 390px;
+      overflow: auto;
+      border: 1px solid #e2e6ed;
+      border-radius: 14px;
+    }
+
+    .page-cuotas .receipt-list {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    .page-cuotas .receipt-list th,
+    .page-cuotas .receipt-list td {
+      padding: 11px 13px;
+      border-bottom: 1px solid #edf0f4;
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .page-cuotas .receipt-list th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      color: #6a7388;
+      background: #f7f8fb;
+      font-size: 10px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+
+    .page-cuotas .receipt-list tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .page-cuotas .receipt-email-missing {
+      color: #c05d16;
+      font-weight: 700;
+    }
+
+    .page-cuotas .feature-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .page-cuotas .feature-modal-progress {
+      margin-right: auto;
+      color: #6e788d;
+      font-size: 12px;
+    }
+
+    .page-cuotas .analytics-tabs {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      margin-bottom: 18px;
+      border: 1px solid #e4dfeb;
+      border-radius: 12px;
+      background: #f8f6fa;
+    }
+
+    .page-cuotas .analytics-tab {
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: #697389;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .page-cuotas .analytics-tab.active {
+      color: #c45d08;
+      background: #fff;
+      box-shadow: 0 4px 14px rgba(62, 53, 74, .1);
+    }
+
+    .page-cuotas .analytics-panel {
+      min-height: 385px;
+      padding: 12px;
+      border: 1px solid #e7e9ef;
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .page-cuotas .analytics-panel[hidden] {
+      display: none !important;
+    }
+
+    .page-cuotas .analytics-panel img {
+      display: block;
+      width: 100%;
+      max-height: 410px;
+      object-fit: contain;
+    }
+
+    .page-cuotas .btn-receipt-row {
+      white-space: nowrap;
+    }
+
+    @media (max-width: 720px) {
+      .page-cuotas .receipt-summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .page-cuotas .feature-modal-header,
+      .page-cuotas .feature-modal-body {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+
+      .page-cuotas .feature-modal-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .page-cuotas .feature-modal-progress {
+        margin-right: 0;
+      }
+
+      .page-cuotas .feature-modal-actions button {
+        width: 100%;
+      }
+    }
+  
+/* La hoja global define nav como menú vertical con !important.
+   Estas reglas SOLO aplican al selector local de Cuotas. */
+body.page-cuotas nav.cuotas-primary-tabs{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:10px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-height:0!important;
+  height:auto!important;
+  margin:14px 0 17px!important;
+  padding:6px!important;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:thin;
+  border:1px solid #e9e6ee;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:none;
+}
+body.page-cuotas nav.cuotas-primary-tabs > a{
+  display:inline-flex;
+  flex:0 0 auto;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:10px 24px;
+  border:1px solid transparent;
+  border-radius:10px;
+  color:#7a6998;
+  background:transparent;
+  text-decoration:none;
+  white-space:nowrap;
+  font-size:12px;
+  font-weight:850;
+  line-height:1.2;
+  transition:background .18s ease,border-color .18s ease;
+}
+body.page-cuotas nav.cuotas-primary-tabs > a:hover{
+  background:#faf6ff;
+  color:#694e86;
+}
+body.page-cuotas nav.cuotas-primary-tabs > a.active,
+body.page-cuotas nav.cuotas-primary-tabs > a[aria-current="page"]{
+  border-color:#e6d6f0;
+  color:#694e86;
+  background:#f8f0ff;
+}
+body.page-cuotas nav.cuotas-primary-tabs > a:focus-visible{
+  outline:3px solid #caaee0;
+  outline-offset:2px;
+}
+/* Se conserva la separación visual de la barra lateral en todas las vistas. */
+body.page-cuotas .cuotas-shell{
+  width:min(1320px,calc(100% - 80px));
+  max-width:1320px;
+  min-width:0;
+  margin-inline:auto;
+}
+@media(max-width:820px){
+  body.page-cuotas .cuotas-shell{width:calc(100% - 36px);max-width:680px}
+}
+@media(max-width:480px){
+  body.page-cuotas .cuotas-shell{width:calc(100% - 28px)}
+  body.page-cuotas nav.cuotas-primary-tabs{gap:6px!important;padding:5px!important}
+  body.page-cuotas nav.cuotas-primary-tabs > a{flex:1 1 0;padding:10px 12px;min-width:0}
+}
+</style>
+  <script src="assets/js/date-display.js?v=20261019"></script>
+</head>
+
+<body class="page-cuotas"><div style="position:fixed;z-index:2147483000;right:12px;bottom:10px;background:#183e4f;color:white;border-radius:17px;padding:9px 13px;font:700 12px system-ui;pointer-events:none">DEMO · Datos ficticios · Administrador</div>
+  <main class="cuotas-shell">
+    <div class="cuotas-topbar">
+      <div class="cuotas-topbar-title">
+        <span>ADMINISTRACIÓN Y FINANZAS</span>
+        <strong>Cuotas</strong>
+      </div>
+
+      <div class="cuotas-topbar-actions">
+        <div id="connectionStatus" class="cuotas-online-status" role="status" aria-live="polite">
+          <i></i>
+          <span>Operación normal</span>
+        </div>
+
+        <button id="exportReportButton" class="btn-secondary cuotas-export-top" type="button" onclick="exportExcel()">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3v12"></path>
+            <path d="m7 10 5 5 5-5"></path>
+            <path d="M5 21h14"></path>
+          </svg>
+          Exportar reporte
+        </button>
+      </div>
+    </div>
+
+    <section class="cuotas-hero">
+      <div class="cuotas-hero-copy">
+        <span class="cuotas-eyebrow">CONTROL MENSUAL</span>
+        <h1>Cuotas claras, comunidad al día.</h1>
+        <p>
+          Revisa pagos, identifica pendientes y administra cada movimiento
+          del fraccionamiento desde una sola vista.
+        </p>
+      </div>
+
+      <div class="cuotas-period-card">
+        <div class="cuotas-period-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="16" rx="3"></rect>
+            <path d="M8 3v4M16 3v4M3 10h18"></path>
+          </svg>
+        </div>
+        <div>
+          <span>Periodo activo</span>
+          <strong id="periodoCuotasHero">Periodo actual</strong>
+        </div>
+      </div>
+    </section>
+
+    <nav class="cuotas-primary-tabs" aria-label="Secciones de cuotas">
+      <a class="active" href="cuotas.html" aria-current="page">Cuotas</a>
+      <a href="analisis-cuotas.html" data-roles="SUPER_ADMIN,ADMINISTRADOR">Análisis</a>
+    </nav>
+
+    <section class="cuotas-metrics-section">
+      <div class="cuotas-metrics-grid">
+        <article class="cuotas-metric cuotas-metric-homes">
+          <div class="cuotas-metric-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m3 10 9-7 9 7v10H3Z"></path>
+              <path d="M9 20v-6h6v6"></path>
+            </svg>
+          </div>
+          <div class="cuotas-metric-content">
+            <small>Casas registradas</small>
+            <strong id="metricCasas">0</strong>
+            <span>Total en padrón</span>
+          </div>
+        </article>
+
+        <article class="cuotas-metric cuotas-metric-paid">
+          <div class="cuotas-metric-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+              <path d="M3 10h18M7 15h3"></path>
+            </svg>
+          </div>
+          <div class="cuotas-metric-content">
+            <small>Pagadas</small>
+            <strong id="metricPagadas">0</strong>
+            <span>Cuotas al corriente</span>
+          </div>
+        </article>
+
+        <article class="cuotas-metric cuotas-metric-pending">
+          <div class="cuotas-metric-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3 3.5 7.5v9L12 21l8.5-4.5v-9Z"></path>
+              <path d="M12 8v5M12 16h.01"></path>
+            </svg>
+          </div>
+          <div class="cuotas-metric-content">
+            <small>Pendientes</small>
+            <strong id="metricPendientes">0</strong>
+            <span>Requieren seguimiento</span>
+          </div>
+        </article>
+
+        <article class="cuotas-metric cuotas-metric-income">
+          <div class="cuotas-metric-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path>
+            </svg>
+          </div>
+          <div class="cuotas-metric-content">
+            <small>Monto recaudado</small>
+            <strong id="metricIngresos">$0</strong>
+            <span>Pagos registrados</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="cuotas-filter-section">
+      <div class="cuotas-section-heading">
+        <div>
+          <span class="cuotas-eyebrow">CONSULTA RÁPIDA</span>
+          <h2>Encuentra una cuota</h2>
+          <p>Busca por residente, casa, calle o estado de pago.</p>
+        </div>
+      </div>
+
+      <div class="cuotas-filter-card">
+        <div class="filters cuotas-filters">
+          <div class="cuotas-filter-search">
+            <label for="filterText">Buscar residente, correo o teléfono</label>
+            <div class="cuotas-input-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="6"></circle>
+                <path d="m16 16 5 5"></path>
+              </svg>
+              <input id="filterText" placeholder="Ej. Juan Pérez" oninput="aplicarFiltros()">
+            </div>
+          </div>
+
+          <div>
+            <label for="filterStreet">Calle</label>
+            <select id="filterStreet" onchange="aplicarFiltros()">
+              <option value="">Todas las calles</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filterHouse">Número de casa</label>
+            <input id="filterHouse" placeholder="Ej. 12" inputmode="numeric" oninput="aplicarFiltros()">
+          </div>
+
+          <div>
+            <label for="filterStatus">Estatus</label>
+            <select id="filterStatus" onchange="aplicarFiltros()">
+              <option value="">Todos los estados</option>
+              <option value="Pagado">Pagado</option>
+              <option value="Pago parcial">Pago parcial</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Cancelado">Cancelado</option>
+              <option value="Condonado">Condonado</option>
+            </select>
+          </div>
+
+          <button class="btn-secondary cuotas-clear-button" type="button" onclick="clearFilters()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 4v5h5"></path>
+              <path d="M20 20v-5h-5"></path>
+              <path d="M6.3 9a7 7 0 0 1 11.4-2.5L20 9"></path>
+              <path d="M17.7 15a7 7 0 0 1-11.4 2.5L4 15"></path>
+            </svg>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <section class="cuotas-table-section">
+      <div class="cuotas-table-heading">
+        <div>
+          <span class="cuotas-eyebrow">REGISTRO OPERATIVO</span>
+          <h2>Tabla de cuotas</h2>
+          <p id="periodoCuotasLabel">Periodo actual</p>
+        </div>
+
+        <div class="actions cuotas-actions">
+          <input id="excelInput" type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(event)">
+
+          <button id="bulkReceiptButton" class="btn-secondary" type="button"
+            data-roles="SUPER_ADMIN,ADMINISTRADOR,MESA_DIRECTIVA" onclick="abrirModalRecibos()" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 4h16v16H4z"></path>
+              <path d="m4 7 8 6 8-6"></path>
+            </svg>
+            Enviar recibos de pago
+          </button>
+
+          <button id="importExcelButton" class="btn-secondary" type="button" data-roles="SUPER_ADMIN,ADMINISTRADOR"
+            onclick="document.getElementById('excelInput').click()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 21V9"></path>
+              <path d="m7 14 5-5 5 5"></path>
+              <path d="M5 3h14v18H5z"></path>
+            </svg>
+            Importar Excel
+          </button>
+
+          <button id="editTableButton" class="btn-edit-table" type="button" onclick="alternarModoEdicion()"
+            data-roles="SUPER_ADMIN,ADMINISTRADOR,MESA_DIRECTIVA">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m4 20 4.5-1 10-10a2.1 2.1 0 0 0-3-3l-10 10Z"></path>
+              <path d="m14 7 3 3"></path>
+            </svg>
+            Editar tabla
+          </button>
+
+          <button id="saveNowButton" class="btn-secondary" type="button"
+            data-roles="SUPER_ADMIN,ADMINISTRADOR,MESA_DIRECTIVA" onclick="guardarCambiosPendientes({ manual: true })"
+            disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 3h12l2 2v16H5z"></path>
+              <path d="M8 3v6h8V3M8 21v-7h8v7"></path>
+            </svg>
+            Guardar ahora
+          </button>
+
+          <button id="addQuotaButton" class="btn-primary" type="button" data-roles="SUPER_ADMIN,ADMINISTRADOR"
+            onclick="abrirModalNuevaCuota()">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14"></path>
+            </svg>
+            Agregar cuota
+          </button>
+        </div>
+      </div>
+
+      <div class="cuotas-table-card">
+        <div class="table-wrap">
+          <table id="cuotasTable" class="cuotas-table">
+            <thead>
+              <tr>
+                <th>Año</th>
+                <th>Mes</th>
+                <th>Casa</th>
+                <th>Calle</th>
+                <th>Nombre</th>
+                <th>Monto</th>
+                <th>Forma de Pago</th>
+                <th>Referencia</th>
+                <th>Fecha de Pago</th>
+                <th>Estatus</th>
+                <th>Folio</th>
+                <th>Recibo PDF</th>
+                <th>Enviado (Sí/No)</th>
+                <th>Email</th>
+                <th>Eliminar</th>
+              </tr>
+            </thead>
+            <tbody id="housesTable"></tbody>
+          </table>
+        </div>
+
+        <div class="table-pagination">
+          <div id="paginationInfo" class="pagination-info">Mostrando 0 cuotas</div>
+
+          <div class="pagination-controls" role="navigation" aria-label="Paginación de cuotas">
+            <button type="button" class="pagination-arrow" id="previousPageButton" onclick="previousPage()"
+              aria-label="Ir a la página anterior" title="Página anterior">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6"></path>
+              </svg>
+            </button>
+
+            <div id="paginationPages" class="pagination-pages"></div>
+
+            <button type="button" class="pagination-arrow" id="nextPageButton" onclick="nextPage()"
+              aria-label="Ir a la página siguiente" title="Página siguiente">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 18l6-6-6-6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="cuotas-footer">
+      <div>Misión Jardines Residencial · Zapopan, Jalisco</div>
+      <div class="powered-by">
+        Plataforma desarrollada por
+        <a href="https://listoenlinea.com" target="_blank" rel="noopener noreferrer">
+          ListoEnLinea.com
+        </a>
+      </div>
+    </footer>
+  </main>
+
+  <div id="receiptContainer" class="receipt-hidden"></div>
+  <div id="toast" class="toast"></div>
+
+  <div id="newQuotaModal" class="edit-modal" hidden aria-hidden="true">
+    <div class="edit-modal-backdrop" onclick="cerrarModalNuevaCuota()"></div>
+
+    <div class="edit-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="newQuotaTitle">
+      <div class="edit-modal-icon">➕</div>
+      <h3 id="newQuotaTitle">Agregar cuota</h3>
+      <p>Selecciona una casa del padrón y registra el periodo de la nueva cuota.</p>
+
+      <div class="form-grid" style="margin-top:18px;text-align:left;">
+        <div class="two">
+          <div>
+            <label for="newQuotaStreet">Calle</label>
+            <select id="newQuotaStreet" onchange="llenarNumerosCasas()">
+              <option value="">Selecciona una calle</option>
+            </select>
+          </div>
+          <div>
+            <label for="newQuotaHouse">Número de casa</label>
+            <select id="newQuotaHouse" disabled>
+              <option value="">Primero selecciona una calle</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="two">
+          <div>
+            <label for="newQuotaYear">Año</label>
+            <input id="newQuotaYear" type="number" min="2000" max="2100" step="1" value="2026">
+          </div>
+
+          <div>
+            <label for="newQuotaMonth">Mes</label>
+            <select id="newQuotaMonth"></select>
+          </div>
+        </div>
+
+        <div>
+          <label for="newQuotaAmount">Monto de la cuota</label>
+          <input id="newQuotaAmount" type="number" min="0" step="1" inputmode="numeric" placeholder="Ej. 850">
+        </div>
+
+        <div>
+          <label for="newQuotaObservations">Observaciones</label>
+          <textarea id="newQuotaObservations" placeholder="Opcional"></textarea>
+        </div>
+      </div>
+
+      <div class="edit-modal-actions" style="margin-top:20px;">
+        <button type="button" class="btn-secondary" onclick="cerrarModalNuevaCuota()">Cancelar</button>
+        <button id="createQuotaButton" type="button" class="btn-primary" onclick="crearNuevaCuota()">Crear
+          cuota</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="saveChangesModal" class="edit-modal" hidden aria-hidden="true">
+    <div class="edit-modal-backdrop" onclick="cerrarModalGuardado()"></div>
+
+    <div class="edit-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="saveChangesTitle">
+      <div class="edit-modal-icon">💾</div>
+      <h3 id="saveChangesTitle">¿Guardar los cambios?</h3>
+      <p id="saveChangesDescription">Los cambios realizados se guardarán en la base de datos.</p>
+      <div id="saveChangesSummary" class="edit-modal-summary"></div>
+
+      <div class="edit-modal-actions">
+        <button type="button" class="btn-secondary" onclick="cerrarModalGuardado()">Seguir editando</button>
+        <button type="button" class="btn-discard" onclick="descartarCambios()">Descartar cambios</button>
+        <button id="confirmSaveChangesButton" type="button" class="btn-primary"
+          onclick="guardarCambiosPendientes({ manual: true })">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="bulkReceiptModal" class="edit-modal cuotas-feature-modal" hidden aria-hidden="true">
+    <div class="edit-modal-backdrop" onclick="cerrarModalRecibos()"></div>
+    <div class="edit-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="bulkReceiptTitle">
+      <div class="feature-modal-header">
+        <div>
+          <span class="feature-modal-eyebrow">COBRANZA CONFIRMADA</span>
+          <h3 id="bulkReceiptTitle">Enviar recibos de pago</h3>
+          <p>Selecciona las viviendas pagadas que recibirán su comprobante oficial.</p>
+        </div>
+        <button class="feature-modal-close" type="button" onclick="cerrarModalRecibos()" aria-label="Cerrar">×</button>
+      </div>
+      <div class="feature-modal-body">
+        <div class="receipt-summary-grid">
+          <div class="receipt-summary-card"><span>Cuotas pagadas</span><strong id="receiptPaidCount">0</strong></div>
+          <div class="receipt-summary-card"><span>Con correo disponible</span><strong id="receiptEmailCount">0</strong>
+          </div>
+          <div class="receipt-summary-card"><span>Enviadas anteriormente</span><strong id="receiptSentCount">0</strong>
+          </div>
+        </div>
+        <div class="receipt-list-wrap">
+          <table class="receipt-list">
+            <thead>
+              <tr>
+                <th><input id="receiptSelectAll" type="checkbox" onchange="seleccionarTodosRecibos(this.checked)"
+                    checked></th>
+                <th>Casa</th>
+                <th>Residente</th>
+                <th>Correo</th>
+                <th>Folio</th>
+                <th>Último envío</th>
+              </tr>
+            </thead>
+            <tbody id="receiptRecipientsBody"></tbody>
+          </table>
+        </div>
+        <div class="feature-modal-actions">
+          <span id="receiptSendProgress" class="feature-modal-progress">Selecciona los recibos que deseas enviar.</span>
+          <button type="button" class="btn-secondary" onclick="cerrarModalRecibos()">Cancelar</button>
+          <button id="sendSelectedReceiptsButton" type="button" class="btn-primary"
+            onclick="enviarRecibosSeleccionados()">
+            Enviar seleccionados
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="analyticsModal" class="edit-modal cuotas-feature-modal" hidden aria-hidden="true">
+    <div class="edit-modal-backdrop" onclick="cerrarModalAnalisis()"></div>
+    <div class="edit-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="analyticsTitle">
+      <div class="feature-modal-header">
+        <div>
+          <span class="feature-modal-eyebrow">PANORAMA DE COBRANZA</span>
+          <h3 id="analyticsTitle">Análisis de cumplimiento</h3>
+          <p id="analyticsPeriodLabel">Consulta visual del periodo activo.</p>
+        </div>
+        <button class="feature-modal-close" type="button" onclick="cerrarModalAnalisis()" aria-label="Cerrar">×</button>
+      </div>
+      <div class="feature-modal-body">
+        <div class="analytics-tabs" role="tablist" aria-label="Gráficas de cumplimiento">
+          <button id="analyticsGeneralTab" class="analytics-tab active" type="button" role="tab" aria-selected="true"
+            onclick="mostrarPestanaAnalisis('general')">Cumplimiento de cuotas</button>
+          <button id="analyticsStreetTab" class="analytics-tab" type="button" role="tab" aria-selected="false"
+            onclick="mostrarPestanaAnalisis('calles')">Cumplimiento por calle</button>
+        </div>
+        <div id="analyticsGeneralPanel" class="analytics-panel" role="tabpanel">
+          <img id="analyticsGeneralImage" alt="Gráfica de cumplimiento de cuotas">
+        </div>
+        <div id="analyticsStreetPanel" class="analytics-panel" role="tabpanel" hidden>
+          <img id="analyticsStreetImage" alt="Gráfica de cumplimiento por calle">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'https://demo.invalid/api';
+    const MEXICO_TIME_ZONE = 'America/Mexico_City';
+
+    const token =
+      localStorage.getItem('misionJardinesToken') ||
+      sessionStorage.getItem('misionJardinesToken');
+
+    const MESES = [
+      'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+      'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+    ];
+
+    let cuotas = [];
+    let casas = [];
+    let usuarioActual = null;
+    let paginaActual = 1;
+    let registrosPorPagina = 5;
+    let modoEdicion = false;
+    let cambiosPendientes = {};
+    let cuotasNuevasPendientes = [];
+    let guardandoCambios = false;
+    let enviandoRecibos = false;
+    let temporizadorBorrador = null;
+    let intervaloAutoguardado = null;
+    const fechaPeriodoActual = new Intl.DateTimeFormat('en-US', { timeZone: MEXICO_TIME_ZONE, year: 'numeric', month: 'numeric' }).formatToParts(new Date());
+    let anioConsulta = Number(fechaPeriodoActual.find(p => p.type === 'year').value);
+    let mesConsulta = MESES[Number(fechaPeriodoActual.find(p => p.type === 'month').value) - 1];
+
+    if (!token) {
+      window.location.replace('login.html');
+    }
+
+    function authHeaders(includeJson = false) {
+      const headers = {
+        Authorization: `Bearer ${token}`
+      };
+
+      if (includeJson) {
+        headers['Content-Type'] = 'application/json';
+      }
+
+      return headers;
+    }
+
+    async function apiRequest(url, options = {}) {
+      const response = await fetch(url, options);
+      let result;
+
+      try {
+        result = await response.json();
+      } catch {
+        result = { ok: false, message: 'El servidor devolvió una respuesta inválida' };
+      }
+
+      if (response.status === 401) {
+        localStorage.removeItem('misionJardinesToken');
+        localStorage.removeItem('misionJardinesUsuario');
+        sessionStorage.removeItem('misionJardinesToken');
+        sessionStorage.removeItem('misionJardinesUsuario');
+        window.location.replace('login.html');
+        throw new Error('La sesión expiró');
+      }
+
+      if (!response.ok || !result.ok) {
+        throw new Error(result.message || 'No fue posible completar la solicitud');
+      }
+
+      return result;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function normalizarTexto(value) {
+      return String(value ?? '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .trim()
+        .toUpperCase();
+    }
+
+    function money(value) {
+      return Number(value || 0).toLocaleString('es-MX', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function formatDate(value) {
+      if (!value) return '';
+      return window.MJDateDisplay.format(value);
+    }
+
+    function formatDateForInput(value) {
+      if (!value) return '';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const parts = Object.fromEntries(
+        new Intl.DateTimeFormat('en-CA', {
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          timeZone: MEXICO_TIME_ZONE
+        }).formatToParts(date).map(({ type, value: part }) => [type, part])
+      );
+      return `${parts.year}-${parts.month}-${parts.day}`;
+    }
+
+    function obtenerOpcionesMeses(mesActual) {
+      return MESES
+        .map(mes => `<option value="${mes}" ${mes === mesActual ? 'selected' : ''}>${mes}</option>`)
+        .join('');
+    }
+
+    function obtenerOpcionesFormaPago(formaActual) {
+      const formasPago = [
+        { value: '', label: 'Seleccionar' },
+        { value: 'EFECTIVO', label: 'Efectivo' },
+        { value: 'TRANSFERENCIA', label: 'Transferencia' },
+        { value: 'DEPOSITO', label: 'Depósito' },
+        { value: 'TARJETA', label: 'Tarjeta' },
+        { value: 'CHEQUE', label: 'Cheque' },
+        { value: 'OTRO', label: 'Otro' }
+      ];
+      return formasPago
+        .map(forma => `<option value="${forma.value}" ${forma.value === (formaActual || '') ? 'selected' : ''}>${forma.label}</option>`)
+        .join('');
+    }
+
+    function obtenerOpcionesEstatus(estatusActual) {
+      const estatus = [
+        { value: 'PENDIENTE', label: 'Pendiente' },
+        { value: 'PAGO_PARCIAL', label: 'Pago parcial' },
+        { value: 'PAGADO', label: 'Pagado' },
+        { value: 'CANCELADO', label: 'Cancelado' },
+        { value: 'CONDONADO', label: 'Condonado' }
+      ];
+      return estatus
+        .map(item => `<option value="${item.value}" ${item.value === estatusActual ? 'selected' : ''}>${item.label}</option>`)
+        .join('');
+    }
+
+    function statusLabel(status) {
+      const labels = {
+        PENDIENTE: 'Pendiente',
+        PAGO_PARCIAL: 'Pago parcial',
+        PAGADO: 'Pagado',
+        CANCELADO: 'Cancelado',
+        CONDONADO: 'Condonado'
+      };
+      return labels[status] || status;
+    }
+
+    function getStatusClass(status) {
+      return status === 'PAGADO' ? 'paid' : 'pending';
+    }
+
+    function obtenerTextoEnviado(cuota) {
+      return cuota.correoEnviado ? 'Sí' : 'No';
+    }
+
+    function rolActual() {
+      return usuarioActual?.rol?.nombre || '';
+    }
+
+    function esRolAdministrativo() {
+      return ['SUPER_ADMIN', 'ADMINISTRADOR', 'MESA_DIRECTIVA'].includes(rolActual());
+    }
+
+    function puedeCrearCuotas() {
+      return ['SUPER_ADMIN', 'ADMINISTRADOR'].includes(rolActual());
+    }
+
+    function puedeEliminarCuotas() {
+      return ['SUPER_ADMIN', 'ADMINISTRADOR'].includes(rolActual());
+    }
+
+    function obtenerPropietario(cuota) {
+      if (cuota.nombrePagador) return cuota.nombrePagador;
+      const condominos = cuota.casa?.condominos || [];
+      const nombresCondominos = condominos
+        .map(condomino => condomino.nombreCompleto)
+        .filter(Boolean);
+      if (nombresCondominos.length) return nombresCondominos.join(' / ');
+      const usuarios = cuota.casa?.usuarios || [];
+      const principal = usuarios.find(usuario => usuario.esContactoPrincipal) || usuarios[0];
+      if (!principal) return '';
+      return [principal.nombre, principal.apellidoPaterno, principal.apellidoMaterno]
+        .filter(Boolean).join(' ');
+    }
+
+    function obtenerCorreo(cuota) {
+      if (cuota.correoDestino) return cuota.correoDestino;
+      const condominos = cuota.casa?.condominos || [];
+      const condominoContacto = condominos.find(condomino => condomino.correo);
+      if (condominoContacto?.correo) return condominoContacto.correo;
+      const usuarios = cuota.casa?.usuarios || [];
+      const contacto =
+        usuarios.find(usuario => usuario.esContactoPrincipal && usuario.recibeCorreosPago) ||
+        usuarios.find(usuario => usuario.recibeCorreosPago) ||
+        usuarios.find(usuario => usuario.esContactoPrincipal) ||
+        usuarios[0];
+      return contacto?.correo || cuota.casa?.correo || '';
+    }
+
+    function obtenerTelefono(cuota) {
+      const condominos = cuota.casa?.condominos || [];
+      const condominoContacto = condominos.find(condomino => condomino.telefono);
+      if (condominoContacto?.telefono) return condominoContacto.telefono;
+      const usuarios = cuota.casa?.usuarios || [];
+      const contacto = usuarios.find(usuario => usuario.esContactoPrincipal) || usuarios[0];
+      return contacto?.telefono || cuota.casa?.telefono || cuota.casa?.telefonoPrincipal || '';
+    }
+
+    function obtenerTextoCondominos(cuota) {
+      return (cuota.casa?.condominos || [])
+        .flatMap(condomino => [
+          condomino.nombreCompleto,
+          condomino.correo,
+          condomino.telefono
+        ])
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+    }
+
+    async function validarSesion() {
+      const result = await apiRequest(`${API_BASE_URL}/auth/perfil`, {
+        headers: authHeaders()
+      });
+      usuarioActual = result.usuario;
+      aplicarPermisosVisuales(rolActual());
+    }
+
+    function aplicarPermisosVisuales(rol) {
+      document.querySelectorAll('[data-roles]').forEach(elemento => {
+        const permitidos = elemento.dataset.roles.split(',').map(item => item.trim());
+        elemento.hidden = !permitidos.includes(rol);
+      });
+    }
+
+    async function cargarCasas() {
+      if (!puedeCrearCuotas()) {
+        casas = [];
+        return;
+      }
+      const result = await apiRequest(`${API_BASE_URL}/casas`, { headers: authHeaders() });
+      casas = result.casas || [];
+      llenarSelectCasas();
+    }
+
+    function llenarSelectCasas() {
+      const streetSelect = document.getElementById('newQuotaStreet');
+      if (!streetSelect) return;
+      const calles = [...new Set(casas.map(casa => String(casa.calleCorrecta || casa.calle || '').trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+      streetSelect.innerHTML = '<option value="">Selecciona una calle</option>' +
+        calles.map(calle => `<option value="${escapeHtml(calle)}">${escapeHtml(calle)}</option>`).join('');
+      llenarNumerosCasas();
+    }
+
+    function llenarNumerosCasas() {
+      const street = document.getElementById('newQuotaStreet')?.value || '';
+      const houseSelect = document.getElementById('newQuotaHouse');
+      if (!houseSelect) return;
+      const disponibles = casas
+        .filter(casa => String(casa.calleCorrecta || casa.calle || '') === street)
+        .sort((a, b) => String(a.numero || '').localeCompare(String(b.numero || ''), 'es', { numeric: true }));
+      houseSelect.disabled = !street;
+      houseSelect.innerHTML = street
+        ? '<option value="">Selecciona un número</option>' +
+          disponibles.map(casa => `<option value="${Number(casa.id)}">${escapeHtml(casa.numero || 'S/N')}</option>`).join('')
+        : '<option value="">Primero selecciona una calle</option>';
+    }
+
+    async function cargarCuotas() {
+      const result = await apiRequest(
+        `${API_BASE_URL}/cuotas?anio=${anioConsulta}&mes=${encodeURIComponent(mesConsulta)}`,
+        { headers: authHeaders() }
+      );
+      cuotas = result.data || [];
+      if (!modoEdicion) cambiosPendientes = {};
+      const periodo = document.getElementById('periodoCuotasLabel');
+      if (periodo) periodo.textContent = `Periodo: ${mesConsulta} ${anioConsulta}`;
+      llenarFiltroCalles();
+      paginaActual = Math.min(paginaActual, Math.max(1, Math.ceil(cuotas.length / registrosPorPagina)));
+      renderHouses();
+      actualizarEstadoBotonEdicion();
+    }
+
+    function llenarFiltroCalles() {
+      const select = document.getElementById('filterStreet');
+      const valorActual = select.value;
+      const calles = [...new Set(
+        cuotas.map(cuota => cuota.casa?.calleCorrecta || cuota.calleSnapshot || cuota.casa?.calle).filter(Boolean)
+      )].sort((a, b) => a.localeCompare(b, 'es'));
+      select.innerHTML = '<option value="">Todas las calles</option>' +
+        calles.map(calle => `<option value="${escapeHtml(calle)}">${escapeHtml(calle)}</option>`).join('');
+      select.value = valorActual;
+    }
+
+    function getFilteredHouses() {
+      const text = document.getElementById('filterText').value.toLowerCase().trim();
+      const house = document.getElementById('filterHouse').value.toLowerCase().trim();
+      const street = document.getElementById('filterStreet').value;
+      const status = document.getElementById('filterStatus').value;
+      return cuotas.filter(cuota => {
+        const propietario = obtenerPropietario(cuota);
+        const correo = obtenerCorreo(cuota);
+        const telefono = obtenerTelefono(cuota);
+        const textoCondominos = obtenerTextoCondominos(cuota);
+        const numero = cuota.numeroCasaSnapshot || cuota.casa?.numero || '';
+        const calle = cuota.casa?.calleCorrecta || cuota.calleSnapshot || cuota.casa?.calle || '';
+        const estatus = statusLabel(cuota.estatusPago);
+        const matchText = !text || propietario.toLowerCase().includes(text) ||
+          correo.toLowerCase().includes(text) || telefono.toLowerCase().includes(text) ||
+          textoCondominos.includes(text);
+        const matchHouse = !house || String(numero).toLowerCase().includes(house);
+        const matchStreet = !street || calle === street;
+        const matchStatus = !status || estatus === status;
+        return matchText && matchHouse && matchStreet && matchStatus;
+      }).sort((a,b) => String(a.casa?.calleCorrecta || a.calleSnapshot || a.casa?.calle || '').localeCompare(String(b.casa?.calleCorrecta || b.calleSnapshot || b.casa?.calle || ''),'es-MX',{numeric:true,sensitivity:'base'}) || String(a.numeroCasaSnapshot || a.casa?.numero || '').localeCompare(String(b.numeroCasaSnapshot || b.casa?.numero || ''),'es-MX',{numeric:true}));
+    }
+
+    function aplicarFiltros() {
+      paginaActual = 1;
+      renderHouses();
+    }
+
+    function obtenerDatosPaginados() {
+      const datosFiltrados = getFilteredHouses();
+      const totalRegistros = datosFiltrados.length;
+      const totalPaginas = Math.max(1, Math.ceil(totalRegistros / registrosPorPagina));
+      if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+      const inicio = (paginaActual - 1) * registrosPorPagina;
+      const fin = inicio + registrosPorPagina;
+      return {
+        datosFiltrados,
+        registrosPagina: datosFiltrados.slice(inicio, fin),
+        totalRegistros,
+        totalPaginas,
+        inicio,
+        fin
+      };
+    }
+
+    function previousPage() {
+      if (paginaActual <= 1) return;
+      paginaActual -= 1;
+      renderHouses();
+      desplazarATabla();
+    }
+
+    function nextPage() {
+      const { totalPaginas } = obtenerDatosPaginados();
+      if (paginaActual >= totalPaginas) return;
+      paginaActual += 1;
+      renderHouses();
+      desplazarATabla();
+    }
+
+    function goToPage(page) {
+      const { totalPaginas } = obtenerDatosPaginados();
+      const nuevaPagina = Number(page);
+      if (!Number.isInteger(nuevaPagina) || nuevaPagina < 1 || nuevaPagina > totalPaginas || nuevaPagina === paginaActual) return;
+      paginaActual = nuevaPagina;
+      renderHouses();
+      desplazarATabla();
+    }
+
+    function desplazarATabla() {
+      const tableWrap = document.querySelector('.page-cuotas .table-wrap');
+      if (!tableWrap) return;
+      tableWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function obtenerPaginasVisibles(actual, totalPaginas) {
+      if (totalPaginas <= 7) return Array.from({ length: totalPaginas }, (_, index) => index + 1);
+      if (actual <= 4) return [1, 2, 3, 4, 5, '...', totalPaginas];
+      if (actual >= totalPaginas - 3) {
+        return [1, '...', totalPaginas - 4, totalPaginas - 3, totalPaginas - 2, totalPaginas - 1, totalPaginas];
+      }
+      return [1, '...', actual - 1, actual, actual + 1, '...', totalPaginas];
+    }
+
+    function renderPagination(totalRegistros, totalPaginas, inicio, fin) {
+      const paginationInfo = document.getElementById('paginationInfo');
+      const paginationPages = document.getElementById('paginationPages');
+      const previousButton = document.getElementById('previousPageButton');
+      const nextButton = document.getElementById('nextPageButton');
+      if (!paginationInfo || !paginationPages || !previousButton || !nextButton) return;
+      const primerRegistro = totalRegistros === 0 ? 0 : inicio + 1;
+      const ultimoRegistro = totalRegistros === 0 ? 0 : Math.min(fin, totalRegistros);
+      paginationInfo.textContent = totalRegistros === 0
+        ? 'No hay cuotas para mostrar'
+        : `Mostrando ${primerRegistro}–${ultimoRegistro} de ${totalRegistros} cuotas`;
+      previousButton.disabled = paginaActual <= 1 || totalRegistros === 0;
+      nextButton.disabled = paginaActual >= totalPaginas || totalRegistros === 0;
+      if (totalRegistros === 0) {
+        paginationPages.innerHTML = '';
+        return;
+      }
+      paginationPages.innerHTML = obtenerPaginasVisibles(paginaActual, totalPaginas)
+        .map(item => {
+          if (item === '...') return '<span class="pagination-ellipsis" aria-hidden="true">…</span>';
+          const activa = item === paginaActual;
+          return `<button type="button" class="pagination-page ${activa ? 'active' : ''}"
+            onclick="goToPage(${item})" aria-label="Ir a la página ${item}"
+            aria-current="${activa ? 'page' : 'false'}">${item}</button>`;
+        }).join('');
+    }
+
+    function obtenerCuotaPorId(cuotaId) {
+      return cuotas.find(cuota => Number(cuota.id) === Number(cuotaId));
+    }
+
+    function obtenerValorActual(cuotaId, campo) {
+      const cuota = obtenerCuotaPorId(cuotaId);
+      if (!cuota) return '';
+      if (Object.prototype.hasOwnProperty.call(cambiosPendientes[cuotaId] || {}, campo)) {
+        return cambiosPendientes[cuotaId][campo];
+      }
+      return cuota[campo];
+    }
+
+    function registrarCambio(cuotaId, campo, valor) {
+      const cuota = obtenerCuotaPorId(cuotaId);
+      if (!cuota) return;
+      if (!cambiosPendientes[cuotaId]) cambiosPendientes[cuotaId] = {};
+      cambiosPendientes[cuotaId][campo] = valor;
+      actualizarEstadoBotonEdicion();
+      programarGuardadoBorrador();
+    }
+
+    function registrarCambioTexto(cuotaId, campo, elemento) {
+      registrarCambio(cuotaId, campo, elemento.value.trim());
+    }
+
+    function registrarCambioSelect(cuotaId, campo, elemento) {
+      registrarCambio(cuotaId, campo, elemento.value || null);
+    }
+
+    function registrarCambioFecha(cuotaId, elemento) {
+      registrarCambio(cuotaId, 'fechaPago', elemento.value || null);
+    }
+
+    function registrarCambioEntero(cuotaId, campo, elemento) {
+      const valor = Number(elemento.value);
+      if (!Number.isInteger(valor) || valor < 0) {
+        showToast('El valor debe ser un número entero mayor o igual a cero.');
+        elemento.value = Math.round(Number(obtenerValorActual(cuotaId, campo) || 0));
+        return;
+      }
+      registrarCambio(cuotaId, campo, valor);
+    }
+
+    function cantidadCuotasModificadas() {
+      return Object.keys(cambiosPendientes)
+        .filter(cuotaId => Object.keys(cambiosPendientes[cuotaId]).length > 0).length;
+    }
+
+    function cantidadCamposModificados() {
+      return Object.values(cambiosPendientes)
+        .reduce((total, cambios) => total + Object.keys(cambios).length, 0);
+    }
+
+    function actualizarEstadoBotonEdicion() {
+      const boton = document.getElementById('editTableButton');
+      const guardar = document.getElementById('saveNowButton');
+      if (!boton) return;
+      const totalCambios = cantidadCamposModificados() + cuotasNuevasPendientes.length;
+      if (guardar) {
+        guardar.disabled = totalCambios === 0 || guardandoCambios;
+        guardar.textContent = guardandoCambios
+          ? 'Guardando...'
+          : totalCambios > 0 ? `Guardar ahora (${totalCambios})` : 'Guardar ahora';
+      }
+      if (!modoEdicion) {
+        boton.textContent = '✏️ Editar tabla';
+        boton.classList.remove('editing');
+        return;
+      }
+      boton.textContent = totalCambios > 0 ? `💾 Finalizar edición (${totalCambios})` : '✓ Finalizar edición';
+      boton.classList.add('editing');
+    }
+
+    function alternarModoEdicion() {
+      if (!esRolAdministrativo()) {
+        showToast('No tienes permisos para editar cuotas.');
+        return;
+      }
+      if (!modoEdicion) {
+        modoEdicion = true;
+        cambiosPendientes = {};
+        actualizarEstadoBotonEdicion();
+        renderHouses();
+        showToast('Modo edición activado.');
+        return;
+      }
+      if (cantidadCamposModificados() === 0) {
+        modoEdicion = false;
+        actualizarEstadoBotonEdicion();
+        renderHouses();
+        showToast('Modo edición desactivado.');
+        return;
+      }
+      abrirModalGuardado();
+    }
+
+    function mostrarModal(modal) {
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+      modal.classList.add('is-open');
+      modal.style.setProperty('display', 'flex', 'important');
+      document.body.classList.add('modal-open');
+    }
+
+    function ocultarModal(modal) {
+      modal.classList.remove('is-open');
+      modal.style.setProperty('display', 'none', 'important');
+      modal.setAttribute('aria-hidden', 'true');
+      modal.hidden = true;
+      document.body.classList.remove('modal-open');
+    }
+
+    function abrirModalGuardado() {
+      const modal = document.getElementById('saveChangesModal');
+      const resumen = document.getElementById('saveChangesSummary');
+      if (!modal || !resumen) {
+        showToast('No fue posible abrir la confirmación.');
+        return;
+      }
+      resumen.textContent = `Se modificarán ${cantidadCamposModificados()} campo(s) en ${cantidadCuotasModificadas()} cuota(s).`;
+      mostrarModal(modal);
+    }
+
+    function cerrarModalGuardado() {
+      const modal = document.getElementById('saveChangesModal');
+      if (modal) ocultarModal(modal);
+    }
+
+    function descartarCambios() {
+      cambiosPendientes = {};
+      cuotasNuevasPendientes = [];
+      modoEdicion = false;
+      eliminarBorradorLocal();
+      cerrarModalGuardado();
+      actualizarEstadoBotonEdicion();
+      renderHouses();
+      showToast('Los cambios fueron descartados.');
+    }
+
+    function obtenerCuotasPagadas() {
+      return cuotas.filter(cuota => cuota.estatusPago === 'PAGADO');
+    }
+
+    function actualizarBotonRecibos() {
+      const boton = document.getElementById('bulkReceiptButton');
+      if (!boton) return;
+      const total = obtenerCuotasPagadas().length;
+      boton.disabled = total === 0 || enviandoRecibos;
+      boton.title = total
+        ? `Enviar recibos de ${total} cuota(s) pagada(s)`
+        : 'Se habilitará cuando exista al menos una cuota pagada';
+    }
+
+    function abrirModalRecibos() {
+      if (!esRolAdministrativo()) {
+        showToast('No tienes permisos para enviar recibos.');
+        return;
+      }
+      const pagadas = obtenerCuotasPagadas();
+      if (!pagadas.length) {
+        showToast('Todavía no hay cuotas pagadas en este periodo.');
+        return;
+      }
+      const tbody = document.getElementById('receiptRecipientsBody');
+      document.getElementById('receiptPaidCount').textContent = pagadas.length;
+      document.getElementById('receiptEmailCount').textContent = pagadas.filter(obtenerCorreo).length;
+      document.getElementById('receiptSentCount').textContent = pagadas.filter(cuota => cuota.correoEnviado).length;
+      document.getElementById('receiptSelectAll').checked = true;
+      document.getElementById('receiptSendProgress').textContent =
+        `${pagadas.filter(obtenerCorreo).length} recibo(s) listos para enviar.`;
+      tbody.innerHTML = pagadas.map(cuota => {
+        const correo = obtenerCorreo(cuota);
+        const casa = cuota.numeroCasaSnapshot || cuota.casa?.numero || '';
+        return `<tr>
+          <td><input class="receipt-recipient-check" type="checkbox" value="${Number(cuota.id)}"
+            ${correo ? 'checked' : 'disabled'} aria-label="Seleccionar casa ${escapeHtml(casa)}"></td>
+          <td><strong>${escapeHtml(casa)}</strong><br><small>${escapeHtml(cuota.casa?.calleCorrecta || cuota.calleSnapshot || cuota.casa?.calle || '')}</small></td>
+          <td>${escapeHtml(obtenerPropietario(cuota))}</td>
+          <td class="${correo ? '' : 'receipt-email-missing'}">${escapeHtml(correo || 'Sin correo registrado')}</td>
+          <td>${escapeHtml(cuota.folio || 'Se generará al enviar')}</td>
+          <td>${cuota.fechaEnvioCorreo ? escapeHtml(formatDate(cuota.fechaEnvioCorreo)) : 'No enviado'}</td>
+        </tr>`;
+      }).join('');
+      actualizarContadorSeleccionados();
+      mostrarModal(document.getElementById('bulkReceiptModal'));
+    }
+
+    function cerrarModalRecibos() {
+      if (enviandoRecibos) return;
+      const modal = document.getElementById('bulkReceiptModal');
+      if (modal) ocultarModal(modal);
+    }
+
+    function seleccionarTodosRecibos(seleccionado) {
+      document.querySelectorAll('.receipt-recipient-check:not(:disabled)').forEach(checkbox => {
+        checkbox.checked = seleccionado;
+      });
+      actualizarContadorSeleccionados();
+    }
+
+    function obtenerIdsRecibosSeleccionados() {
+      return [...document.querySelectorAll('.receipt-recipient-check:checked:not(:disabled)')]
+        .map(checkbox => Number(checkbox.value))
+        .filter(Number.isInteger);
+    }
+
+    function actualizarContadorSeleccionados() {
+      const seleccionados = obtenerIdsRecibosSeleccionados().length;
+      const disponibles = document.querySelectorAll('.receipt-recipient-check:not(:disabled)').length;
+      const boton = document.getElementById('sendSelectedReceiptsButton');
+      const progreso = document.getElementById('receiptSendProgress');
+      if (boton) {
+        boton.disabled = seleccionados === 0 || enviandoRecibos;
+        boton.textContent = seleccionados === disponibles && disponibles > 0
+          ? `Enviar todos (${seleccionados})`
+          : seleccionados
+            ? `Enviar seleccionados (${seleccionados})`
+            : 'Selecciona al menos uno';
+      }
+      if (progreso && !enviandoRecibos) {
+        progreso.textContent = `${seleccionados} recibo(s) seleccionado(s).`;
+      }
+    }
+
+    document.addEventListener('change', event => {
+      if (event.target.classList?.contains('receipt-recipient-check')) {
+        actualizarContadorSeleccionados();
+      }
+    });
+
+    async function enviarRecibosSeleccionados() {
+      const ids = obtenerIdsRecibosSeleccionados();
+      if (!ids.length || enviandoRecibos) return;
+      const confirmacion = window.confirm(
+        `Se enviarán ${ids.length} recibo(s) por correo. Los comprobantes se regenerarán con su mismo folio. ¿Deseas continuar?`
+      );
+      if (!confirmacion) return;
+      enviandoRecibos = true;
+      const boton = document.getElementById('sendSelectedReceiptsButton');
+      const progreso = document.getElementById('receiptSendProgress');
+      boton.disabled = true;
+      boton.textContent = 'Enviando...';
+      progreso.textContent = 'Generando comprobantes y enviando correos. No cierres esta ventana.';
+      actualizarBotonRecibos();
+      try {
+        const tamanoLote = 10;
+        const resultados = [];
+
+        for (let inicio = 0; inicio < ids.length; inicio += tamanoLote) {
+          const lote = ids.slice(inicio, inicio + tamanoLote);
+          progreso.textContent =
+            `Procesando ${Math.min(inicio + lote.length, ids.length)} de ${ids.length} recibos...`;
+
+          const result = await apiRequest(`${API_BASE_URL}/cuotas/recibos/enviar-lote`, {
+            method: 'POST',
+            headers: authHeaders(true),
+            body: JSON.stringify({ ids: lote })
+          });
+
+          resultados.push(...(result.resultados || []));
+        }
+
+        const enviados = resultados.filter(item => item.enviado).length;
+        const fallidos = resultados.length - enviados;
+        progreso.textContent = `${enviados} enviado(s) · ${fallidos} pendiente(s).`;
+        showToast(`Proceso terminado: ${enviados} enviado(s) y ${fallidos} pendiente(s).`);
+        await cargarCuotas();
+        if (!fallidos) {
+          enviandoRecibos = false;
+          cerrarModalRecibos();
+        } else {
+          const errores = resultados
+            .filter(item => !item.enviado)
+            .map(item => `Cuota ${item.id}: ${item.motivo}`)
+            .slice(0, 10);
+          window.alert(`Algunos recibos requieren atención:\n\n${errores.join('\n')}`);
+        }
+      } catch (error) {
+        progreso.textContent = `El envío se detuvo: ${error.message}`;
+        showToast(`No fue posible enviar los recibos: ${error.message}`);
+      } finally {
+        enviandoRecibos = false;
+        actualizarBotonRecibos();
+        actualizarContadorSeleccionados();
+      }
+    }
+
+    function obtenerAnaliticaActual() {
+      const datos = getFilteredHouses();
+      const metricas = {
+        total: datos.length,
+        pagadas: datos.filter(cuota => cuota.estatusPago === 'PAGADO').length,
+        parciales: datos.filter(cuota => cuota.estatusPago === 'PAGO_PARCIAL').length,
+        pendientes: datos.filter(cuota => cuota.estatusPago === 'PENDIENTE').length,
+        condonadas: datos.filter(cuota => cuota.estatusPago === 'CONDONADO').length,
+        canceladas: datos.filter(cuota => cuota.estatusPago === 'CANCELADO').length
+      };
+      const exigibles = metricas.total - metricas.condonadas - metricas.canceladas;
+      metricas.cumplimiento = exigibles ? metricas.pagadas / exigibles : 0;
+      const calles = new Map();
+      datos.forEach(cuota => {
+        const calle = cuota.casa?.calleCorrecta || cuota.calleSnapshot || cuota.casa?.calle || 'Sin calle';
+        const actual = calles.get(calle) || { calle, total: 0, pagadas: 0 };
+        actual.total += 1;
+        actual.pagadas += cuota.estatusPago === 'PAGADO' ? 1 : 0;
+        calles.set(calle, actual);
+      });
+      const analisisCalles = [...calles.values()].map(item => ({
+        ...item,
+        cumplimiento: item.total ? item.pagadas / item.total : 0
+      }));
+      return { datos, metricas, analisisCalles };
+    }
+
+    function abrirModalAnalisis() {
+      const { datos, metricas, analisisCalles } = obtenerAnaliticaActual();
+      if (!datos.length) {
+        showToast('No hay cuotas para analizar con los filtros actuales.');
+        return;
+      }
+      document.getElementById('analyticsPeriodLabel').textContent =
+        `${mesConsulta} ${anioConsulta} · ${datos.length} cuota(s) según los filtros actuales`;
+      document.getElementById('analyticsGeneralImage').src = crearGraficaCumplimiento(metricas);
+      document.getElementById('analyticsStreetImage').src = crearGraficaCalles(analisisCalles);
+      mostrarPestanaAnalisis('general');
+      mostrarModal(document.getElementById('analyticsModal'));
+    }
+
+    function cerrarModalAnalisis() {
+      const modal = document.getElementById('analyticsModal');
+      if (modal) ocultarModal(modal);
+    }
+
+    function mostrarPestanaAnalisis(pestana) {
+      const general = pestana === 'general';
+      document.getElementById('analyticsGeneralPanel').hidden = !general;
+      document.getElementById('analyticsStreetPanel').hidden = general;
+      document.getElementById('analyticsGeneralTab').classList.toggle('active', general);
+      document.getElementById('analyticsStreetTab').classList.toggle('active', !general);
+      document.getElementById('analyticsGeneralTab').setAttribute('aria-selected', String(general));
+      document.getElementById('analyticsStreetTab').setAttribute('aria-selected', String(!general));
+    }
+
+    function claveBorrador() {
+      return `mision-jardines:cuotas:borrador:${usuarioActual?.id || 'sesion'}`;
+    }
+
+    function programarGuardadoBorrador() {
+      clearTimeout(temporizadorBorrador);
+      temporizadorBorrador = setTimeout(guardarBorradorLocal, 250);
+    }
+
+    function guardarBorradorLocal() {
+      const tieneCambios = cantidadCamposModificados() > 0 || cuotasNuevasPendientes.length > 0;
+      if (!tieneCambios) {
+        eliminarBorradorLocal();
+        return;
+      }
+      localStorage.setItem(claveBorrador(), JSON.stringify({
+        cambiosPendientes,
+        cuotasNuevasPendientes,
+        guardadoEn: new Date().toISOString()
+      }));
+      actualizarEstadoConexion();
+    }
+
+    function eliminarBorradorLocal() {
+      localStorage.removeItem(claveBorrador());
+    }
+
+    function restaurarBorradorLocal() {
+      const contenido = localStorage.getItem(claveBorrador());
+      if (!contenido) return false;
+      try {
+        const borrador = JSON.parse(contenido);
+        cambiosPendientes = borrador.cambiosPendientes || {};
+        cuotasNuevasPendientes = Array.isArray(borrador.cuotasNuevasPendientes)
+          ? borrador.cuotasNuevasPendientes : [];
+        if (cantidadCamposModificados() || cuotasNuevasPendientes.length) {
+          modoEdicion = true;
+          showToast('Recuperamos cambios que estaban pendientes de guardar.');
+          return true;
+        }
+      } catch (error) {
+        console.warn('No fue posible restaurar el borrador de cuotas:', error);
+        eliminarBorradorLocal();
+      }
+      return false;
+    }
+
+    function actualizarEstadoConexion(mensaje) {
+      const estado = document.getElementById('connectionStatus');
+      if (!estado) return;
+      const pendientes = cantidadCamposModificados() + cuotasNuevasPendientes.length;
+      estado.classList.toggle('is-offline', !navigator.onLine);
+      const texto = estado.querySelector('span');
+      if (texto) texto.textContent = mensaje || (!navigator.onLine
+        ? `Sin internet${pendientes ? ` · ${pendientes} pendiente(s)` : ''}`
+        : pendientes ? `${pendientes} cambio(s) sin guardar` : 'Operación normal');
+    }
+
+    async function sincronizarCuotasNuevas() {
+      while (cuotasNuevasPendientes.length) {
+        const pendiente = cuotasNuevasPendientes[0];
+        await apiRequest(`${API_BASE_URL}/cuotas`, {
+          method: 'POST', headers: authHeaders(true), body: JSON.stringify(pendiente)
+        });
+        cuotasNuevasPendientes.shift();
+        guardarBorradorLocal();
+      }
+    }
+
+    async function guardarCambiosPendientes(opciones = {}) {
+      const manual = Boolean(opciones.manual);
+      const boton = document.getElementById('confirmSaveChangesButton');
+      const cambios = Object.entries(cambiosPendientes)
+        .filter(([, campos]) => Object.keys(campos).length > 0);
+      if (!cambios.length && !cuotasNuevasPendientes.length) {
+        if (manual) cerrarModalGuardado();
+        if (manual) modoEdicion = false;
+        actualizarEstadoBotonEdicion();
+        renderHouses();
+        return;
+      }
+      if (guardandoCambios) return;
+      if (!navigator.onLine) {
+        guardarBorradorLocal();
+        cerrarModalGuardado();
+        showToast('Sin internet: los cambios quedaron protegidos en este dispositivo y se enviarán al reconectar.');
+        return;
+      }
+      guardandoCambios = true;
+      if (boton) {
+        boton.disabled = true;
+        boton.textContent = 'Guardando...';
+      }
+      actualizarEstadoBotonEdicion();
+      actualizarEstadoConexion('Guardando cambios...');
+      try {
+        await sincronizarCuotasNuevas();
+        if (cambios.length) {
+          await apiRequest(`${API_BASE_URL}/cuotas/lote`, {
+            method: 'PATCH', headers: authHeaders(true), body: JSON.stringify({
+              operaciones: cambios.map(([cuotaId, campos]) => ({
+                id: Number(cuotaId),
+                version: obtenerCuotaPorId(cuotaId)?.actualizadoEn || null,
+                cambios: campos
+              }))
+            })
+          });
+        }
+        cambiosPendientes = {};
+        eliminarBorradorLocal();
+        if (manual) modoEdicion = false;
+        if (manual) cerrarModalGuardado();
+        actualizarEstadoBotonEdicion();
+        await cargarCuotas();
+        showToast(manual ? 'Los cambios se guardaron correctamente.' : 'Autoguardado completado.');
+      } catch (error) {
+        guardarBorradorLocal();
+        showToast(`No fue posible guardar: ${error.message}`);
+        modoEdicion = true;
+        renderHouses();
+      } finally {
+        guardandoCambios = false;
+        if (boton) {
+          boton.disabled = false;
+          boton.textContent = 'Guardar cambios';
+        }
+        actualizarEstadoBotonEdicion();
+        actualizarEstadoConexion();
+      }
+    }
+
+    function renderHouses() {
+      const { registrosPagina, totalRegistros, totalPaginas, inicio, fin } = obtenerDatosPaginados();
+      const tbody = document.getElementById('housesTable');
+      const tabla = document.getElementById('cuotasTable');
+      if (tabla) tabla.classList.toggle('modo-edicion', modoEdicion);
+      tbody.innerHTML = '';
+      const administrativo = esRolAdministrativo();
+      if (!totalRegistros) {
+        tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;">No se encontraron cuotas.</td></tr>';
+        renderPagination(totalRegistros, totalPaginas, inicio, fin);
+        updateMetrics();
+        return;
+      }
+
+      registrosPagina.forEach(cuota => {
+        const tr = document.createElement('tr');
+        const casa = cuota.numeroCasaSnapshot || cuota.casa?.numero || '';
+        const calle = cuota.casa?.calleCorrecta || cuota.calleSnapshot || cuota.casa?.calle || '';
+        const nombre = obtenerPropietario(cuota);
+        const email = obtenerCorreo(cuota);
+        const pagada = cuota.estatusPago === 'PAGADO';
+        const camposDeshabilitados = !administrativo || !modoEdicion ? 'disabled' : '';
+        const eliminarDeshabilitado = !puedeEliminarCuotas() || !modoEdicion ? 'disabled' : '';
+        const reciboPdf = cuota.reciboPdfUrl
+          ? `<a class="btn-secondary" href="${escapeHtml(cuota.reciboPdfUrl)}" target="_blank" rel="noopener noreferrer">Ver PDF</a>`
+          : '<span>Sin PDF</span>';
+        const accionesCorreo = administrativo
+          ? `<div class="email-status-cell"><strong>${obtenerTextoEnviado(cuota)}</strong>
+             <button type="button" class="btn-secondary btn-receipt-row"
+               onclick="enviarReciboIndividual(${cuota.id})" ${pagada ? '' : 'disabled'}
+               title="${pagada ? 'Generar y enviar el recibo de esta cuota' : 'Disponible únicamente para cuotas pagadas'}">
+               Enviar recibo
+             </button></div>`
+          : `<strong>${obtenerTextoEnviado(cuota)}</strong>`;
+
+        tr.innerHTML = `
+          <td><input type="number" min="2000" max="2100" step="1" inputmode="numeric"
+            value="${Number(obtenerValorActual(cuota.id, 'anio') || cuota.anio)}" ${camposDeshabilitados}
+            onchange="registrarCambioEntero(${cuota.id}, 'anio', this)"></td>
+          <td><select ${camposDeshabilitados} onchange="registrarCambioSelect(${cuota.id}, 'mes', this)">
+            ${obtenerOpcionesMeses(obtenerValorActual(cuota.id, 'mes') || cuota.mes)}</select></td>
+          <td><input type="text" value="${escapeHtml(casa)}" disabled title="La casa proviene del padrón de viviendas"></td>
+          <td><input type="text" value="${escapeHtml(calle)}" disabled title="La calle proviene del padrón de viviendas"></td>
+          <td><input type="text" maxlength="250" value="${escapeHtml(obtenerValorActual(cuota.id, 'nombrePagador') ?? nombre)}"
+            ${camposDeshabilitados} onchange="registrarCambioTexto(${cuota.id}, 'nombrePagador', this)"></td>
+          <td><input type="number" min="0" step="1" inputmode="numeric"
+            value="${Math.round(Number(obtenerValorActual(cuota.id, 'montoPagado') ?? cuota.montoPagado ?? cuota.montoCuota ?? 0))}"
+            ${camposDeshabilitados} onchange="registrarCambioEntero(${cuota.id}, 'montoPagado', this)"></td>
+          <td><select ${camposDeshabilitados} onchange="registrarCambioSelect(${cuota.id}, 'formaPago', this)">
+            ${obtenerOpcionesFormaPago(obtenerValorActual(cuota.id, 'formaPago') ?? cuota.formaPago)}</select></td>
+          <td><input type="text" maxlength="150" value="${escapeHtml(obtenerValorActual(cuota.id, 'referencia') ?? cuota.referencia ?? '')}"
+            ${camposDeshabilitados} onchange="registrarCambioTexto(${cuota.id}, 'referencia', this)"></td>
+          <td><input type="date" value="${formatDateForInput(obtenerValorActual(cuota.id, 'fechaPago') ?? cuota.fechaPago)}"
+            ${camposDeshabilitados} onchange="registrarCambioFecha(${cuota.id}, this)"></td>
+          <td>${administrativo
+            ? `<select class="status-select ${getStatusClass(cuota.estatusPago)}" ${camposDeshabilitados}
+                onchange="cambiarEstatus(${cuota.id}, this.value)">${obtenerOpcionesEstatus(cuota.estatusPago)}</select>`
+            : `<span class="status-select ${getStatusClass(cuota.estatusPago)}">${escapeHtml(statusLabel(cuota.estatusPago))}</span>`}</td>
+          <td><input type="text" value="${escapeHtml(cuota.folio || '')}" disabled title="El folio se genera automáticamente"></td>
+          <td>${reciboPdf}</td>
+          <td>${accionesCorreo}</td>
+          <td><input type="email" maxlength="150" value="${escapeHtml(obtenerValorActual(cuota.id, 'correoDestino') ?? email)}"
+            ${camposDeshabilitados} onchange="registrarCambioTexto(${cuota.id}, 'correoDestino', this)"></td>
+          <td>${puedeEliminarCuotas()
+            ? `<button type="button" class="btn-delete" onclick="eliminarCuota(${cuota.id})" title="Eliminar cuota" ${eliminarDeshabilitado}>Eliminar</button>`
+            : '—'}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      renderPagination(totalRegistros, totalPaginas, inicio, fin);
+      updateMetrics();
+    }
+
+    async function actualizarCampo(cuotaId, campo, valor) {
+      try {
+        await apiRequest(`${API_BASE_URL}/cuotas/${cuotaId}`, {
+          method: 'PATCH', headers: authHeaders(true), body: JSON.stringify({ [campo]: valor })
+        });
+        const cuota = cuotas.find(item => Number(item.id) === Number(cuotaId));
+        if (cuota) cuota[campo] = valor;
+        showToast('Información actualizada.');
+      } catch (error) {
+        showToast(`Error: ${error.message}`);
+        await cargarCuotas();
+      }
+    }
+
+    async function eliminarCuota(cuotaId) {
+      if (!puedeEliminarCuotas()) {
+        showToast('No tienes permisos para eliminar cuotas.');
+        return;
+      }
+      const cuota = cuotas.find(item => Number(item.id) === Number(cuotaId));
+      if (!cuota) {
+        showToast('No se encontró la cuota.');
+        return;
+      }
+      const casa = cuota.numeroCasaSnapshot || cuota.casa?.numero || '';
+      const confirmacion = window.confirm(
+        `¿Seguro que deseas eliminar la cuota de la casa ${casa}, correspondiente a ${cuota.mes} de ${cuota.anio}?`
+      );
+      if (!confirmacion) return;
+      try {
+        await apiRequest(`${API_BASE_URL}/cuotas/${cuotaId}`, { method: 'DELETE', headers: authHeaders() });
+        showToast('Cuota eliminada correctamente.');
+        await cargarCuotas();
+      } catch (error) {
+        showToast(`Error: ${error.message}`);
+      }
+    }
+
+    async function cambiarEstatus(cuotaId, estatus) {
+      if (!modoEdicion) {
+        showToast('Activa primero el modo edición.');
+        await cargarCuotas();
+        return;
+      }
+      if (estatus !== 'PAGADO') {
+        await actualizarCampo(cuotaId, 'estatusPago', estatus);
+        const cuota = cuotas.find(item => Number(item.id) === Number(cuotaId));
+        if (cuota) cuota.estatusPago = estatus;
+        renderHouses();
+        return;
+      }
+      const cuota = cuotas.find(item => Number(item.id) === Number(cuotaId));
+      if (!cuota) return;
+      const montoIngresado = prompt('Monto pagado:', Number(cuota.montoPagado || cuota.montoCuota || 0));
+      if (montoIngresado === null) { renderHouses(); return; }
+      const montoPagado = Number(montoIngresado);
+      if (!Number.isFinite(montoPagado) || montoPagado <= 0) {
+        showToast('Ingresa un monto válido.'); renderHouses(); return;
+      }
+      const formaPago = prompt(
+        'Forma de pago: EFECTIVO, TRANSFERENCIA, DEPOSITO, TARJETA, CHEQUE u OTRO',
+        cuota.formaPago || 'EFECTIVO'
+      );
+      if (formaPago === null) { renderHouses(); return; }
+      const formaNormalizada = formaPago.trim().toUpperCase();
+      const formasPermitidas = ['EFECTIVO', 'TRANSFERENCIA', 'DEPOSITO', 'TARJETA', 'CHEQUE', 'OTRO'];
+      if (!formasPermitidas.includes(formaNormalizada)) {
+        showToast('La forma de pago no es válida.'); renderHouses(); return;
+      }
+      const referencia = prompt('Referencia del pago:', cuota.referencia || '');
+      if (referencia === null) { renderHouses(); return; }
+      try {
+        showToast('Confirmando pago y generando recibo...');
+        const result = await apiRequest(`${API_BASE_URL}/cuotas/${cuotaId}/confirmar`, {
+          method: 'PATCH',
+          headers: authHeaders(true),
+          body: JSON.stringify({
+            montoPagado,
+            formaPago: formaNormalizada,
+            referencia: referencia.trim(),
+            correoDestino: obtenerCorreo(cuota),
+            nombrePagador: obtenerPropietario(cuota)
+          })
+        });
+        showToast(result.message);
+        await cargarCuotas();
+      } catch (error) {
+        showToast(`Error: ${error.message}`);
+        await cargarCuotas();
+      }
+    }
+
+    async function enviarReciboIndividual(cuotaId) {
+      const cuota = cuotas.find(item => Number(item.id) === Number(cuotaId));
+      if (!cuota || cuota.estatusPago !== 'PAGADO') {
+        showToast('El recibo solo puede enviarse cuando la cuota está pagada.');
+        return;
+      }
+      const correo = obtenerCorreo(cuota);
+      if (!correo) {
+        showToast('La vivienda no tiene un correo registrado. Agrégalo antes de enviar.');
+        return;
+      }
+      const confirmacion = window.confirm(
+        `Se enviará el recibo de la casa ${cuota.numeroCasaSnapshot || cuota.casa?.numero || ''} a ${correo}. ¿Deseas continuar?`
+      );
+      if (!confirmacion) return;
+      try {
+        showToast('Generando y enviando recibo...');
+        const result = await apiRequest(`${API_BASE_URL}/cuotas/${cuotaId}/reenviar`, {
+          method: 'POST', headers: authHeaders(true), body: JSON.stringify({ correoDestino: correo })
+        });
+        showToast(result.message);
+        await cargarCuotas();
+      } catch (error) {
+        showToast(`Error: ${error.message}`);
+      }
+    }
+
+    function updateMetrics() {
+      const total = cuotas.length;
+      const pagadas = cuotas.filter(cuota => cuota.estatusPago === 'PAGADO').length;
+      const pendientes = cuotas.filter(cuota => cuota.estatusPago === 'PENDIENTE').length;
+      const ingresos = cuotas.filter(cuota => cuota.estatusPago === 'PAGADO')
+        .reduce((totalIngresos, cuota) => totalIngresos + Number(cuota.montoPagado || 0), 0);
+      document.getElementById('metricCasas').textContent = total;
+      document.getElementById('metricPagadas').textContent = pagadas;
+      document.getElementById('metricPendientes').textContent = pendientes;
+      document.getElementById('metricIngresos').textContent = `$${money(ingresos)}`;
+      actualizarBotonRecibos();
+    }
+
+    function clearFilters() {
+      document.getElementById('filterText').value = '';
+      document.getElementById('filterHouse').value = '';
+      document.getElementById('filterStreet').value = '';
+      document.getElementById('filterStatus').value = '';
+      paginaActual = 1;
+      renderHouses();
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      clearTimeout(window.cuotasToastTimer);
+      window.cuotasToastTimer = setTimeout(() => { toast.style.display = 'none'; }, 4500);
+    }
+
+    function prepararFormularioNuevaCuota() {
+      document.getElementById('newQuotaYear').value = anioConsulta;
+      document.getElementById('newQuotaMonth').innerHTML = obtenerOpcionesMeses(mesConsulta);
+      document.getElementById('newQuotaAmount').value = '';
+      document.getElementById('newQuotaObservations').value = '';
+      document.getElementById('newQuotaStreet').value = '';
+      llenarNumerosCasas();
+    }
+
+    async function abrirModalNuevaCuota() {
+      if (!puedeCrearCuotas()) {
+        showToast('No tienes permisos para crear cuotas.');
+        return;
+      }
+      try {
+        if (!casas.length) await cargarCasas();
+        prepararFormularioNuevaCuota();
+        mostrarModal(document.getElementById('newQuotaModal'));
+      } catch (error) {
+        showToast(`No fue posible cargar el padrón: ${error.message}`);
+      }
+    }
+
+    function cerrarModalNuevaCuota() {
+      const modal = document.getElementById('newQuotaModal');
+      if (modal) ocultarModal(modal);
+    }
+
+    async function crearNuevaCuota() {
+      if (!puedeCrearCuotas()) {
+        showToast('No tienes permisos para crear cuotas.');
+        return;
+      }
+      const casaId = Number(document.getElementById('newQuotaHouse').value);
+      const anio = Number(document.getElementById('newQuotaYear').value);
+      const mes = normalizarTexto(document.getElementById('newQuotaMonth').value);
+      const montoCuota = Number(document.getElementById('newQuotaAmount').value);
+      const observaciones = document.getElementById('newQuotaObservations').value.trim();
+      const boton = document.getElementById('createQuotaButton');
+      if (!document.getElementById('newQuotaStreet').value) { showToast('Selecciona una calle.'); return; }
+      if (!casaId) { showToast('Selecciona el número de casa.'); return; }
+      if (!Number.isInteger(anio) || anio < 2000 || anio > 2100) { showToast('Ingresa un año válido.'); return; }
+      if (!MESES.includes(mes)) { showToast('Selecciona un mes válido.'); return; }
+      if (!Number.isFinite(montoCuota) || montoCuota < 0) { showToast('Ingresa un monto válido.'); return; }
+      boton.disabled = true;
+      boton.textContent = 'Creando...';
+      try {
+        const nuevaCuota = {
+          casaId, anio, mes, montoCuota,
+          observaciones: observaciones || null
+        };
+        if (!navigator.onLine) {
+          const repetida = cuotasNuevasPendientes.some(item =>
+            Number(item.casaId) === casaId && Number(item.anio) === anio && item.mes === mes
+          );
+          if (repetida) throw new Error('Esa cuota ya está en la cola de sincronización.');
+          cuotasNuevasPendientes.push(nuevaCuota);
+          guardarBorradorLocal();
+          cerrarModalNuevaCuota();
+          actualizarEstadoBotonEdicion();
+          showToast('Sin internet: la nueva cuota quedó en cola y se creará al reconectar.');
+          return;
+        }
+        await apiRequest(`${API_BASE_URL}/cuotas`, {
+          method: 'POST', headers: authHeaders(true),
+          body: JSON.stringify(nuevaCuota)
+        });
+        anioConsulta = anio;
+        mesConsulta = mes;
+        paginaActual = 1;
+        cerrarModalNuevaCuota();
+        await cargarCuotas();
+        showToast('Cuota creada correctamente.');
+      } catch (error) {
+        showToast(`No fue posible crear la cuota: ${error.message}`);
+      } finally {
+        boton.disabled = false;
+        boton.textContent = 'Crear cuota';
+      }
+    }
+
+    function colorArgb(hex) {
+      return `FF${String(hex).replace('#', '').toUpperCase()}`;
+    }
+
+    function estiloCeldaKpi(celda, colorFondo, colorTexto = '#27324A') {
+      celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb(colorFondo) } };
+      celda.font = { name: 'Aptos Display', size: 20, bold: true, color: { argb: colorArgb(colorTexto) } };
+      celda.alignment = { vertical: 'middle', horizontal: 'center' };
+      celda.border = {
+        top: { style: 'thin', color: { argb: colorArgb('#E3E7EF') } },
+        left: { style: 'thin', color: { argb: colorArgb('#E3E7EF') } },
+        bottom: { style: 'thin', color: { argb: colorArgb('#E3E7EF') } },
+        right: { style: 'thin', color: { argb: colorArgb('#E3E7EF') } }
+      };
+    }
+
+    function estilizarEncabezadoTabla(fila) {
+      fila.height = 25;
+      fila.eachCell(celda => {
+        celda.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#F28A2A') } };
+        celda.font = { name: 'Aptos', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+        celda.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+        celda.border = { bottom: { style: 'medium', color: { argb: colorArgb('#D96B0B') } } };
+      });
+    }
+
+    function crearGraficaCumplimiento(metricas) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 900;
+      canvas.height = 390;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#27324A';
+      ctx.font = '700 27px Arial';
+      ctx.fillText('Cumplimiento de cuotas', 34, 45);
+      ctx.fillStyle = '#7A8499';
+      ctx.font = '16px Arial';
+      ctx.fillText('Distribución del periodo exportado', 34, 72);
+
+      const valores = [metricas.pagadas, metricas.parciales, metricas.pendientes, metricas.condonadas, metricas.canceladas];
+      const colores = ['#40AE72', '#F1B94E', '#F28A2A', '#9B84BD', '#B8C0CE'];
+      const etiquetas = ['Pagadas', 'Pago parcial', 'Pendientes', 'Condonadas', 'Canceladas'];
+      const total = Math.max(valores.reduce((suma, valor) => suma + valor, 0), 1);
+      let angulo = -Math.PI / 2;
+      valores.forEach((valor, index) => {
+        if (!valor) return;
+        const siguiente = angulo + (valor / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.arc(205, 230, 112, angulo, siguiente);
+        ctx.arc(205, 230, 67, siguiente, angulo, true);
+        ctx.closePath();
+        ctx.fillStyle = colores[index];
+        ctx.fill();
+        angulo = siguiente;
+      });
+      ctx.fillStyle = '#27324A';
+      ctx.textAlign = 'center';
+      ctx.font = '700 32px Arial';
+      ctx.fillText(`${Math.round(metricas.cumplimiento * 100)}%`, 205, 226);
+      ctx.fillStyle = '#7A8499';
+      ctx.font = '14px Arial';
+      ctx.fillText('cumplimiento', 205, 250);
+      ctx.textAlign = 'left';
+
+      etiquetas.forEach((etiqueta, index) => {
+        const y = 125 + index * 48;
+        ctx.fillStyle = colores[index];
+        ctx.beginPath();
+        ctx.roundRect(410, y - 15, 22, 22, 6);
+        ctx.fill();
+        ctx.fillStyle = '#46516A';
+        ctx.font = '16px Arial';
+        ctx.fillText(etiqueta, 448, y + 2);
+        ctx.fillStyle = '#27324A';
+        ctx.font = '700 17px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(`${valores[index]}  ·  ${((valores[index] / total) * 100).toFixed(1)}%`, 840, y + 2);
+        ctx.textAlign = 'left';
+      });
+      return canvas.toDataURL('image/png');
+    }
+
+    function crearGraficaCalles(analisisCalles) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1000;
+      canvas.height = 430;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#27324A';
+      ctx.font = '700 27px Arial';
+      ctx.fillText('Cumplimiento por calle', 32, 43);
+      ctx.fillStyle = '#7A8499';
+      ctx.font = '16px Arial';
+      ctx.fillText('Calles con mayor número de viviendas en el reporte', 32, 70);
+      const top = [...analisisCalles].sort((a, b) => b.total - a.total).slice(0, 8);
+      const maximo = Math.max(...top.map(item => item.total), 1);
+      top.forEach((item, index) => {
+        const y = 108 + index * 38;
+        const ancho = (item.total / maximo) * 510;
+        const anchoPagado = item.total ? (item.pagadas / item.total) * ancho : 0;
+        ctx.fillStyle = '#46516A';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(String(item.calle).slice(0, 27), 245, y + 17);
+        ctx.fillStyle = '#F1F3F7';
+        ctx.beginPath();
+        ctx.roundRect(265, y, 510, 22, 7);
+        ctx.fill();
+        ctx.fillStyle = '#F4C08D';
+        ctx.beginPath();
+        ctx.roundRect(265, y, ancho, 22, 7);
+        ctx.fill();
+        if (anchoPagado) {
+          ctx.fillStyle = '#40AE72';
+          ctx.beginPath();
+          ctx.roundRect(265, y, anchoPagado, 22, 7);
+          ctx.fill();
+        }
+        ctx.fillStyle = '#27324A';
+        ctx.font = '700 14px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${item.pagadas}/${item.total} · ${Math.round(item.cumplimiento * 100)}%`, 795, y + 17);
+      });
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#40AE72';
+      ctx.fillRect(265, 405, 18, 8);
+      ctx.fillStyle = '#68738A';
+      ctx.font = '13px Arial';
+      ctx.fillText('Pagadas', 291, 414);
+      ctx.fillStyle = '#F4C08D';
+      ctx.fillRect(380, 405, 18, 8);
+      ctx.fillStyle = '#68738A';
+      ctx.fillText('No pagadas', 406, 414);
+      return canvas.toDataURL('image/png');
+    }
+
+    async function exportExcel() {
+      const boton = document.getElementById('exportReportButton');
+      const contenidoOriginal = boton?.innerHTML || '';
+      if (!navigator.onLine) {
+        showToast('Necesitas conexión para asegurar que el reporte use los datos más recientes.');
+        return;
+      }
+      if (cantidadCamposModificados() || cuotasNuevasPendientes.length) {
+        showToast('Guarda primero los cambios pendientes para generar un reporte consistente.');
+        return;
+      }
+      const datos = getFilteredHouses();
+      if (!datos.length) {
+        showToast('No hay cuotas para exportar con los filtros actuales.');
+        return;
+      }
+      if (typeof ExcelJS === 'undefined') {
+        showToast('No se pudo cargar el generador del reporte. Actualiza la página e intenta de nuevo.');
+        return;
+      }
+
+      if (boton) {
+        boton.disabled = true;
+        boton.textContent = 'Generando reporte...';
+      }
+      showToast('Preparando reporte ejecutivo...');
+
+      try {
+        const filas = datos.map(cuota => {
+          const estatus = cuota.estatusPago || 'PENDIENTE';
+          const montoCuota = Number(cuota.montoCuota || 0);
+          const montoPagado = Number(cuota.montoPagado || 0);
+          const noExigible = ['CANCELADO', 'CONDONADO'].includes(estatus);
+          return {
+            anio: Number(cuota.anio),
+            mes: cuota.mes || '',
+            casa: cuota.numeroCasaSnapshot || cuota.casa?.numero || '',
+            calle: cuota.casa?.calleCorrecta || cuota.calleSnapshot || cuota.casa?.calle || 'Sin calle',
+            nombre: obtenerPropietario(cuota) || 'Sin nombre registrado',
+            montoCuota,
+            montoPagado,
+            saldoPendiente: noExigible ? 0 : Math.max(montoCuota - montoPagado, 0),
+            formaPago: cuota.formaPago || 'Sin registrar',
+            referencia: cuota.referencia || '',
+            fechaPago: cuota.fechaPago ? new Date(cuota.fechaPago) : null,
+            estatus: statusLabel(estatus),
+            estatusCodigo: estatus,
+            folio: cuota.folio || '',
+            recibo: cuota.reciboPdfUrl || '',
+            enviado: cuota.correoEnviado ? 'Sí' : 'No',
+            email: obtenerCorreo(cuota),
+            telefono: obtenerTelefono(cuota),
+            observaciones: cuota.observaciones || ''
+          };
+        });
+
+        const metricas = {
+          total: filas.length,
+          pagadas: filas.filter(fila => fila.estatusCodigo === 'PAGADO').length,
+          parciales: filas.filter(fila => fila.estatusCodigo === 'PAGO_PARCIAL').length,
+          pendientes: filas.filter(fila => fila.estatusCodigo === 'PENDIENTE').length,
+          condonadas: filas.filter(fila => fila.estatusCodigo === 'CONDONADO').length,
+          canceladas: filas.filter(fila => fila.estatusCodigo === 'CANCELADO').length,
+          esperado: filas.filter(fila => !['CANCELADO', 'CONDONADO'].includes(fila.estatusCodigo))
+            .reduce((suma, fila) => suma + fila.montoCuota, 0),
+          recaudado: filas.reduce((suma, fila) => suma + fila.montoPagado, 0),
+          saldo: filas.reduce((suma, fila) => suma + fila.saldoPendiente, 0)
+        };
+        const exigibles = metricas.total - metricas.condonadas - metricas.canceladas;
+        metricas.cumplimiento = exigibles ? metricas.pagadas / exigibles : 0;
+        metricas.recuperacion = metricas.esperado ? metricas.recaudado / metricas.esperado : 0;
+
+        const mapaCalles = new Map();
+        filas.forEach(fila => {
+          const actual = mapaCalles.get(fila.calle) || {
+            calle: fila.calle, total: 0, pagadas: 0, parciales: 0, pendientes: 0,
+            esperado: 0, recaudado: 0, saldo: 0
+          };
+          actual.total += 1;
+          actual.pagadas += fila.estatusCodigo === 'PAGADO' ? 1 : 0;
+          actual.parciales += fila.estatusCodigo === 'PAGO_PARCIAL' ? 1 : 0;
+          actual.pendientes += fila.estatusCodigo === 'PENDIENTE' ? 1 : 0;
+          if (!['CANCELADO', 'CONDONADO'].includes(fila.estatusCodigo)) actual.esperado += fila.montoCuota;
+          actual.recaudado += fila.montoPagado;
+          actual.saldo += fila.saldoPendiente;
+          mapaCalles.set(fila.calle, actual);
+        });
+        const analisisCalles = [...mapaCalles.values()]
+          .map(item => ({ ...item, cumplimiento: item.total ? item.pagadas / item.total : 0 }))
+          .sort((a, b) => a.calle.localeCompare(b.calle, 'es-MX', {numeric:true,sensitivity:'base'}));
+
+        const mapaFormas = new Map();
+        filas.filter(fila => fila.montoPagado > 0).forEach(fila => {
+          const actual = mapaFormas.get(fila.formaPago) || { forma: fila.formaPago, operaciones: 0, monto: 0 };
+          actual.operaciones += 1;
+          actual.monto += fila.montoPagado;
+          mapaFormas.set(fila.formaPago, actual);
+        });
+        const formasPago = [...mapaFormas.values()].sort((a, b) => b.monto - a.monto);
+
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = 'Misión Jardines · ListoEnLinea.com';
+        workbook.lastModifiedBy = usuarioActual?.nombre || 'Administración Misión Jardines';
+        workbook.created = new Date();
+        workbook.modified = new Date();
+        workbook.calcProperties.fullCalcOnLoad = true;
+        workbook.calcProperties.forceFullCalc = true;
+
+        const resumen = workbook.addWorksheet('Resumen Ejecutivo', {
+          views: [{ showGridLines: false }],
+          pageSetup: { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 1 }
+        });
+        resumen.columns = [
+          { width: 18 }, { width: 18 }, { width: 8 }, { width: 18 }, { width: 18 },
+          { width: 3 }, { width: 18 }, { width: 18 }, { width: 3 }, { width: 20 },
+          { width: 20 }, { width: 18 }, { width: 18 }
+        ];
+        resumen.mergeCells('A1:M2');
+        resumen.getCell('A1').value = 'MISIÓN JARDINES · REPORTE EJECUTIVO DE CUOTAS';
+        resumen.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#27324A') } };
+        resumen.getCell('A1').font = { name: 'Aptos Display', size: 22, bold: true, color: { argb: 'FFFFFFFF' } };
+        resumen.getCell('A1').alignment = { vertical: 'middle', horizontal: 'left' };
+        resumen.getRow(1).height = 28;
+        resumen.getRow(2).height = 18;
+        resumen.mergeCells('A3:H3');
+        resumen.getCell('A3').value = `Periodo: ${mesConsulta} ${anioConsulta} · ${filas.length} cuotas incluidas`;
+        resumen.getCell('A3').font = { name: 'Aptos', size: 11, color: { argb: colorArgb('#68738A') } };
+        resumen.mergeCells('I3:K3');
+        resumen.getCell('I3').value = `Generado: ${new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium', timeStyle: 'short', timeZone: MEXICO_TIME_ZONE }).format(new Date())}`;
+        resumen.getCell('I3').alignment = { horizontal: 'right' };
+        resumen.getCell('I3').font = { name: 'Aptos', size: 10, italic: true, color: { argb: colorArgb('#7A8499') } };
+
+        const kpis = [
+          { tituloRango: 'A5:B5', valorRango: 'A6:B7', titulo: 'CUOTAS INCLUIDAS', formula: '=ROWS(TablaCuotas[Casa])', resultado: metricas.total, fondo: '#EAF6FD', formato: '#,##0' },
+          { tituloRango: 'D5:E5', valorRango: 'D6:E7', titulo: 'CUMPLIMIENTO', formula: '=IFERROR(COUNTIF(TablaCuotas[Estatus],"Pagado")/(ROWS(TablaCuotas[Casa])-COUNTIF(TablaCuotas[Estatus],"Condonado")-COUNTIF(TablaCuotas[Estatus],"Cancelado")),0)', resultado: metricas.cumplimiento, fondo: '#EAF8EF', formato: '0.0%' },
+          { tituloRango: 'G5:H5', valorRango: 'G6:H7', titulo: 'TOTAL RECAUDADO', formula: '=SUM(TablaCuotas[Monto Pagado])', resultado: metricas.recaudado, fondo: '#FFF5E9', formato: '"$"#,##0.00' },
+          { tituloRango: 'J5:K5', valorRango: 'J6:K7', titulo: 'SALDO PENDIENTE', formula: '=SUM(TablaCuotas[Saldo Pendiente])', resultado: metricas.saldo, fondo: '#F4EEFB', formato: '"$"#,##0.00' }
+        ];
+        kpis.forEach(kpi => {
+          resumen.mergeCells(kpi.tituloRango);
+          resumen.mergeCells(kpi.valorRango);
+          const titulo = resumen.getCell(kpi.tituloRango.split(':')[0]);
+          titulo.value = kpi.titulo;
+          titulo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb(kpi.fondo) } };
+          titulo.font = { name: 'Aptos', size: 9, bold: true, color: { argb: colorArgb('#68738A') } };
+          titulo.alignment = { vertical: 'bottom', horizontal: 'center' };
+          const celda = resumen.getCell(kpi.valorRango.split(':')[0]);
+          celda.value = { formula: kpi.formula.slice(1), result: kpi.resultado };
+          celda.numFmt = kpi.formato;
+          estiloCeldaKpi(celda, kpi.fondo);
+        });
+        resumen.getCell('A4').value = 'INDICADORES CLAVE';
+        resumen.getCell('A4').font = { name: 'Aptos', size: 9, bold: true, color: { argb: colorArgb('#D96B0B') } };
+        resumen.mergeCells('A9:E9');
+        resumen.getCell('A9').value = 'ESTADO DE LA COBRANZA';
+        resumen.getCell('A9').font = { name: 'Aptos Display', size: 14, bold: true, color: { argb: colorArgb('#27324A') } };
+        resumen.getRow(10).values = ['Estatus', 'Viviendas', '% del total', 'Monto pagado', 'Saldo'];
+        estilizarEncabezadoTabla(resumen.getRow(10));
+        const estados = [
+          ['Pagado', metricas.pagadas, metricas.total ? metricas.pagadas / metricas.total : 0],
+          ['Pago parcial', metricas.parciales, metricas.total ? metricas.parciales / metricas.total : 0],
+          ['Pendiente', metricas.pendientes, metricas.total ? metricas.pendientes / metricas.total : 0],
+          ['Condonado', metricas.condonadas, metricas.total ? metricas.condonadas / metricas.total : 0],
+          ['Cancelado', metricas.canceladas, metricas.total ? metricas.canceladas / metricas.total : 0]
+        ];
+        estados.forEach((estado, index) => {
+          const row = 11 + index;
+          const filasEstado = filas.filter(fila => fila.estatus === estado[0]);
+          resumen.getRow(row).values = [
+            estado[0], estado[1], estado[2],
+            filasEstado.reduce((suma, fila) => suma + fila.montoPagado, 0),
+            filasEstado.reduce((suma, fila) => suma + fila.saldoPendiente, 0)
+          ];
+          resumen.getCell(`C${row}`).numFmt = '0.0%';
+          resumen.getCell(`D${row}`).numFmt = '"$"#,##0.00';
+          resumen.getCell(`E${row}`).numFmt = '"$"#,##0.00';
+        });
+        resumen.getCell('A17').value = 'Definición: cumplimiento = cuotas PAGADAS ÷ cuotas exigibles. Las canceladas y condonadas no forman parte del denominador.';
+        resumen.mergeCells('A17:K17');
+        resumen.getCell('A17').font = { name: 'Aptos', size: 9, italic: true, color: { argb: colorArgb('#68738A') } };
+
+        const graficaCumplimiento = workbook.addImage({ base64: crearGraficaCumplimiento(metricas), extension: 'png' });
+        resumen.addImage(graficaCumplimiento, { tl: { col: 5.2, row: 8.5 }, ext: { width: 610, height: 265 } });
+        const graficaCalles = workbook.addImage({ base64: crearGraficaCalles(analisisCalles), extension: 'png' });
+        resumen.addImage(graficaCalles, { tl: { col: 0, row: 18 }, ext: { width: 610, height: 305 } });
+
+        resumen.getCell('J20').value = 'LECTURA EJECUTIVA';
+        resumen.getCell('J20').font = { name: 'Aptos Display', size: 14, bold: true, color: { argb: colorArgb('#27324A') } };
+        resumen.mergeCells('J21:M21');
+        resumen.getCell('J21').value = metricas.cumplimiento >= 0.9 ? 'Cobranza saludable' : metricas.cumplimiento >= 0.75 ? 'Cobranza en seguimiento' : 'Cobranza que requiere atención';
+        resumen.getCell('J21').font = { name: 'Aptos Display', size: 17, bold: true, color: { argb: colorArgb(metricas.cumplimiento >= 0.9 ? '#248453' : metricas.cumplimiento >= 0.75 ? '#D96B0B' : '#C44E52') } };
+        resumen.mergeCells('J22:M25');
+        resumen.getCell('J22').value = `${metricas.pagadas} viviendas están al corriente y ${metricas.pendientes + metricas.parciales} requieren seguimiento. Se ha recuperado ${(metricas.recuperacion * 100).toFixed(1)}% del monto esperado, con un saldo pendiente de $${money(metricas.saldo)}.`;
+        resumen.getCell('J22').alignment = { vertical: 'top', wrapText: true };
+        resumen.getCell('J22').font = { name: 'Aptos', size: 11, color: { argb: colorArgb('#58637A') } };
+        resumen.mergeCells('J27:M28');
+        resumen.getCell('J27').value = `Filtros aplicados: ${document.getElementById('filterText').value.trim() || 'sin búsqueda'} · Casa: ${document.getElementById('filterHouse').value.trim() || 'todas'} · Calle: ${document.getElementById('filterStreet').value || 'todas'} · Estatus: ${document.getElementById('filterStatus').value || 'todos'}`;
+        resumen.getCell('J27').alignment = { wrapText: true, vertical: 'top' };
+        resumen.getCell('J27').font = { name: 'Aptos', size: 9, italic: true, color: { argb: colorArgb('#7A8499') } };
+
+        const calleSheet = workbook.addWorksheet('Análisis por calle', { views: [{ state: 'frozen', ySplit: 4, showGridLines: false }] });
+        calleSheet.mergeCells('A1:H2');
+        calleSheet.getCell('A1').value = 'ANÁLISIS DE COBRANZA POR CALLE';
+        calleSheet.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#27324A') } };
+        calleSheet.getCell('A1').font = { name: 'Aptos Display', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
+        calleSheet.getCell('A1').alignment = { vertical: 'middle' };
+        calleSheet.getRow(4).values = ['Calle', 'Cuotas', 'Pagadas', 'Pago parcial', 'Pendientes', 'Cumplimiento', 'Recaudado', 'Saldo pendiente'];
+        estilizarEncabezadoTabla(calleSheet.getRow(4));
+        analisisCalles.forEach((item, index) => {
+          const row = 5 + index;
+          calleSheet.getRow(row).values = [item.calle, item.total, item.pagadas, item.parciales, item.pendientes, item.cumplimiento, item.recaudado, item.saldo];
+          calleSheet.getCell(`F${row}`).numFmt = '0.0%';
+          calleSheet.getCell(`G${row}`).numFmt = '"$"#,##0.00';
+          calleSheet.getCell(`H${row}`).numFmt = '"$"#,##0.00';
+        });
+        calleSheet.columns = [{ width: 30 }, { width: 12 }, { width: 12 }, { width: 16 }, { width: 14 }, { width: 16 }, { width: 18 }, { width: 18 }];
+        calleSheet.autoFilter = { from: 'A4', to: `H${4 + analisisCalles.length}` };
+        if (analisisCalles.length) {
+          calleSheet.addConditionalFormatting({
+            ref: `F5:F${4 + analisisCalles.length}`,
+            rules: [{ type: 'colorScale', cfvo: [{ type: 'min' }, { type: 'percentile', value: 50 }, { type: 'max' }], color: [{ argb: colorArgb('#FCE8E8') }, { argb: colorArgb('#FFF2D6') }, { argb: colorArgb('#DCF3E5') }] }]
+          });
+        }
+
+        const pagosSheet = workbook.addWorksheet('Pagadas', { views: [{ state: 'frozen', ySplit: 4, showGridLines: false }] });
+        const pendientesSheet = workbook.addWorksheet('Pendientes', { views: [{ state: 'frozen', ySplit: 4, showGridLines: false }] });
+        const columnasSeguimiento = [
+          { name: 'Casa', key: 'casa', width: 12 }, { name: 'Calle', key: 'calle', width: 28 },
+          { name: 'Residente', key: 'nombre', width: 34 }, { name: 'Estatus', key: 'estatus', width: 16 },
+          { name: 'Cuota', key: 'montoCuota', width: 15 }, { name: 'Pagado', key: 'montoPagado', width: 15 },
+          { name: 'Saldo', key: 'saldoPendiente', width: 15 }, { name: 'Forma de pago', key: 'formaPago', width: 18 },
+          { name: 'Fecha de pago', key: 'fechaPago', width: 17 }, { name: 'Folio', key: 'folio', width: 18 },
+          { name: 'Email', key: 'email', width: 32 }, { name: 'Teléfono', key: 'telefono', width: 18 },
+          { name: 'Observaciones', key: 'observaciones', width: 38 }
+        ];
+        function prepararHojaSeguimiento(sheet, titulo, color, registros, nombreTabla) {
+          sheet.mergeCells('A1:M2');
+          sheet.getCell('A1').value = titulo;
+          sheet.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb(color) } };
+          sheet.getCell('A1').font = { name: 'Aptos Display', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
+          sheet.getCell('A1').alignment = { vertical: 'middle' };
+          sheet.addTable({
+            name: nombreTabla, ref: 'A4', headerRow: true, totalsRow: false,
+            style: { theme: 'TableStyleMedium2', showRowStripes: true },
+            columns: columnasSeguimiento.map(columna => ({ name: columna.name, filterButton: true })),
+            rows: registros.map(fila => columnasSeguimiento.map(columna => fila[columna.key] ?? ''))
+          });
+          columnasSeguimiento.forEach((columna, index) => { sheet.getColumn(index + 1).width = columna.width; });
+          estilizarEncabezadoTabla(sheet.getRow(4));
+          const ultima = 4 + Math.max(registros.length, 1);
+          ['E', 'F', 'G'].forEach(letra => { sheet.getColumn(letra).numFmt = '"$"#,##0.00'; });
+          sheet.getColumn('I').numFmt = 'dd/mm/yyyy';
+          sheet.getRows(5, Math.max(registros.length, 1)).forEach(row => { row.height = 21; row.alignment = { vertical: 'middle' }; });
+          if (registros.length) {
+            sheet.addConditionalFormatting({
+              ref: `D5:D${ultima}`,
+              rules: [
+                { type: 'containsText', operator: 'containsText', text: 'Pagado', style: { fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#DCF3E5') } }, font: { color: { argb: colorArgb('#248453') }, bold: true } } },
+                { type: 'containsText', operator: 'containsText', text: 'Pendiente', style: { fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#FFF0E1') } }, font: { color: { argb: colorArgb('#B85D0C') }, bold: true } } }
+              ]
+            });
+          }
+          sheet.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+        }
+        prepararHojaSeguimiento(pagosSheet, 'VIVIENDAS AL CORRIENTE', '#248453', filas.filter(fila => fila.estatusCodigo === 'PAGADO'), 'TablaPagadas');
+        prepararHojaSeguimiento(pendientesSheet, 'SEGUIMIENTO DE CUOTAS PENDIENTES', '#D96B0B', filas.filter(fila => ['PENDIENTE', 'PAGO_PARCIAL'].includes(fila.estatusCodigo)), 'TablaPendientes');
+
+        const formasSheet = workbook.addWorksheet('Formas de pago', { views: [{ state: 'frozen', ySplit: 4, showGridLines: false }] });
+        formasSheet.mergeCells('A1:D2');
+        formasSheet.getCell('A1').value = 'ANÁLISIS POR FORMA DE PAGO';
+        formasSheet.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#27324A') } };
+        formasSheet.getCell('A1').font = { name: 'Aptos Display', size: 20, bold: true, color: { argb: 'FFFFFFFF' } };
+        formasSheet.getRow(4).values = ['Forma de pago', 'Operaciones', 'Monto recaudado', '% del monto'];
+        estilizarEncabezadoTabla(formasSheet.getRow(4));
+        formasPago.forEach((item, index) => {
+          const row = 5 + index;
+          formasSheet.getRow(row).values = [item.forma, item.operaciones, item.monto, metricas.recaudado ? item.monto / metricas.recaudado : 0];
+          formasSheet.getCell(`C${row}`).numFmt = '"$"#,##0.00';
+          formasSheet.getCell(`D${row}`).numFmt = '0.0%';
+        });
+        formasSheet.columns = [{ width: 24 }, { width: 16 }, { width: 22 }, { width: 18 }];
+
+        const datosSheet = workbook.addWorksheet('Datos', { views: [{ state: 'frozen', ySplit: 1, xSplit: 4, showGridLines: false }] });
+        const columnasDatos = [
+          ['Año', 'anio'], ['Mes', 'mes'], ['Casa', 'casa'], ['Calle', 'calle'], ['Residente', 'nombre'],
+          ['Monto Cuota', 'montoCuota'], ['Monto Pagado', 'montoPagado'], ['Saldo Pendiente', 'saldoPendiente'],
+          ['Forma de Pago', 'formaPago'], ['Referencia', 'referencia'], ['Fecha de Pago', 'fechaPago'], ['Estatus', 'estatus'],
+          ['Folio', 'folio'], ['Recibo PDF', 'recibo'], ['Correo enviado', 'enviado'], ['Email', 'email'],
+          ['Teléfono', 'telefono'], ['Observaciones', 'observaciones']
+        ];
+        datosSheet.addTable({
+          name: 'TablaCuotas', ref: 'A1', headerRow: true, totalsRow: false,
+          style: { theme: 'TableStyleMedium2', showRowStripes: true },
+          columns: columnasDatos.map(([name]) => ({ name, filterButton: true })),
+          rows: filas.map(fila => columnasDatos.map(([, key]) => fila[key] ?? ''))
+        });
+        estilizarEncabezadoTabla(datosSheet.getRow(1));
+        [10, 14, 12, 28, 36, 16, 16, 18, 18, 20, 17, 16, 18, 42, 16, 34, 18, 42]
+          .forEach((width, index) => { datosSheet.getColumn(index + 1).width = width; });
+        ['F', 'G', 'H'].forEach(letra => { datosSheet.getColumn(letra).numFmt = '"$"#,##0.00'; });
+        datosSheet.getColumn('K').numFmt = 'dd/mm/yyyy';
+        datosSheet.pageSetup = { orientation: 'landscape', fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+        if (filas.length) {
+          datosSheet.addConditionalFormatting({
+            ref: `L2:L${filas.length + 1}`,
+            rules: [
+              { type: 'containsText', operator: 'containsText', text: 'Pagado', style: { fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#DCF3E5') } }, font: { color: { argb: colorArgb('#248453') }, bold: true } } },
+              { type: 'containsText', operator: 'containsText', text: 'Pendiente', style: { fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: colorArgb('#FFF0E1') } }, font: { color: { argb: colorArgb('#B85D0C') }, bold: true } } }
+            ]
+          });
+        }
+
+        workbook.worksheets.forEach(sheet => {
+          sheet.properties.defaultRowHeight = 20;
+          sheet.headerFooter.oddFooter = '&LMisión Jardines Residencial&CReporte confidencial&RListoEnLinea.com';
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        const enlace = document.createElement('a');
+        enlace.href = url;
+        enlace.download = `Reporte_Ejecutivo_Cuotas_Mision_Jardines_${mesConsulta}_${anioConsulta}.xlsx`;
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+        URL.revokeObjectURL(url);
+        showToast('Reporte ejecutivo exportado correctamente.');
+      } catch (error) {
+        console.error('Error al generar reporte ejecutivo:', error);
+        showToast(`No fue posible generar el reporte: ${error.message}`);
+      } finally {
+        if (boton) {
+          boton.disabled = false;
+          boton.innerHTML = contenidoOriginal;
+        }
+      }
+    }
+
+    function obtenerCampoExcel(fila, nombres) {
+      const claves = Object.keys(fila);
+      for (const nombre of nombres) {
+        const objetivo = normalizarTexto(nombre);
+        const clave = claves.find(item => normalizarTexto(item) === objetivo);
+        if (clave !== undefined) return fila[clave];
+      }
+      return '';
+    }
+
+    function numeroDesdeExcel(value) {
+      if (typeof value === 'number') return value;
+      const limpio = String(value ?? '').replace(/[$,\s]/g, '').trim();
+      return limpio === '' ? NaN : Number(limpio);
+    }
+
+    function buscarCasaParaImportar(fila) {
+      const numero = obtenerCampoExcel(fila, ['Casa', 'Numero', 'Número', 'numeroCasa']);
+      const calle = obtenerCampoExcel(fila, ['Calle']);
+      const numeroNormalizado = normalizarTexto(numero);
+      const calleNormalizada = normalizarTexto(calle);
+      if (!numeroNormalizado) throw new Error('Falta la columna Casa o el número de casa.');
+      const coincidencias = casas.filter(casa => {
+        const coincideNumero = normalizarTexto(casa.numero) === numeroNormalizado;
+        const coincideCalle = !calleNormalizada || normalizarTexto(casa.calle) === calleNormalizada;
+        return coincideNumero && coincideCalle;
+      });
+      if (coincidencias.length === 1) return coincidencias[0];
+      if (coincidencias.length === 0) {
+        throw new Error(`No se encontró la casa ${numero}${calle ? ` en ${calle}` : ''}.`);
+      }
+      throw new Error(`La casa ${numero} aparece en más de una calle; agrega la columna Calle.`);
+    }
+
+    async function importExcel(event) {
+      const input = event.target;
+      const file = input.files?.[0];
+      if (!file) return;
+      if (!puedeCrearCuotas()) {
+        showToast('No tienes permisos para importar cuotas.');
+        input.value = '';
+        return;
+      }
+      const boton = document.getElementById('importExcelButton');
+      boton.disabled = true;
+      boton.textContent = 'Importando...';
+      try {
+        if (!casas.length) await cargarCasas();
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        if (!firstSheetName) throw new Error('El archivo no contiene hojas.');
+        const filas = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], {
+          defval: '', raw: false
+        }).filter(fila => Object.values(fila).some(valor => String(valor).trim() !== ''));
+        if (!filas.length) throw new Error('El archivo no contiene registros para importar.');
+        const confirmar = window.confirm(`Se intentarán importar ${filas.length} cuota(s). ¿Deseas continuar?`);
+        if (!confirmar) return;
+        let creadas = 0;
+        const errores = [];
+        for (let index = 0; index < filas.length; index += 1) {
+          const fila = filas[index];
+          try {
+            const casa = buscarCasaParaImportar(fila);
+            const anio = numeroDesdeExcel(obtenerCampoExcel(fila, ['Año', 'Anio']));
+            const mes = normalizarTexto(obtenerCampoExcel(fila, ['Mes']));
+            const montoCuota = numeroDesdeExcel(obtenerCampoExcel(fila, ['Monto Cuota', 'Monto', 'montoCuota']));
+            const observaciones = String(obtenerCampoExcel(fila, ['Observaciones']) || '').trim();
+            if (!Number.isInteger(anio) || anio < 2000 || anio > 2100) throw new Error('Año inválido.');
+            if (!MESES.includes(mes)) throw new Error('Mes inválido.');
+            if (!Number.isFinite(montoCuota) || montoCuota < 0) throw new Error('Monto de cuota inválido.');
+            await apiRequest(`${API_BASE_URL}/cuotas`, {
+              method: 'POST', headers: authHeaders(true),
+              body: JSON.stringify({ casaId: casa.id, anio, mes, montoCuota, observaciones: observaciones || null })
+            });
+            creadas += 1;
+          } catch (error) {
+            errores.push(`Fila ${index + 2}: ${error.message}`);
+          }
+        }
+        await cargarCuotas();
+        const resumen = `Importación terminada: ${creadas} creada(s), ${errores.length} con error.`;
+        showToast(resumen);
+        if (errores.length) {
+          console.warn('Errores de importación de cuotas:', errores);
+          window.alert(`${resumen}\n\n${errores.slice(0, 8).join('\n')}${errores.length > 8 ? '\n…' : ''}`);
+        }
+      } catch (error) {
+        showToast(`No fue posible importar el Excel: ${error.message}`);
+      } finally {
+        input.value = '';
+        boton.disabled = false;
+        boton.textContent = 'Importar Excel';
+      }
+    }
+
+    document.addEventListener('keydown', event => {
+      if (event.key !== 'Escape') return;
+      const newQuotaModal = document.getElementById('newQuotaModal');
+      const saveChangesModal = document.getElementById('saveChangesModal');
+      const bulkReceiptModal = document.getElementById('bulkReceiptModal');
+      const analyticsModal = document.getElementById('analyticsModal');
+      if (newQuotaModal && !newQuotaModal.hidden) cerrarModalNuevaCuota();
+      if (saveChangesModal && !saveChangesModal.hidden) cerrarModalGuardado();
+      if (bulkReceiptModal && !bulkReceiptModal.hidden) cerrarModalRecibos();
+      if (analyticsModal && !analyticsModal.hidden) cerrarModalAnalisis();
+    });
+
+    async function iniciarPagina() {
+      try {
+        await validarSesion();
+        if (puedeCrearCuotas()) await cargarCasas();
+        await cargarCuotas();
+        const parametros = new URLSearchParams(window.location.search);
+        const calleInicial = parametros.get('calle');
+        const numeroInicial = parametros.get('numero') || parametros.get('casa');
+        if (calleInicial) document.getElementById('filterStreet').value = calleInicial;
+        if (numeroInicial) document.getElementById('filterHouse').value = numeroInicial;
+        restaurarBorradorLocal();
+        renderHouses();
+        actualizarEstadoBotonEdicion();
+        actualizarEstadoConexion();
+
+        window.addEventListener('offline', () => {
+          guardarBorradorLocal();
+          actualizarEstadoConexion();
+          showToast('Se perdió la conexión. Tus cambios seguirán protegidos en este dispositivo.');
+        });
+        window.addEventListener('online', async () => {
+          actualizarEstadoConexion('Conexión recuperada · sincronizando...');
+          showToast('Conexión recuperada. Sincronizando cambios pendientes...');
+          await guardarCambiosPendientes({ automatico: true });
+        });
+        window.addEventListener('beforeunload', guardarBorradorLocal);
+
+        intervaloAutoguardado = window.setInterval(() => {
+          if (cantidadCamposModificados() || cuotasNuevasPendientes.length) {
+            guardarCambiosPendientes({ automatico: true });
+          }
+        }, 5 * 60 * 1000);
+      } catch (error) {
+        console.error(error);
+        showToast(`Error: ${error.message}`);
+      }
+    }
+
+    iniciarPagina();
+  </script>
+  <script src="assets/js/site-sidebar.js?v=20261021-refresco-scroll"></script>
+</body>
+
+</html>
