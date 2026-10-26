@@ -65,7 +65,30 @@ window.fetch=async function(input,init={}){
   const isPdf=String.fromCharCode(...header.slice(0,5))==='%PDF-',isZip=header[0]===80&&header[1]===75&&header[2]===3&&header[3]===4,isDcm=header.length>=132&&String.fromCharCode(...header.slice(128,132))==='DICM';
   if(mime==='application/pdf'&&!isPdf||mime==='application/zip'&&!isZip||mime==='application/dicom'&&!isDcm)return response({error:'La firma del archivo no corresponde con su formato.'},400);
   if(mime==='application/zip'){const tail=new Uint8Array(await file.slice(Math.max(0,file.size-65558)).arrayBuffer());let central=false;for(let i=0;i<=tail.length-4;i++)if(tail[i]===80&&tail[i+1]===75&&tail[i+2]===5&&tail[i+3]===6){central=true;break}if(!central)return response({error:'El ZIP está incompleto o carece de directorio central.'},400)}
-  if(mime==='application/zip'&&window.JSZip){try{const archive=await window.JSZip.loadAsync(file);if(!Object.keys(archive.files).length)return response({error:'El ZIP está vacío.'},400)}catch{return response({error:'El ZIP no contiene un archivo válido.'},400)}}
+  if(mime==='application/zip'){
+    if(!window.JSZip?.loadAsync)return response({error:'El lector CBCT no está disponible en este navegador.'},503);
+    let archive;
+    try{archive=await window.JSZip.loadAsync(file,{checkCRC32:false})}catch{return response({error:'El ZIP está dañado o usa una compresión no admitida.'},400)}
+    const entries=Object.values(archive.files);
+    if(entries.length>1200)return response({error:'El ZIP contiene más de 1200 entradas.'},400);
+    const slices=entries.filter(e=>!e.dir&&/\\.(dcm|dicom|ima)$/i.test(e.name));
+    if(slices.length<12||slices.length>400)return response({error:'El ZIP necesita entre 12 y 400 cortes DICOM.'},400);
+    let totalUncompressed=0;
+    for(const entry of slices){
+      const original=entry.unsafeOriginalName||entry.name;
+      if(original.split(/[\\\\/]/).some(segment=>segment==='..'||segment.includes('\\0')))return response({error:'Ruta DICOM insegura en el ZIP.'},400);
+      const size=entry._data?.uncompressedSize;
+      if(!Number.isSafeInteger(size)||size<256||size>14*1024*1024)return response({error:'Corte DICOM de tamaño inválido (máximo 14 MB).'},400);
+      totalUncompressed+=size;
+      if(totalUncompressed>256*1024*1024)return response({error:'Serie CBCT mayor de 256 MB sin comprimir.'},400);
+    }
+    for(const entry of slices){
+      let bytes;
+      try{bytes=await entry.async('uint8array')}catch{return response({error:'Corte DICOM corrupto en el ZIP.'},400)}
+      if(bytes.length!==entry._data.uncompressedSize||String.fromCharCode(...bytes.subarray(128,132))!=='DICM')
+        return response({error:'El ZIP incluye un archivo .dcm inválido.'},400);
+    }
+  }
   const nextId=Math.max(0,...c.files.map(f=>f.id))+1,record={id:nextId,category,filename:name,mime_type:mime,size_bytes:file.size,description:url.searchParams.get('description')||'',created_at:new Date().toISOString()};
   try{await fileTransaction(id+':'+nextId,'readwrite',file);}catch(err){return response({error:'El navegador no pudo guardar el archivo. Revisa espacio y permisos.'},507)}
   c.files.unshift(record);persist();return response(record,201)
