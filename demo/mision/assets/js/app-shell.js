@@ -158,7 +158,7 @@
     requested = route.target;
     loading.hidden = true;
     errorBox.hidden = true;
-    document.title = (frame.contentDocument?.title || route.page) + ' | Misión Jardines';
+    document.title = (frame.contentDocument?.title || route.page) + ' | Fraccionamiento Demo';
     updateSidebar();
   }
 
