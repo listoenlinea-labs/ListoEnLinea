@@ -69,6 +69,6 @@ test('ZIP con menos de doce cortes o DICOM falsificado se rechaza',async()=>{
  await assert.rejects(async()=>cbct.fromFiles([await archiveZip(12,{broken:true})],{zipLib:JSZip}),/no es un DICOM/);
 });
 test('Serie con pacientes/series diferentes no puede producir volumetría engañosa',async()=>{
- const records=Array.from({length:12},(_,i)=>file('corte_'+i+'.dcm',makeSlice(i,{series:i===7?'OTRA.SERIE':'1.2.3.999'})));
+ const records=Array.from({length:12},(_,i)=>{const b=makeSlice(i,{series:i===7?'OTRA.SERIE':'1.2.3.999'});return {name:'corte_'+i+'.dcm',buffer:b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength)}});
  await assert.rejects(()=>volume.fromFiles(records),/misma serie/);
 });
