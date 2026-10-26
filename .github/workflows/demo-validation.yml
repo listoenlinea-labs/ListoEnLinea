@@ -1,5 +1,8 @@
 name: Validate public demos
 on:
+  push:
+    branches:
+      - feat/demos-fieles-ficticios-yerena-mision-20261026
   pull_request:
     paths:
       - 'demo/**'
