@@ -6,11 +6,14 @@ on:
   pull_request:
     paths:
       - 'demo/mision/**'
+      - 'assets/img/projects/**'
+      - 'index.html'
       - 'demo/tests/mision-navigation-finance.cjs'
       - 'demo/tests/mision-conmutador-finance-ui.cjs'
       - 'demo/tests/mision-casa-club-calendar.cjs'
       - 'demo/tests/mision-maintenance-history.cjs'
       - 'demo/tests/mision-security-dues-navigation.cjs'
+      - 'demo/tests/mision-branding-browser.cjs'
       - '.github/workflows/mision-demo-navigation.yml'
 permissions:
   contents: read
@@ -31,3 +34,4 @@ jobs:
       - run: node demo/tests/mision-casa-club-calendar.cjs
       - run: node demo/tests/mision-maintenance-history.cjs
       - run: node demo/tests/mision-security-dues-navigation.cjs
+      - run: node demo/tests/mision-branding-browser.cjs

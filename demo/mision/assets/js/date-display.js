@@ -1,4 +1,4 @@
-/* Formato de PRESENTACIÓN de fechas para toda Misión Jardines.
+/* Formato de PRESENTACIÓN de fechas para toda Fraccionamiento Demo.
  * No modifica los valores ISO de formularios, atributos de datos, API ni BD.
  */
 (function (root) {

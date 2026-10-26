@@ -716,7 +716,7 @@ function renderHouses(){
  $('houseReceiptWhatsApp').addEventListener('click',()=>{
   const phone=normalizeReceiptPhone($('houseReceiptPhoneInput').value);
   if(!receiptBlob||!receiptDetails||!phone)return;
-  const message='Hola, te compartimos tu recibo de mantenimiento de Misión Jardines, folio '+receiptDetails.folio+'. Adjunto el documento PDF.';
+  const message='Hola, te compartimos tu recibo de mantenimiento de Fraccionamiento Demo, folio '+receiptDetails.folio+'. Adjunto el documento PDF.';
   const link=receiptIsMobile()
    ? 'https://wa.me/'+encodeURIComponent(phone)+'?text='+encodeURIComponent(message)
    : 'https://web.whatsapp.com/send?phone='+encodeURIComponent(phone)+'&text='+encodeURIComponent(message);

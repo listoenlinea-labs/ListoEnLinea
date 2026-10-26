@@ -1,4 +1,4 @@
-/* Misión Jardines · controles de cierre unificados (2026-10-21).
+/* Fraccionamiento Demo · controles de cierre unificados (2026-10-21).
  * Reutiliza el botón de cierre y su listener original, sin alterar los flujos
  * de guardado/confirmación. Soporta diálogos HTML y overlays heredados.
  */

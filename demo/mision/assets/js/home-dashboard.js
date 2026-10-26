@@ -540,7 +540,7 @@
     };
     flow.addTo(map);
 
-    L.marker([center.lat, center.lng]).addTo(map).bindPopup('Misión Jardines Fraccionamiento');
+    L.marker([center.lat, center.lng]).addTo(map).bindPopup('Fraccionamiento Demo Fraccionamiento');
     status.innerHTML = '<b>Tráfico en vivo · TomTom</b><span>Calles marcadas por velocidad de circulación. Se actualiza al consultar el mapa.</span>';
     document.getElementById('hlTrafficLegend')?.removeAttribute('hidden');
   }
@@ -551,7 +551,7 @@
     if (!mapElement || !status) return;
 
     const key = config?.googleMapsKey || '';
-    const address = config?.address || 'Misión Jardines Fraccionamiento, Zapopan, Jalisco';
+    const address = config?.address || 'Fraccionamiento Demo, entorno de prueba';
 
     if (!key) {
       if (config?.trafficFlowConfigured) {
@@ -562,12 +562,12 @@
           console.warn('No fue posible dibujar tráfico de TomTom:', error.message);
           environmentLeafletMap?.remove();
           environmentLeafletMap = null;
-          mapElement.innerHTML = `<iframe title="Ubicación real de Misión Jardines" src="${GOOGLE_EMBED_URL}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
+          mapElement.innerHTML = `<iframe title="Ubicación de referencia del demo" src="${GOOGLE_EMBED_URL}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
           status.innerHTML = '<b>Mapa de ubicación · sin tráfico en vivo</b><span>' + escapeHtml(error.message) + ' · Abre Tráfico en Google Maps ↗.</span>';
           return;
         }
       }
-      mapElement.innerHTML = `<iframe title="Ubicación real de Misión Jardines" src="${GOOGLE_EMBED_URL}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
+      mapElement.innerHTML = `<iframe title="Ubicación de referencia del demo" src="${GOOGLE_EMBED_URL}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
       status.innerHTML = '<b>Mapa de ubicación · sin capa de tráfico</b><span>Configura TOMTOM_API_KEY o GOOGLE_MAPS_BROWSER_API_KEY, o abre el tráfico en Google Maps ↗.</span>';
       return;
     }
@@ -578,7 +578,7 @@
       const result = await geocoder.geocode({ address });
       const location = result.results?.[0]?.geometry?.location;
 
-      if (!location) throw new Error('No fue posible ubicar Misión Jardines.');
+      if (!location) throw new Error('No fue posible ubicar Fraccionamiento Demo.');
 
       mapElement.innerHTML = '';
       const map = new google.maps.Map(mapElement, {
@@ -595,7 +595,7 @@
       new google.maps.Marker({
         map,
         position: location,
-        title: 'Misión Jardines Fraccionamiento'
+        title: 'Fraccionamiento Demo Fraccionamiento'
       });
 
       status.innerHTML = '<b>Tráfico en vivo · Google Maps</b><span>Rojo: circulación lenta · naranja: congestión moderada. Actualización automática.</span>';
@@ -611,7 +611,7 @@
           environmentLeafletMap = null;
         }
       }
-      mapElement.innerHTML = `<iframe title="Ubicación real de Misión Jardines" src="${GOOGLE_EMBED_URL}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
+      mapElement.innerHTML = `<iframe title="Ubicación de referencia del demo" src="${GOOGLE_EMBED_URL}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
       status.innerHTML = '<b>Mapa de ubicación · sin capa de tráfico</b><span>' + escapeHtml(error.message) + ' · Usa el enlace Tráfico en Google Maps ↗.</span>';
     }
   }
@@ -828,8 +828,8 @@
           <div class="hl-card-head hl-environment-head">
             <div>
               <span class="hl-eyebrow">ENTORNO EN VIVO</span>
-              <h2>Misión Jardines Fraccionamiento</h2>
-              <p>C. Atotonilco 700, C.P. 45138, Zapopan, Jalisco.</p>
+              <h2>Fraccionamiento Demo Fraccionamiento</h2>
+              <p>Ubicación ilustrativa · Entorno de demostración.</p>
             </div>
             <div class="hl-environment-actions">
               <div class="hl-environment-tabs" role="tablist" aria-label="Entorno del fraccionamiento">
@@ -891,7 +891,7 @@
 
           <div class="hl-data-note">
             <span class="hl-source ok">● Entorno en vivo</span>
-            <span>Tráfico, incidencias y noticias públicas alrededor de Misión Jardines.</span>
+            <span>Tráfico, incidencias y noticias públicas alrededor de Fraccionamiento Demo.</span>
             <a href="mapa.html">Ver plano interno</a>
           </div>
         </article>

@@ -135,8 +135,8 @@
     }).join('');
     const account = accountData();
     return `<div class="mj-side-inner">
-      <div class="mj-side-logo"><img src="../../assets/img/projects/mision-jardines.webp" alt="Misión Jardines"></div>
-      <div class="mj-side-community"><strong>Misión Jardines</strong><span>Zapopan, Jalisco</span></div>
+      <div class="mj-side-logo"><img src="../../assets/img/projects/Fraccionameinto-Demo.png" alt="Fraccionamiento Demo"></div>
+      <div class="mj-side-community"><strong>Fraccionamiento Demo</strong><span>Modo demostración</span></div>
       <nav class="mj-side-nav" aria-label="Navegación principal">${nav}</nav>
       <a class="mj-side-account${active === 'cuenta.html' ? ' active' : ''}" href="cuenta.html">${icons.account}<span><strong>${account.name}</strong><small>${account.role} · Editar cuenta</small></span></a>
       <details class="mj-side-support"><summary>${icons.headset}<span>¿Necesitas ayuda?</span></summary><p>Soporte disponible · Lun - Vie 9:00 - 18:00</p><a href="mailto:soluciones@listoenlinea.com">Contactar soporte</a></details>
@@ -342,7 +342,7 @@
   function loadHomeDashboard() {
     if (window.MJ_SHELL_MODE || page() !== 'index.html' || document.querySelector('script[data-mj-home-dashboard]')) return;
     const script = document.createElement('script');
-    script.src = 'assets/js/home-dashboard.js?v=20261026-historial-coherente';
+    script.src = 'assets/js/home-dashboard.js?v=20261026-demo-brand';
     script.defer = true;
     script.dataset.mjHomeDashboard = 'true';
     document.body.appendChild(script);
@@ -396,7 +396,7 @@
     loadHomeDashboard();
     if (page() !== 'login.html' && !document.querySelector('script[data-mj-global-search]')) {
       const search = document.createElement('script');
-      search.src = 'assets/js/global-search.js?v=20261009-header';
+      search.src = 'assets/js/global-search.js?v=20261026-demo-brand';
       search.dataset.mjGlobalSearch = 'true';
       document.body.appendChild(search);
     }

@@ -36,7 +36,7 @@ const {chromium}=require('playwright');
    assert.equal(cells[0],selected.calle);
    assert.equal(cells[1],String(selected.numero));
    assert.match(cells[2],/Deudor/);
-   await frame.locator('body').evaluate(h=>{
+   await frame.locator('body').evaluate((_,h)=>{
     // Resolver por el domicilio visible, incluso si cambia el identificador de API.
     const fixture=window.MISION_DEMO.getState().casas.find(c=>
       String(c.calle)===String(h.calle)&&String(c.numero)===String(h.numero));

@@ -201,7 +201,7 @@
   function shareText() {
     const code = $('generatedCode')?.textContent?.trim() || qrCode;
     const summary = $('generatedSummary')?.textContent?.trim() || '';
-    return `Misión Jardines\nVisita autorizada\nCódigo: ${code}${summary ? `\n${summary}` : ''}\nPresenta el código QR en la entrada.`;
+    return `Fraccionamiento Demo\nVisita autorizada\nCódigo: ${code}${summary ? `\n${summary}` : ''}\nPresenta el código QR en la entrada.`;
   }
 
   async function shareQr() {
@@ -215,7 +215,7 @@
 
     try {
       if (navigator.share) {
-        const data = { title: 'Acceso a Misión Jardines', text };
+        const data = { title: 'Acceso a Fraccionamiento Demo', text };
         if (!navigator.canShare || navigator.canShare({ files: [file] })) data.files = [file];
         await navigator.share(data);
         return;

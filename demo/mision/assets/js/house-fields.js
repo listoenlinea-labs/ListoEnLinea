@@ -2,7 +2,7 @@
   'use strict';
 
   const STREETS = [
-    'Misión Jardines',
+    'Fraccionamiento Demo',
     'Misión Gardenias',
     'Misión Magnolias',
     'Misión Rosas',
@@ -13,7 +13,7 @@
   ].sort((a,b)=>a.localeCompare(b,'es-MX',{numeric:true,sensitivity:'base'}));
 
   const PREFIXES = {
-    MJ: 'Misión Jardines',
+    MJ: 'Fraccionamiento Demo',
     MG: 'Misión Gardenias',
     MM: 'Misión Magnolias',
     MR: 'Misión Rosas',
