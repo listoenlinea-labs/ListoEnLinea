@@ -1,0 +1,31 @@
+name: Verificación de demos públicos
+on:
+  pull_request:
+    paths:
+      - 'demo/**'
+      - 'index.html'
+      - 'assets/css/project-demos.css'
+      - '.github/workflows/demo-smoke.yml'
+  push:
+    branches:
+      - 'feat/demos-fieles-ficticios-yerena-mision-20261026'
+    paths:
+      - 'demo/**'
+      - '.github/workflows/demo-smoke.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-demo-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: JavaScript syntax
+        run: |
+          find demo/mision/assets/js demo/yerena/assets/js -type f -name '*.js' ! -path '*/vendor/*' -print0 | xargs -0 -n 1 node --check
+          node --check demo/mision/demo-bootstrap.js
+          node --check demo/fraccionamiento-sim.js
+      - name: Functional isolation tests
+        run: node --test demo/tests/*.test.cjs
