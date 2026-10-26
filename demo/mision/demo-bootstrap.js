@@ -80,8 +80,49 @@ function handle(uri,method,body,query){
  if(uri.startsWith('/accesos/')&&uri.endsWith('/salida')){const entry=state.accesos.find(x=>x.id===Number(parts[1]));if(entry){entry.estado='SALIO';entry.fechaSalida=new Date().toISOString()}save();return ok(entry)}
  if(uri.startsWith('/dashboard')){
   const fin=analisis(),total=state.casas.length,vis=state.visitas.length,inside=state.accesos.filter(a=>a.estado==='DENTRO').length;
-  return ok({vista:'ADMINISTRADOR',fuentes:{cuotas:true,visitas:true,accesos:true,residentes:true,viviendas:true},kpis:{cuotas:{porcentajeAlCorriente:fin.porcentaje,alCorriente:fin.pagadas,total},visitas:{hoy:vis,programadas:vis,enCurso:inside},accesos:{activos:inside,entradasHoy:state.accesos.length},residentes:{activos:total,viviendasOcupadas:total,viviendasTotales:total}},
-  recaudacion:{totalMes:fin.ingresosParaBalance,variacionPorcentaje:0,serie:[{anio:yyyy,mes:mm,ingresos:fin.ingresosParaBalance,egresos:fin.totalEgresos,disponible:fin.balanceReportado,monto:fin.ingresosParaBalance}]},periodo:{actual:{etiqueta:monthName[mm-1]+' '+yyyy}},eventos:[],eventosProximos7Dias:[],actividad:state.accesos.slice(0,8),operativo:{visitas:state.visitas,accesos:state.accesos},generadoEn:new Date().toISOString()});
+  // Mismos campos que consume home-dashboard.js. No mezclar números productivos:
+  // historial determinista ficticio desde enero, complementado con pagos y egresos
+  // que el visitante haya registrado únicamente en este navegador.
+  let balance=0;
+  const monthAbbr=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const cuotaBase=state.casas.reduce((sum,c)=>sum+c.cuota,0);
+  const serie=Array.from({length:mm},(_,index)=>{
+    const mes=index+1,season=(index*17+7)%11;
+    const pagosDelMes=state.pagos.filter(p=>{
+      const fecha=String(p.fecha||'');
+      return fecha.slice(0,7)===yyyy+'-'+pad(mes);
+    }).reduce((sum,p)=>sum+cap(p.monto),0);
+    const otherPayments=(state.pagosConcepto||[]).filter(p=>String(p.fecha||'').slice(0,7)===yyyy+'-'+pad(mes)).reduce((sum,p)=>sum+cap(p.monto),0);
+    const gastoNuevo=state.egresos.filter(e=>String(e.fecha||'').slice(0,7)===yyyy+'-'+pad(mes)).reduce((sum,e)=>sum+cap(e.monto),0);
+    const cuotas=cap(cuotaBase*(0.76+season*0.013)+pagosDelMes);
+    const ingresosAdicionales=cap(400+otherPayments);
+    const saldoInicial=index===0?15000:0;
+    const ingresos=cap(cuotas+ingresosAdicionales+saldoInicial);
+    const egresos=cap(cuotaBase*(0.78+((index*7+2)%13)*0.013)+gastoNuevo);
+    balance=cap(balance+ingresos-egresos);
+    return {anio:yyyy,mes,etiqueta:monthAbbr[index]+' '+yyyy,cuotas,ingresosAdicionales,saldoInicial,ingresos,egresos,disponible:balance,total:ingresos,monto:cuotas};
+  });
+  const current=serie.at(-1),previous=serie.at(-2);
+  const activity=[
+    ...state.pagos.map(p=>({tipo:'PAGO',titulo:'Pago de cuota registrado',monto:p.monto,fecha:p.fecha,
+      calle:byId(p.casaId)?.calle,numero:byId(p.casaId)?.numero})),
+    ...state.visitas.map(v=>({tipo:'VISITA',titulo:'Visita de demostración',fecha:v.fecha,
+      calle:byId(v.casaId)?.calle,numero:byId(v.casaId)?.numero})),
+    ...state.accesos.map(a=>({tipo:'ACCESO',titulo:'Acceso simulado',fecha:a.fechaEntrada,
+      calle:byId(a.casaId)?.calle,numero:byId(a.casaId)?.numero}))
+  ].sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha))).slice(0,8);
+  // El dashboard del repositorio original espera campos a nivel raíz, no dentro de "data".
+  return {ok:true,vista:'ADMINISTRADOR',
+    fuentes:{cuotas:true,visitas:true,accesos:true,residentes:true,viviendas:true,eventos:true},
+    kpis:{cuotas:{porcentajeAlCorriente:fin.porcentaje,alCorriente:fin.pagadas,total},
+      visitas:{hoy:vis,programadas:vis,enCurso:inside},
+      accesos:{activos:inside,entradasHoy:state.accesos.length},
+      residentes:{activos:total,viviendasOcupadas:total,viviendasTotales:total}},
+    recaudacion:{totalMes:current.cuotas,variacionPorcentaje:previous&&previous.cuotas
+      ?Math.round((current.cuotas-previous.cuotas)/previous.cuotas*10000)/100:0,serie},
+    periodo:{actual:{etiqueta:monthAbbr[mm-1]+' '+yyyy}},eventos:[],eventosProximos7Dias:0,
+    actividad:activity,operativo:{visitas:state.visitas,accesos:state.accesos},
+    generadoEn:new Date().toISOString(),modo:'DEMO_FICTICIO'};
  }
  if(uri==='/finanzas/analisis')return ok(analisis());
  if(uri==='/finanzas/egresos'&&method==='POST'){const e={id:++state.lastId,concepto:body.concepto||'Egreso demostrativo',categoria:body.categoria||'OPERACION',monto:cap(body.monto),fecha:body.fecha||longDate,referencia:body.referencia||'DEMO'};state.egresos.push(e);save();return ok(e)}
