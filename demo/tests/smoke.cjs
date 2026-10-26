@@ -51,6 +51,20 @@ const assert = require('node:assert/strict');
   console.log('MISION',m);
   assert(m.updated);assert(m.valid);assert(m.tagCount>0);
   assert.equal(errors.length,0,'Page exceptions: '+errors.join(' | '));
+
+  const routes=['seguridad.html','zkteco.html','analisis-cuotas.html','visitas.html','casa-club.html','cuotas.html','viviendas.html','pagos.html'];
+  const diagnostics=[];
+  for(const route of routes){
+   const before=errors.length;
+   await page.goto('http://127.0.0.1:8765/demo/mision/'+route,{waitUntil:'domcontentloaded'});
+   await page.waitForTimeout(550);
+   const info=await page.evaluate(()=>({title:document.title,bodyVisibility:getComputedStyle(document.body).visibility,authorized:document.documentElement.hasAttribute('data-mj-authorized')}));
+   diagnostics.push({route,...info,errors:errors.slice(before)});
+   assert(!page.url().endsWith('login.html'),'Navigation unexpectedly entered login on '+route);
+  }
+  console.log('MISION ROUTE SWEEP',JSON.stringify(diagnostics));
+  assert.equal(diagnostics.filter(d=>!d.authorized).length,0,'Algunas pantallas no permitieron acceso de administrador');
+  assert.equal(diagnostics.filter(d=>d.errors.length>0).length,0,'Errores JavaScript en pantallas: '+JSON.stringify(diagnostics.filter(d=>d.errors.length)));
   console.log('SMOKE PASS');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
