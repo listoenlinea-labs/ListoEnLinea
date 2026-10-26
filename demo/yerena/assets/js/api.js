@@ -12,10 +12,10 @@ if(route==='/auth/password'||route==='/auth/users')return {error:'La administrac
 if(route==='/patients'&&method==='GET')return {patients:db.patients};
 if(route==='/patients'&&method==='POST'){const p={id:count(db.patients),...input};db.patients.push(p);persist();return {patient:p}}
 if((m=route.match(/^\/patients\/(\d+)\/details$/))){const p=patient(m[1]);return {patient:p,appointments:db.appointments.filter(a=>a.patient_id===p.id)}}
-if((m=route.match(/^\/patients\/(\d+)$/))){const p=patient(m[1]);if(!p)throw Error('Paciente no encontrado');if(method==='DELETE'){db.patients=db.patients.filter(x=>x!==p);db.appointments=db.appointments.filter(a=>a.patient_id!==p.id);persist();return {archived:true}}Object.assign(p,input);persist();return {patient:p}}
+if((m=route.match(/^\/patients\/(\d+)$/))){const p=patient(m[1]);if(!p)throw Error('Paciente no encontrado');if(method==='DELETE'){if(db.appointments.some(a=>a.patient_id===p.id&&a.start_at>new Date().toISOString().slice(0,10)&&!['completed','cancelled'].includes(a.status)))throw Error('Este paciente tiene citas futuras. Cancélalas primero.');db.patients=db.patients.filter(x=>x!==p);db.appointments=db.appointments.filter(a=>a.patient_id!==p.id);persist();return {archived:true}}Object.assign(p,input);persist();return {patient:p}}
 if(route.startsWith('/appointments?')){const q=new URLSearchParams(route.split('?')[1]);return {appointments:db.appointments.filter(x=>x.start_at.slice(0,10)>=(q.get('from')||'0000')&&x.start_at.slice(0,10)<=(q.get('to')||'9999'))}}
-if(route==='/appointments'&&method==='POST'){const p=patient(input.patient_id);if(!p)throw Error('Selecciona un paciente válido');const a={id:count(db.appointments),...input,patient_name:full(p)};db.appointments.push(a);persist();return {appointment:a,calendar_warning:'Cita registrada únicamente en este demo.'}}
-if((m=route.match(/^\/appointments\/(\d+)$/))){const a=db.appointments.find(x=>x.id===Number(m[1]));if(!a)throw Error('Cita no encontrada');Object.assign(a,input);a.patient_name=full(patient(a.patient_id));persist();return {appointment:a,calendar_warning:'No se sincronizó con Google Calendar (demo).'}}
+if(route==='/appointments'&&method==='POST'){const p=patient(input.patient_id);if(!p)throw Error('Selecciona un paciente válido');if(db.appointments.some(x=>x.status!=='cancelled'&&input.start_at<x.end_at&&input.end_at>x.start_at&&(x.professional_name===input.professional_name||x.resource===input.resource)))throw Error('Horario ocupado para ese profesional o sillón.');const a={id:count(db.appointments),...input,patient_name:full(p)};db.appointments.push(a);persist();return {appointment:a,calendar_warning:'Cita registrada únicamente en este demo.'}}
+if((m=route.match(/^\/appointments\/(\d+)$/))){const a=db.appointments.find(x=>x.id===Number(m[1]));if(!a)throw Error('Cita no encontrada');if(db.appointments.some(x=>x.id!==a.id&&x.status!=='cancelled'&&input.start_at<x.end_at&&input.end_at>x.start_at&&(x.professional_name===input.professional_name||x.resource===input.resource)))throw Error('Horario ocupado para ese profesional o sillón.');Object.assign(a,input);a.patient_name=full(patient(a.patient_id));persist();return {appointment:a,calendar_warning:'No se sincronizó con Google Calendar (demo).'}}
 if(route==='/settings/doctor-photo'&&method==='PUT'){db.doctorPhoto=input.photo_data;persist();return {has_photo:true}}
 if(route==='/settings/doctor-photo'&&method==='DELETE'){db.doctorPhoto=null;persist();return {has_photo:false}}
 if(route==='/settings/reminders'){if(method==='PUT'){db.settings=input;persist()}return {settings:db.settings,mode:'demo',capabilities:{schedulerEnabled:true,emailReady:false,whatsappReady:false,clinicEmailsConfigured:false}}}
@@ -40,7 +40,7 @@ if((m=route.match(/^\/clinical\/(\d+)(?:\/(.*))?$/))){const id=Number(m[1]),sect
 }
 throw Error('Acción no habilitada en esta simulación: '+route)};
 window.YERENA_CONFIG=Object.freeze({API_BASE_URL:'demo://isolated'});
-window.API={token:()=> 'demo-administrator',saveToken:()=>{},request:async(route,o)=>result(answer(route,o)),photo:async()=>{throw Error('Sin foto')},doctorPhoto:async()=>db.doctorPhoto?await (await fetch(db.doctorPhoto)).blob():null,logout:()=>{location.href='app.html'}};
+window.API={token:()=> 'demo-administrator',saveToken:()=>{},request:async(route,o)=>result(answer(route,o)),photo:async(id)=>{const p=patient(id);if(!p?.photo_data)throw Error('Sin fotografía');return (await fetch(p.photo_data)).blob()},doctorPhoto:async()=>db.doctorPhoto?await (await fetch(db.doctorPhoto)).blob():null,logout:()=>{location.href='app.html'}};
 
 const openFiles=()=>new Promise((resolve,reject)=>{if(!indexedDB)return reject(Error('Este navegador no admite IndexedDB'));const request=indexedDB.open('yerena-public-demo-files-v1',1);request.onupgradeneeded=()=>request.result.createObjectStore('blobs');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)});
 async function fileTransaction(id,mode,value){const database=await openFiles();return new Promise((resolve,reject)=>{const tx=database.transaction('blobs',mode),store=tx.objectStore('blobs'),q=mode==='readonly'?store.get(id):value===null?store.delete(id):store.put(value,id);q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);tx.oncomplete=()=>database.close()})}
@@ -48,7 +48,7 @@ const response=(value,status=200)=>new Response(JSON.stringify(value),{status,he
 const nativeFetch=window.fetch.bind(window);
 window.fetch=async function(input,init={}){
  const raw=typeof input==='string'?input:input.url;
- if(!raw.startsWith('demo://isolated/'))return nativeFetch(input,init);
+ if(!raw.startsWith('demo://isolated/')){const method=(init.method||'GET').toUpperCase();if(!['GET','HEAD'].includes(method)||/yerenariso\.listoenlinea\.host/i.test(raw))throw Error('La operación externa está bloqueada en este demo.');return nativeFetch(input,init)}
  const url=new URL(raw),route=url.pathname,method=(init.method||'GET').toUpperCase();
  let m=route.match(/^\/clinical\/(\d+)\/files(?:\/(\d+))?$/);
  if(!m)return response({error:'Esta ruta no requiere red externa.'},404);
@@ -64,6 +64,7 @@ window.fetch=async function(input,init={}){
   const header=new Uint8Array(await file.slice(0,136).arrayBuffer());
   const isPdf=String.fromCharCode(...header.slice(0,5))==='%PDF-',isZip=header[0]===80&&header[1]===75,isDcm=header.length>=132&&String.fromCharCode(...header.slice(128,132))==='DICM';
   if(mime==='application/pdf'&&!isPdf||mime==='application/zip'&&!isZip||mime==='application/dicom'&&!isDcm)return response({error:'La firma del archivo no corresponde con su formato.'},400);
+  if(mime==='application/zip'&&window.JSZip){try{const archive=await window.JSZip.loadAsync(file);if(!Object.keys(archive.files).length)return response({error:'El ZIP está vacío.'},400)}catch{return response({error:'El ZIP no contiene un archivo válido.'},400)}}
   const nextId=Math.max(0,...c.files.map(f=>f.id))+1,record={id:nextId,category,filename:name,mime_type:mime,size_bytes:file.size,description:url.searchParams.get('description')||'',created_at:new Date().toISOString()};
   try{await fileTransaction(id+':'+nextId,'readwrite',file);}catch(err){return response({error:'El navegador no pudo guardar el archivo. Revisa espacio y permisos.'},507)}
   c.files.unshift(record);persist();return response(record,201)
