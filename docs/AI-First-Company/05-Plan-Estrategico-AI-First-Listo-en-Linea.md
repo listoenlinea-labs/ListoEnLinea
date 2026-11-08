@@ -697,3 +697,278 @@ El riesgo no se limita a «alucinaciones»: un documento o mensaje malicioso pue
 ## Fracaso 8. Dependencia técnica de una herramienta
 
 **Señal:** el proveedor cambia API/precio o deja de existir y el producto no puede operar. **Respuesta:** adaptadores, exportación documentada, alternativas de proveedor, pruebas de transición y modo manual controlado.
+
+
+# 22. Mecanismo de ejecución: puertas de calidad y decisiones
+
+La diferencia entre un programa AI-first y una colección de experimentos es que cada iniciativa atraviesa pasos de aprobación observables. Las siguientes puertas de gobierno son una **elaboración original** a partir de los Documentos 3 y 4 y los requisitos del portafolio.
+
+## G0 — oportunidad calificada
+
+Debe existir un comprador o responsable del proceso, dolor verificable, volumen, línea base, autoridad para decidir y estimación del costo de no actuar. **Salida:** una ficha de oportunidad; si no hay economía o responsable, sólo se permite descubrimiento.
+
+## G1 — datos y alcance válidos
+
+Deben existir requisitos, permisos, clasificación de datos, responsable y criterio para que un resultado sea aceptado. **Salida:** plan de piloto con fuentes de verdad; si el proyecto implica datos de salud, financieros o identidad, revisión especial antes de usar datos reales.
+
+## G2 — prueba de concepto reproducible
+
+Un prototipo debe superar casos normales y adversos con revisión humana; se registran costos y errores. **Salida:** informe de evaluación, limitaciones conocidas y decisión de continuar o detener.
+
+## G3 — aceptación productiva
+
+Debe existir recuperación de fallas, restauración de backup, bitácora, control de acceso, contrato de datos, límites de autonomía y capacitación. **Salida:** acta de puesta en marcha con un responsable técnico y uno del cliente. Ningún screenshot, mockup o PR sustituye el resultado de pruebas reales.
+
+## G4 — ampliación comercial
+
+Debe conocerse contribución por cuenta y capacidad de soporte. **Salida:** decisión de replicar, cobrar una nueva instalación, mejorar producto o posponer expansión. Una integración nueva se justifica por demanda de varios clientes o por margen de un contrato específico.
+
+## G5 — revisión posterior y retirada
+
+Tras 30 y 90 días de operación, comparar resultados con línea base, registrar incidentes y decidir continuar, actualizar precios, renegociar, retirar el módulo o reemplazar proveedor. **Salida:** informe breve con decisiones y responsables.
+
+# 23. Fichas de aceptación de alto impacto
+
+Estas fichas se proponen como criterios de prueba; **no afirman que ya se hayan ejecutado** en instalaciones reales. Los casos deben utilizar datos ficticios, ambientes de pruebas y dispositivos autorizados.
+
+## 23.1. Cuotas y banco
+
+| Prueba propuesta | Resultado indispensable |
+|---|---|
+| Importe parcial inferior al saldo | Registrar íntegramente el abono y aplicar reglas aprobadas sin rechazar por monto incompleto |
+| Referencia incorrecta o duplicada | No confirmar un movimiento ajeno o previamente aplicado |
+| Comprobante con texto alterado | No acreditar sólo por OCR o imagen |
+| CEP pendiente o no disponible | Mantener estado pendiente y ruta de revisión |
+| Duplicación de webhook | Una sola recepción lógica y cero duplicaciones contables |
+| Falta de red durante registro | Estado consistente y reintento sin pérdida |
+| Cambio de fecha/corte | Regla temporal comprobada con casos antes, el día y después del corte |
+| Abono asignado a varias viviendas | Distribución aprobada y trazable, sin inferencia del modelo |
+| Confirmación de pago y cambio de TAG | Sólo reglas autorizadas; estado de hardware distinguido de solicitud |
+| Error después de actualizar base y antes de enviar | Recuperar desde evento durable sin volver a cobrar |
+| Evento anulado con origen C3 | Respetar bloqueo/permiso conforme a regla documentada |
+| Reconciliación final | Registro financiero, recibo, evento y dispositivo coherentes o excepción visible |
+
+Los tests precisos de Misión Jardines deben basarse en sus documentos de reglas vigentes; esta tabla no modifica ni sustituye `PAGOS_ACCESO_C3.md`. [R3]
+
+## 23.2. Identidad, seguridad y red local
+
+Comprobar sesiones y roles sin acceder a cuentas ajenas; que los administradores vean lo permitido; que un mensaje malicioso no otorgue permisos; que no exista conexión directa no autorizada desde internet a un equipo local; que el puente seguro no acepte un controlador distinto sin autorización; que un apagón o cambio de red no produzca una apertura accidental; que una simulación visual no se presente como sensor físico verificado.
+
+Prueba de recuperación: cortar conectividad en entorno controlado, medir detección, informar estado, volver a conectar y reconciliar eventos sin acciones repetidas. Los dispositivos físicos se prueban únicamente con permiso y plan manual de contingencia.
+
+## 23.3. Agenda administrativa y comunicación
+
+Comprobar zonas horarias, horarios de verano, traslapes, citas movidas o borradas, consentimiento de contacto, número equivocado, duplicación de recordatorios, revocación de sesión y recuperación ante fallas de SMTP/API. No insertar datos clínicos reales hasta concluir evaluación y autorización.
+
+## 23.4. Entrega de software asistida por IA
+
+Cada cambio sugerido por herramientas generativas debe tener: requerimiento identificable, revisión de código, tests automáticos relevantes, inspección de permisos, plan de reversión y comparación con reglas del negocio. Un modelo no puede convertir una función no probada en «entregada» mediante documentación. Mantener historial de incidencias y pruebas después de cada despliegue.
+
+# 24. Sistema de conocimiento y documentación de Listo en Línea
+
+## 24.1. Bibliotecas por propósito
+
+**Biblioteca corporativa:** portafolio y oferta; cliente objetivo; metodología de descubrimiento; cotización; contrato y alcance; privacidad y seguridad; criterios de producción; soporte, incidentes y entrega. En un repositorio público sólo debe incluirse información autorizada para publicación.
+
+**Biblioteca de producto:** especificaciones, modelo de estados, reglas, API, migraciones, casos de prueba, manuales funcionales y versión aceptada. Idealmente cada producto mantiene documentos en su propio repositorio para evitar divergencias.
+
+**Biblioteca confidencial, fuera del repositorio público:** datos de clientes, contratos, costos y márgenes reales, contactos, credenciales, configuraciones de red, incidentes de seguridad, cuentas y material clínico. Debe almacenarse en herramientas con control de acceso, cifrado, retención y eliminación.
+
+**Biblioteca de IA:** instrucciones de tareas, conjunto de casos de aceptación, versiones de skills, evaluación de proveedores, umbrales y registro de errores. Usar datos sintéticos para pruebas públicas.
+
+## 24.2. Estructura mínima sugerida
+
+`docs/estrategia/`: alcance público, objetivos y seguimiento no sensible.  
+`docs/ventas/`: material y mensajes públicos aprobados.  
+`docs/producto/`: documentación no confidencial de módulos y contratos de interfaz.  
+`docs/operaciones/`: procedimientos públicos de soporte y recuperación sin secretos.  
+`docs/ai/`: políticas, evaluación y plantillas sanitizadas.  
+**Repositorio o almacén privado:** contratos, contabilidad, credenciales, incidentes, datos de clientes y planes comerciales sensibles.
+
+Esta organización es orientativa. **No reorganizar los repositorios actuales sin revisión de referencias y procedimientos que ya existen.** Las nuevas carpetas no son un requisito técnico de GitHub.
+
+## 24.3. Biblioteca de habilidades prioritarias
+
+| Habilidad | Entrada | Salida | Revisión |
+|---|---|---|---|
+| Descubrimiento de cliente | Entrevista autorizada y requisitos | Mapa de flujo y cuestiones abiertas | Dirección |
+| Propuesta comercial | Ficha de oportunidad y catálogo | Alcance, exclusiones y borrador de inversión | Dirección |
+| Revisión de cambios de GitHub | Diff y reglas documentadas | Riesgos, pruebas faltantes y resumen | Ingeniería |
+| Triage de soporte | Ticket sanitizado | Prioridad sugerida, módulo y preguntas | Soporte |
+| Clasificación de comprobante | Archivo permitido y contexto mínimo | Campos sugeridos, SIN acreditar | Responsable de pagos |
+| Búsqueda de políticas | Documentos vigentes por cliente | Respuesta con referencia y abstención | Usuario con permisos |
+| Redacción de incidencias | Hechos verificados y decisiones | Informe entendible para el cliente | Ingeniería |
+| Investigación de proveedores | Comparables y fecha de corte | Matriz de costos/risgos con fuentes | Dirección |
+
+Cada habilidad comienza asistida; se mide contra un conjunto de prueba antes de ampliar. El dueño de la habilidad responde por cambios de versión y resultados; un proveedor de IA no asume automáticamente esa responsabilidad.
+
+# 25. Plantillas para ejecutar el plan
+
+## Plantilla A — ficha comercial de un servicio
+
+**Producto o paquete:**  
+**Problema verificable que resuelve:**  
+**Comprador y responsable de aprobación:**  
+**Casos de uso y exclusiones:**  
+**Módulos incluidos y opcionales:**  
+**Datos necesarios y consentimiento:**  
+**Integraciones sujetas a prueba:**  
+**Criterios de puesta en marcha:**  
+**Costo de instalación y mantenimiento real:**  
+**Precio y condiciones por volumen:**  
+**Soporte incluido; visitas y cambios aparte:**  
+**Seguridad, privacidad y obligaciones:**  
+**Indicadores de éxito del cliente:**  
+**Condición de cancelación y exportación de datos:**
+
+## Plantilla B — ficha de piloto AI-first
+
+**Hipótesis comercial y fuente de valor:**  
+**Proceso actual y línea base:**  
+**Conjunto de pruebas y excepciones:**  
+**Modelo/herramienta candidata y versión:**  
+**Documentos oficiales que usa:**  
+**Datos prohibidos y permisos permitidos:**  
+**Acciones que requieren aprobación:**  
+**Tiempo de preparación / ejecución / revisión / corrección:**  
+**Costo de modelo y terceros:**  
+**Errores graves y condiciones de suspensión:**  
+**Fecha y responsable de revisión:**  
+**Decisión: cancelar / ajustar / ampliar / automatizar parcialmente:**
+
+## Plantilla C — acta de aceptación técnica
+
+**Versión y SHA de commit:**  
+**Ambiente: pruebas / producción autorizada:**  
+**Cliente y aprobador autorizado:**  
+**Escenarios críticos y resultados:**  
+**Evidencia de respaldo restaurable:**  
+**Evidencia de roles y permisos:**  
+**Integraciones verificadas realmente:**  
+**Simulaciones que aún no prueban hardware o servicios externos:**  
+**Fallas conocidas con severidad y plan:**  
+**Manual de recuperación y capacitación:**  
+**Fecha, responsables y autorización final:**
+
+## Plantilla D — cálculo de precio mínimo sostenible
+
+**MRR objetivo de cliente:**  
+**Costos de nube, mensajería y API:**  
+**Horas esperadas de soporte × costo/hora:**  
+**Reserva de incidentes y visitas:**  
+**Amortización de instalación no cobrada:**  
+**Margen de contribución después de esos costos:**  
+**Gastos generales corporativos no incluidos:**  
+**Impuestos, facturación y comisiones:**  
+**Precio mínimo que cumple contribución requerida:**  
+**Variación si se duplican horas de soporte o consumo:**  
+**Mecanismo contractual para actualizar tarifa:**
+
+## Plantilla E — decisión semanal de dirección
+
+**Tres resultados clave de la semana:**  
+**Ingresos cobrados y nuevas propuestas:**  
+**Incidentes críticos y estado de recuperación:**  
+**Dos iniciativas activas y avance verificable:**  
+**Horas dedicadas a soporte / producto / ventas:**  
+**Pruebas aprobadas / fallidas / pendientes externas:**  
+**Decisiones que necesita el cliente:**  
+**Un trabajo que se suspende para proteger capacidad:**  
+**Próximo hito y quién lo aprueba:**
+
+## Plantilla F — registro de riesgos de IA y conectores
+
+**Activo y proveedor:**  
+**Datos tratados / propietario:**  
+**Finalidad autorizada:**  
+**Permisos de lectura / escritura:**  
+**Ataque o fallo plausible:**  
+**Impacto en personas, dinero o acceso:**  
+**Control preventivo y prueba ejecutada:**  
+**Registro y retención de evidencia:**  
+**Acción segura si falla:**  
+**Responsable y fecha de revisión:**
+
+# 26. Lista de las diez primeras decisiones ejecutables
+
+Estas tareas convierten el estudio en acciones inmediatas que pueden asignarse en una reunión de dirección. No significan que se haya modificado código productivo o creado contratos.
+
+1. **Aprobar dos prioridades para el trimestre:** estabilización CondoOps y comercialización repetible. Asignar un dueño a cada una.
+2. **Levantar línea base de horas durante dos semanas:** separar soporte, código nuevo, visitas, ventas y tareas internas.
+3. **Verificar estado real de Misión Jardines:** confrontar docs, pruebas automáticas, despliegue, MySQL, Meta y C3, y documentar qué no puede probarse aún.
+4. **Crear ficha de producto CondoOps 1.0:** base, módulos opcionales, instalación, límites, hardware y soporte.
+5. **Auditar un proceso de administración de cuota:** preparar matriz de casos, trazabilidad y prueba de recuperación.
+6. **Probar un asistente interno de propuestas:** medir tiempo total hasta aprobación frente a 30–50 casos representativos.
+7. **Configurar pipeline simple de ventas:** guardar segmento, problema, siguiente paso, propuesta, resultado y motivo de rechazo.
+8. **Revisar costos reales de cada contrato:** calcular contribución con horas, API, infraestructura, visitas y obligaciones.
+9. **Formalizar política de datos y de IA:** qué información se permite, quién aprueba, cuándo debe detenerse un sistema y qué nunca puede ejecutar solo.
+10. **Programar la revisión al día 90:** comparar beneficios, defectos, ventas y capacidad; suspender iniciativas sin retorno o sin condiciones de seguridad.
+
+# 27. Cierre estratégico: la empresa que Listo en Línea puede construir
+
+La oportunidad más importante para Listo en Línea no consiste en convertirse en una fábrica indiscriminada de bots. Consiste en empaquetar un conocimiento ya adquirido: entender problemas que aparecen entre pagos, administración, personas y dispositivos; traducirlos en reglas de software; ponerlos a prueba y mantenerlos funcionando. La IA puede acelerar documentación, propuestas y operaciones de apoyo, pero la continuidad del servicio se gana mediante ingeniería, validación, seguridad y atención a clientes.
+
+**La restricción más probable es la dispersión de trabajo**, no la falta de una herramienta de IA. Esta hipótesis debe medirse, no aceptarse por intuición. Si se confirma, el paso de mayor retorno podría ser abandonar funcionalidades periféricas, estandarizar contratos y concentrarse en un producto que varios clientes compren, en lugar de escribir una nueva integración.
+
+**Una estrategia AI-first madura no promete automatizar todo:** selecciona qué decisiones se benefician de modelos, cuáles requieren software determinista, cuáles deben quedar en manos de personas y cuándo conviene no invertir. Esa separación es especialmente importante en el negocio que Listo en Línea ya ha comenzado a construir.
+
+**Dictamen del Documento 5:** priorizar CondoOps y automatizaciones empresariales; profesionalizar entrega y soporte; realizar un primer piloto de IA limitado y medido; mantener líneas clínicas y hospitalarias bajo requisitos estrictos; presupuestar con contribución real y no con horas aparentes; revisar el programa a los 90 días antes de expandir. La evaluación debe premiar clientes que usan y pagan un sistema confiable, no el número de demostraciones realizadas.
+
+# Fuentes, verificación y límites
+
+## Repositorios revisados el 8 de noviembre de 2026
+
+**[R1] Listo en Línea, sitio corporativo:** https://github.com/listoenlinea-labs/ListoEnLinea — descripción comercial, secciones de servicios, contacto y demo. Revisado: `index.html` y `Readme.txt`.
+
+**[R2] Misión Jardines, bitácora de estado:** https://github.com/listoenlinea-labs/MisionJardines/blob/main/docs/ESTADO_PROYECTO.md — distingue cambios fusionados, pruebas simuladas, despliegue pendiente y piloto de recepción WhatsApp desactivado por defecto.
+
+**[R3] Misión Jardines, pagos y acceso C3:** https://github.com/listoenlinea-labs/MisionJardines/blob/main/docs/PAGOS_ACCESO_C3.md — reglas de aplicación, eventos, estados y reconciliación de controladores.
+
+**[R4] App dental, documentación principal:** https://github.com/listoenlinea-labs/Dra_Yerena_Riso/blob/main/README.md — alcance MVP, agenda, contactos y advertencias de uso de datos de salud.
+
+**[R5] Floristería Magno, sitio de compra:** https://github.com/listoenlinea-labs/Floristeria-Magno/tree/main/docs — catálogo, compra, entrega y páginas SEO; se examinó también `docs/index.html`.
+
+**[R6] Misión Jardines, validación bancaria y comunicación:** https://github.com/listoenlinea-labs/MisionJardines/blob/main/docs/VALIDACION_BANCARIA_CORREO.md — procesos y reglas existentes de verificación y comunicación.
+
+**[R7] HospitalOS, alcance demo:** https://github.com/listoenlinea-labs/HospitalOS/blob/main/README.md y https://github.com/listoenlinea-labs/HospitalOS/blob/main/docs/ESTADO_RF.md — estados de prototipo, requisitos y fases aún pendientes.
+
+**[R8] API-banco, consulta CEP experimental:** https://github.com/listoenlinea-labs/API-banco/blob/main/README.md — no oficial, sin SLA, no cubre todo tipo de depósitos y no acredita pagos sin evidencia suficiente.
+
+## Referencias externas de gobierno y costos
+
+**[E1] Precios públicos de API de OpenAI, variables por modelo, capacidad y fecha:** https://developers.openai.com/api/docs/pricing — fuente para comparar costos de consumo, no autorización ni recomendación de proveedor exclusivo.
+
+**[E2] Meta for Developers, precios de WhatsApp Business Platform:** https://developers.facebook.com/documentation/business-messaging/whatsapp/pricing — verificar tarjetas por país, categoría, moneda, fecha y condiciones.
+
+**[E3] NIST AI 600-1 (2024), perfil de IA generativa:** https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence — control voluntario de riesgos que no sustituye requisitos sectoriales.
+
+**[E4] Ley Federal de Protección de Datos Personales en Posesión de los Particulares:** https://www.diputados.gob.mx/LeyesBiblio/pdf/LFPDPPP.pdf — consultar texto vigente y sus reformas con un profesional.
+
+**[E5] OCDE, encuesta de 2026 sobre IA en pymes:** https://www.oecd.org/en/publications/empowering-smes-in-the-age-of-ai_bf5a9816-en.html — muestra no representativa de más de 2,000 pymes; identifica costos, mantenimiento y habilidades como barreras.
+
+**[E6] OWASP GenAI Security Project, Top 10 LLM Applications:** https://genai.owasp.org/llm-top-10/ — riesgos de seguridad, incluidos inyección de instrucciones, divulgación de información y agencia excesiva.
+
+**[E7] McKinsey, State of AI 2026 (25 de agosto de 2026):** https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai — adopción, rediseño de flujos y brecha entre uso y contribución al EBIT; encuesta no causal.
+
+## Documentos de la serie dentro de este repositorio
+
+**[D1]** `docs/AI-First-Company/01-Analisis-Critico-The-AI-First-Company.md` — evaluación de las ocho partes y 35 capítulos del libro.
+
+**[D2]** `docs/AI-First-Company/02-Resumen-Ejecutivo-Detallado-The-AI-First-Company.md` — síntesis ejecutiva original.
+
+**[D3]** `docs/AI-First-Company/03-Estrategias-y-Metodologias-The-AI-First-Company.md` — 30 metodologías, ocho plantillas y recorridos.
+
+**[D4]** `docs/AI-First-Company/04-Evaluacion-de-Viabilidad-y-Evidencia-The-AI-First-Company.md` — contraste científico, costos y riesgos.
+
+**[D5]** Este documento — propuesta de aplicación a Listo en Línea.
+
+## Transparencia y control de cambios
+
+- **No se accedió a producción** para validar bases de datos, mensajes reales, cobros, controladores, pacientes ni ingresos cobrados.
+- **No se modificó el código ni las reglas de los productos**; el único cambio realizado como parte de este informe será añadir documentación al repositorio corporativo.
+- **No se publicó información confidencial de clientes o prospectos.** Las tarifas y presupuestos usados en escenarios son construcciones de análisis, no ofertas reales, rentabilidad observada ni datos sensibles de contratos.
+- Los repositorios y servicios cambian. Cada fase debe volver a verificar `main`, despliegues, obligaciones legales, APIs, suscripciones y pruebas vigentes.
+- La estrategia es revisable: se recomienda revisión operativa mensual, revisión de economía trimestral y una revisión extraordinaria tras cualquier incidente crítico o cambio normativo.
+- **Fecha de corte de fuentes:** 8 de noviembre de 2026. **Edición:** 1.0.
+
+**Fin del Documento 5 — Serie The AI First Company (Listo en Línea).**
