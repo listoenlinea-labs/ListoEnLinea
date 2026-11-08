@@ -375,3 +375,325 @@ Definir presupuesto de 2028, objetivos de retención, crecimiento de ingresos re
 **IA madura en 2029, si las pruebas lo autorizan:** clasificación automática de casos sencillos, extracción con controles, preparación de respuestas y planes de acción, búsqueda con trazabilidad y mejora experimental de procesos internos. La autonomía sobre pagos, salud o acceso continuará limitada por riesgos y legislación independientemente de avances de modelos.
 
 **Punto de revisión anual:** evaluar retención, margen de contribución, tiempo de soporte por cliente, tasa de incidentes, dependencia del fundador, capacidad real y demanda por cada módulo antes de abrir un nuevo frente.
+
+
+# 13. Modelo de negocio, paquetes y política de precios
+
+Una compañía AI-first puede tener mejor productividad sin generar caja. Por eso cada oferta debe definir precio de implementación, ingreso recurrente, responsabilidad de soporte, garantías, exclusiones y costo de operar el servicio. Se propone un menú sencillo, con personalización tarifada por separado.
+
+## 13.1. Paquete 1 — diagnóstico digital y de procesos
+
+**Comprador:** administración de comunidad, clínica, comercio o pyme que no conoce bien su necesidad.
+
+**Entrega estándar:** sesión de descubrimiento, mapa de procesos, problemas priorizados, arquitectura preliminar, prototipo de flujo y presupuesto de implementación. No incluye desarrollar una aplicación terminada ni desplegar dispositivos.
+
+**Duración orientativa:** una a dos semanas según complejidad y acceso a información. **Cobro recomendado:** precio fijo conforme a horas y alcance, acreditable parcialmente a implementación si el negocio lo decide. Como ejercicio de planeación, no como tarifa de mercado, considerar un ticket ilustrativo de 3,000 a 12,000 MXN para diagnósticos básicos y recalcular para trabajos complejos.
+
+**Ventaja económica:** filtra prospectos, obliga a obtener datos reales y protege horas de consultoría que de otro modo quedarían sin facturar.
+
+## 13.2. Paquete 2 — implementación productiva
+
+**Entrega:** configuración, migración autorizada, personalización acotada, pruebas, capacitación, despliegue, plan de recuperación y acta de aceptación. Los integradores de hardware pueden presupuestarse por separado.
+
+**Cobro:** instalación inicial basada en trabajo real más un margen de riesgo y garantía. No esconder meses de desarrollo a medida dentro de una mensualidad baja. Declarar qué integración y cuántos usuarios o viviendas incluye el alcance.
+
+**Criterio de éxito:** un nuevo cliente se pone en marcha por un procedimiento reproducible que no requiere modificar el núcleo del software.
+
+## 13.3. Paquete 3 — suscripción y mantenimiento
+
+**Entrega:** uso de módulos contratados, actualizaciones programadas, respaldo y recuperación según SLA, soporte definido, monitoreo proporcional y cambios correctivos cubiertos. Las nuevas funcionalidades, migraciones extraordinarias, dispositivos ajenos y visitas fuera de alcance deben presupuestarse aparte.
+
+**Unidades de precio útiles:** mínimo mensual por organización más cargo escalonado por viviendas/usuarios o módulos, según la estructura real de costos. Evaluar con cuidado precios por vivienda que no cubran el costo fijo de atender a una comunidad pequeña.
+
+**Objetivo:** que el ingreso recurrente pague consumo de servicios, atención, mantenimiento, incidentes esperados y una contribución a los gastos generales, sin depender de cobros únicos para mantener la plataforma activa.
+
+## 13.4. Paquete 4 — automatización con IA bajo suscripción
+
+**Cobro:** implementación de flujo y suscripción por volumen/uso, con límite de tareas incluido y costo de excedentes comunicado. Separar procesamiento de IA de las tarifas del canal (por ejemplo WhatsApp) y del tiempo de validación humana.
+
+**Límite:** un bot de recepción o soporte puede operar en modo asistido. No cobrar como «conciliación automática» una función que sólo extrae campos de archivos.
+
+**Recomendación comercial:** vender resultado verificable ("preparar reportes en menos tiempo", "ordenar solicitudes"), no un número de tokens, prompts o agentes.
+
+# 14. Economía unitaria: cuánto debe aportar cada cuenta
+
+## 14.1. Modelo general
+
+**MRR (ingreso recurrente mensual):** cuotas de suscripción cobrables y no ingresos de instalaciones únicas.  
+**Costos variables de caja:** nube, almacenamiento, mensajes, API, licencias, proveedores externos y comisiones no repercutidas.  
+**Horas directas:** soporte, conciliación excepcional, pruebas y mantenimiento específicas del cliente.  
+**Contribución por cuenta:** MRR - costos variables de caja - valor económico de horas directas.  
+**Margen de contribución:** contribución / MRR, antes de gastos generales, impuestos, marketing, desarrollo de nuevos productos y remuneración directiva no imputada.
+
+**Costo total de cliente:** incluir instalación, migración, ventas, soporte, renovación, incidentes y baja, especialmente cuando existe hardware físico.
+
+El costo/hora de referencia empleado en los escenarios siguientes es **350 MXN como supuesto interno ilustrativo**, no nómina real, sueldo de empleados, precio de venta ni dato contable verificado. Reemplazarlo por el costo real completo de cada perfil antes de decidir.
+
+## 14.2. Ejemplo de unidad: comunidad con 300 viviendas
+
+Supuestos totalmente hipotéticos: 300 viviendas, tarifa equivalente a 45 MXN por vivienda/mes, ingreso 13,500 MXN/mes. Infraestructura y mensajería 1,500 MXN/mes; soporte 10 horas a 350 MXN = 3,500 MXN; reserva operativa 500 MXN. **Contribución antes de gastos generales: 8,000 MXN/mes (59.3% del MRR)**.
+
+**Sensibilidad:** si la atención crece de 10 a 22 horas mensuales, la contribución cae de 8,000 a **3,800 MXN**. Si el hardware requiere visitas, combustible o soporte 24/7, deben presupuestarse además. Este escenario no representa un contrato real ni una recomendación de precio fijo a cualquier comunidad.
+
+## 14.3. Ejemplo de unidad: consultorio administrativo
+
+Supuestos hipotéticos: suscripción de 1,800 MXN/mes; infraestructura y comunicaciones 350 MXN; soporte 3 horas a 350 MXN = 1,050 MXN; provisión de incidentes 200 MXN. **Contribución: 200 MXN/mes (11.1%)**, antes de ventas, desarrollo y obligaciones clínicas adicionales.
+
+**Conclusión:** la suscripción de un consultorio puede ser insuficiente si demanda soporte y cambios frecuentes. Antes de comercializar masivamente, el servicio debe automatizar soporte, limitar alcance o cambiar su precio. Un ticket bajo sólo funciona con muchas cuentas estandarizadas, soporte muy reducido o ingreso adicional legítimo.
+
+## 14.4. Ejemplo de unidad: retainer de automatización
+
+Supuestos hipotéticos: servicio de automatización a 2,500 MXN/mes; consumo tecnológico 300 MXN, soporte/seguimiento 2 horas a 350 MXN = 700 MXN y reserva 400 MXN. **Contribución: 1,100 MXN/mes (44%)**. Si cada cliente exige un flujo propio que cambia semanalmente, el costo/hora se incrementa y puede eliminar el beneficio.
+
+**Aprendizaje:** la configuración repetible es condición para que un servicio a medida pueda sostener ingresos recurrentes.
+
+# 15. Tres escenarios de ingresos recurrentes al mes 12
+
+Estas cifras son un **modelo de sensibilidad de cartera futura**, no previsión de contratos ni proyección de ventas certificada. Se calculan a mes 12 como una fotografía de MRR; no equivalen a ingreso acumulado del año ni incluyen implementaciones, IVA, ISR, comisiones de venta, nómina corporativa, salarios directivos, adquisición de clientes o reserva fiscal.
+
+| Variable | Conservador | Base | Expansión |
+|---|---:|---:|---:|
+| Comunidades activas | 1 | 3 | 6 |
+| Viviendas promedio por comunidad | 250 | 300 | 350 |
+| Cuota ilustrativa por vivienda (MXN/mes) | 35 | 45 | 50 |
+| Ingreso mensual de comunidades (MXN) | 8,750 | 40,500 | 105,000 |
+| Consultorios administrativos | 2 × 1,500 | 5 × 1,800 | 10 × 2,000 |
+| Ingreso mensual de consultorios (MXN) | 3,000 | 9,000 | 20,000 |
+| Retainers de automatización | 2 × 1,500 | 4 × 2,500 | 8 × 3,000 |
+| Ingreso mensual de retainers (MXN) | 3,000 | 10,000 | 24,000 |
+| **MRR total ilustrativo (MXN)** | **14,750** | **59,500** | **149,000** |
+| Costos variables de caja (MXN/mes) | 5,000 | 14,000 | 33,000 |
+| Horas directas mensuales | 30 | 70 | 160 |
+| Valorización de horas a 350 MXN | 10,500 | 24,500 | 56,000 |
+| **Contribución antes de gastos generales (MXN)** | **-750** | **21,000** | **60,000** |
+
+**Lectura correcta:** en el escenario conservador se pierde dinero bajo los supuestos de la unidad, incluso antes de gastos corporativos. El escenario base genera contribución, pero no demuestra que la empresa sea rentable después de salarios, dirección, adquisición y desarrollo. El de expansión consume 160 horas mensuales de atención, lo que puede forzar una contratación o reducir la capacidad comercial del equipo.
+
+**Regla para usar esta tabla:** cambiar número de cuentas, precio, soporte por cuenta, costo tecnológico, demora de cobro y churn con datos reales. Evaluar escenarios con cero nuevas ventas durante varios meses. No construir estructura fija basada en el escenario de expansión.
+
+## 15.1. Fórmulas para completar el modelo con datos verdaderos
+
+**Ingreso recurrente esperado:** cuentas activas × precio medio por cuenta + complementos pagados - descuentos recurrentes.  
+**Margen operativo real:** ingresos cobrados - todos los costos recurrentes - nómina e impuestos relevantes - depreciación/amortización procedente - gastos generales.  
+**CAC:** costo de prospección y venta del periodo / nuevos clientes ganados atribuibles.  
+**Recuperación de CAC:** CAC / contribución mensual promedio del cliente, si el denominador es positivo.  
+**Churn de clientes:** cuentas canceladas en el periodo / cuentas al inicio.  
+**Churn de ingresos:** MRR perdido en periodo / MRR inicial, con tratamiento explícito de expansiones.  
+**Punto de equilibrio de suscripción:** costos atribuibles fijos mensuales / contribución por cuenta, si el modelo es homogéneo.
+
+**Precaución financiera:** no contar una hora liberada como ingreso si no se vendió el servicio adicional ni se eliminó un gasto; tampoco añadir por separado la misma contribución dentro de un margen calculado.
+
+# 16. Presupuesto de ejecución para los primeros 90 días
+
+## 16.1. Trabajo del equipo
+
+Propuesta de asignación durante 90 días, **270–360 horas económicas** dedicadas al programa: producto y pruebas 100–140 horas; ventas/oferta 60–80; piloto interno de IA 40–55; documentación, seguridad y datos 50–65; revisión de dirección 20 horas. No representa la jornada total de ambos colaboradores: el resto debe mantener servicio contratado, incidencias y otras obligaciones.
+
+Con el **supuesto ilustrativo** de 350 MXN/hora de costo económico completo, son **94,500 a 126,000 MXN** de capacidad que se deja de utilizar en otra cosa. No es gasto de caja incremental si la nómina ya se paga, pero sí tiene costo de oportunidad y debe aparecer en la decisión de inversión.
+
+## 16.2. Gasto de caja adicional
+
+Una banda exploratoria de **10,000–35,000 MXN durante 90 días** podría distribuirse entre servicios/API e infraestructura de prueba (3,000–12,000), validaciones y desplazamientos (2,000–8,000) y apoyo externo acotado en revisión contractual, privacidad o seguridad (5,000–15,000). **No es una cotización ni asegura cobertura legal completa**, especialmente en servicios de salud o control físico.
+
+**Inversión económica ilustrativa total del programa:** **104,500–161,000 MXN** combinando horas internas valoradas y caja incremental. Antes de aprobarla, comparar con el margen de contribución mensual esperado y la probabilidad real de conseguir contratos.
+
+## 16.3. Puerta para autorizar gasto mayor
+
+No adquirir hardware, contratar una API compleja o construir una capa multi-tenant costosa hasta contar con: comprador identificado; alcance; beneficio medible; arquitectura y datos; costo de mantenimiento; responsable de soporte; criterios de aceptación; contrato y plan de salida. Si falta un elemento, financiar sólo un prototipo reversible o trabajo de descubrimiento.
+
+## 16.4. Costos de IA y WhatsApp: cálculo que no depende de una marca
+
+Los modelos comerciales de API suelen cobrar por volumen de entrada/salida, y sus tarifas pueden cambiar, incluso por velocidad, caché, región y herramientas. Para presupuestar 1,000 tareas al mes con 2,500 tokens de entrada y 350 de salida por tarea, la facturación de tokens es **2.5 × tarifa de entrada por millón + 0.35 × tarifa de salida por millón**, en la moneda definida por el proveedor; faltan reintentos, RAG, adjuntos, almacenamiento y revisión. Reemplazar con la tarifa vigente al momento de compra. [E1]
+
+La WhatsApp Business Platform aplica categorías de mensajes y estructuras de tarifas por país y fecha. Consultar la tarjeta oficial de Meta antes de presupuestar, separando mensajes de utilidad, marketing, autenticación y otras condiciones; evitar suponer gratis todos los recordatorios o que la misma tarifa aplica a todos los países. [E2]
+
+# 17. Capacidad de dos personas: cómo proteger margen y continuidad
+
+## 17.1. Política de trabajo en curso
+
+**No más de dos grandes iniciativas en desarrollo simultáneo**, más incidentes contractuales. Cada tarea entra a una cola priorizada; si una urgencia de cliente supera el límite, se debe posponer otra iniciativa de manera explícita. Mantener una reserva operativa para incidentes y mantenimiento no previstos, calculada a partir de horas reales.
+
+El equipo debe tener una sola cola de problemas por prioridad y un registro de cambios por producto. Crear una nueva aplicación para resolver un requerimiento común sólo es justificable si los módulos existentes no sirven.
+
+## 17.2. Roles sugeridos, no nombramientos existentes
+
+**Responsable de negocio y dirección:** entrevistas de cliente, prioridades, precio, aprobación de cambios de alcance, contratos, métricas de margen y aceptación del trabajo.
+
+**Responsable de arquitectura y operaciones técnicas:** pruebas, integraciones, seguridad, despliegues, respaldos, monitoreo y procedimientos de recuperación.
+
+**Responsables compartidos:** documentación de requisitos, revisión de IA, atención de incidentes, validación con usuarios y calendario de mejoras.
+
+**Especialistas externos según riesgo y costo:** instalación física de controladores, seguridad de red, asesoría jurídica de datos personales, fiscalidad, cumplimiento clínico y soporte de equipos médicos. La contratación de cualquiera requiere términos y responsabilidad concretos.
+
+## 17.3. RACI simplificado
+
+| Decisión | Negocio / dirección | Ingeniería | Cliente autorizador |
+|---|---|---|---|
+| Priorización de producto | Aprueba | Asesora | Consultado |
+| Precio y contrato | Aprueba | Estima esfuerzo | Acepta alcance |
+| Diseño técnico | Informado | Responsable | Consultado |
+| Cambio en datos financieros | Autoriza política | Implementa control | Aprueba operación según contrato |
+| Cambio de vigencia o hardware | Autoriza condiciones | Verifica y registra | Autoriza acción |
+| Entrega de datos médicos | Autoriza política comercial | Configura controles | Responsable según contrato y ley |
+| Incidente crítico | Coordina comunicación | Ejecuta recuperación | Recibe información / interviene |
+| Publicar caso de éxito | Aprueba | Verifica datos técnicos | Autoriza divulgación |
+
+## 17.4. Soporte y horarios que se pueden cumplir
+
+Definir SLA por plan. Una empresa pequeña no puede prometer respuesta inmediata 24/7 sin turnos, personal, alertas, redundancia y presupuesto. Ejemplo orientativo para un servicio administrado **en horario laboral acordado**: prioridad 1 con recepción y clasificación urgente y objetivo de primera respuesta dentro de cuatro horas laborales; prioridad 2 dentro del siguiente día laboral; prioridad 3 según backlog programado. Estos tiempos son propuestas a validar con capacidad real, no contratos actuales.
+
+Para acceso vehicular y otros servicios críticos, diferenciar **disponibilidad del software** de **respuesta humana presencial**, del mantenimiento de internet y de la capacidad del proveedor del dispositivo. Un SLA comercial debe dejar clara la responsabilidad de cada capa y el procedimiento local de contingencia.
+
+## 17.5. Condición para contratar más capacidad
+
+Considerar apoyo externo o contratación cuando, durante ocho semanas, se cumplan simultáneamente: contribución recurrente positiva y cobrable, tickets de soporte que ya consumen capacidad reservada, backlog comercial rechazado por falta de tiempo y procedimientos estables para delegar. La contratación debe basarse en la restricción demostrada; no sólo en haber lanzado nuevas funcionalidades.
+
+# 18. Comercialización: embudo, segmentos y mensajes
+
+## 18.1. Cliente ideal inicial de CondoOps
+
+Administración o comité de comunidad que tenga dificultad documentada con cobros, morosos, comunicación, control de acceso o informes; disponga de responsable para autorizar procesos y presupuesto; acepte registrar correctamente sus reglas; y pueda realizar una prueba controlada. Un prospecto que únicamente desea «tener IA» pero no puede identificar un proceso costoso debe pasar primero por diagnóstico.
+
+La cercanía geográfica en la fase inicial importa si la solución requiere controlador o red local. Mantener una oferta exclusivamente de software para comunidades fuera del radio de soporte presencial acordado.
+
+## 18.2. Investigación comercial antes de la demo
+
+Preguntar: ¿cuántas viviendas y cuántas activas?, ¿cómo se registran pagos?, ¿cómo se confirma realmente la transferencia?, ¿qué pasa con pagos parciales?, ¿cuánto tarda una aclaración?, ¿qué dispositivos existen?, ¿quién los administra?, ¿qué pasa en un apagón?, ¿qué decisiones puede tomar el guardia?, ¿cuánto cuesta hoy el problema?, ¿quién compra y quién firma? No solicitar archivos de residentes, credenciales o estados de cuenta por canales inseguros durante la prospección.
+
+**Resultado:** una ficha de oportunidad con dolor, responsable, presupuesto, datos, riesgo, fecha y siguiente paso acordado.
+
+## 18.3. Narrativa de venta que no dependa de moda
+
+**Apertura:** «Desarrollamos software ajustado a las reglas de su comunidad y lo conectamos con herramientas existentes cuando hay una integración técnicamente viable».
+
+**Prueba:** mostrar flujo de cuota, cuenta, reporte y un dispositivo de prueba, con incertidumbres claramente identificadas.
+
+**Beneficio:** menos duplicación de trabajo, seguimiento de movimientos y visibilidad para administración; el valor de la seguridad debe tratarse con responsabilidad.
+
+**IA opcional:** «Podemos agregar un módulo para clasificar solicitudes y preparar reportes, sujeto a pruebas y aprobación de la administración». No atribuir a IA acciones que ejecuta el backend con reglas convencionales.
+
+## 18.4. Experimento de captación de 90 días
+
+Seleccionar 40–60 prospectos relevantes, agrupados por tamaño y problema. Documentar contacto, conversación, propuesta, motivo de rechazo y compromiso de siguiente paso. Crear dos versiones de la oferta —una centrada en cobros y otra en operación integral—, compararlas sin exagerar resultados y revisar semanalmente.
+
+**Hipótesis a validar:** al menos 10 entrevistas de problema, 3 propuestas concretas y una conversación seria sobre un piloto pagado. Estos números son metas operativas sugeridas, no tasas del mercado. Si la conversión es baja, revisar precio, autoridad del comprador y valor ofrecido antes de comprar publicidad.
+
+## 18.5. Sitio web como instrumento medible
+
+El sitio de Listo en Línea contiene un acceso a una demostración y formularios de contacto. Recomendación: instrumentar eventos de visitas, clic en demo, demo iniciada/completada, contacto solicitado, reunión agendada, propuesta enviada y cierre, conservando privacidad y permisos. No instalar un sistema pesado de CRM si una hoja estructurada o sistema simple cubre la etapa.
+
+Se deben crear casos de estudio con permiso de clientes, páginas orientadas a búsqueda de problemas concretos, un formulario breve de diagnóstico y una explicación honesta de alcances. Evitar que la demo generativa invente retornos o precios de productos como si fueran resultados reales. [R1]
+
+# 19. Indicadores y cuadro de mando de dirección
+
+## 19.1. Finanzas y cartera
+
+- **MRR cobrado**, no sólo facturado; nuevos MRR y pérdidas por cancelación.
+- **Contribución por cuenta y por línea**, incluyendo horas de soporte realmente trabajadas.
+- **Ingresos únicos frente a recurrentes** para conocer dependencia de instalaciones.
+- **Tiempo de cobro** y cuentas con pagos atrasados.
+- **Costo de adquisición** y retorno de la actividad comercial, si existe un registro consistente.
+
+## 19.2. Entrega y calidad
+
+- Tiempo desde aceptación de requerimiento hasta despliegue comprobado.
+- Porcentaje de requerimientos entregados sin retrabajo significativo.
+- Defectos críticos en producción y tiempo hasta contención.
+- Porcentaje de restauraciones de respaldos probadas satisfactoriamente.
+- Tiempo de puesta en marcha de cliente nuevo y personalizaciones que requieren cambios al núcleo.
+
+## 19.3. Producto y adopción
+
+- Comunidades activas que realizan procesos reales, no sólo cuentas creadas.
+- Porcentaje de conciliaciones correctamente verificadas; comprobantes pendientes.
+- Porcentaje de eventos físicos que se registran con estado confirmado.
+- Uso de reportes por administradores y problemas resueltos.
+- Para clínica: citas confirmadas y comunicaciones autorizadas, sin inferir resultados clínicos.
+
+## 19.4. IA y automatización
+
+- Costo de IA por resultado aceptado, incluyendo revisión.
+- Tiempo neto ahorrado medido y **aprovechado** en una tarea de valor.
+- Tasa de respuestas que necesitan corrección; errores por clase y severidad.
+- Fugas de información o acciones no autorizadas: objetivo **cero incidentes**; cualquier incidencia crítica dispara revisión.
+- Pruebas de regresión aprobadas antes de cambiar modelo, prompt, documentos o conectores.
+
+## 19.5. Objetivos hipotéticos de control en 90 días
+
+| Indicador | Meta de trabajo, no dato histórico |
+|---|---|
+| Procesos prioritarios con dueño, entrada, salida y regla documentada | 100% de los seleccionados |
+| Casos críticos de pago y acceso simulados antes de intervención real | 100% del conjunto de aceptación aprobado |
+| Pilotos internos de IA medidos con línea base y revisión | 1 completo |
+| Propuestas que usan plantilla aprobada con alcance claro | 100% de las nuevas |
+| Defectos críticos conocidos al autorizar nuevo despliegue | 0 abiertos |
+| Restauración de respaldo en un entorno controlado | 1 prueba completa documentada |
+| Prospectos con necesidad, autoridad, presupuesto y siguiente paso | Por lo menos 10 conversaciones cualificadas |
+| Horas reales de soporte registradas por producto | Cobertura total del periodo de prueba |
+
+**No confundir:** una meta de «cero defectos críticos abiertos» no prueba ausencia de defectos desconocidos; sólo impide ignorar riesgos ya detectados.
+
+# 20. Gobierno de IA, seguridad y protección de datos
+
+## 20.1. Política corporativa mínima
+
+**Permitido de inicio:** ayuda a redacción no sensible, investigación con fuentes, documentación de código, clasificación de tickets de bajo riesgo, pruebas de software y análisis de datos agregados. **Condicionado:** lectura de datos de clientes con bases legales, contratos, controles de acceso y minimización; extracción de comprobantes que no alteren cuentas; agentes de escritura para acciones reversibles. **Prohibido sin aprobación especial:** decisiones clínicas, acreditaciones financieras, control físico, publicación de credenciales o tratamiento indiscriminado de datos sensibles mediante modelos externos.
+
+El NIST AI RMF y su perfil de IA generativa son referencias voluntarias para diseñar gobierno, medición y controles según contexto; no sustituyen obligaciones jurídicas ni certifican una plataforma comercial. [E3]
+
+## 20.2. Inventario de datos y terceros
+
+Mantener para cada integración: controlador de los datos, finalidad, base legitimadora, categoría de información, proveedor, ubicación de tratamiento cuando aplique, acceso, retención, borrado, subprocesadores, incidentes y responsable. Revisar condiciones del proveedor antes de introducir datos de clientes. Usar datos ficticios en pruebas hasta que exista autorización.
+
+## 20.3. Ley mexicana y datos de salud
+
+La Ley Federal de Protección de Datos Personales en Posesión de los Particulares fue renovada en marzo de 2025 y debe consultarse en su texto vigente y sus reformas; la empresa debe evaluar avisos, finalidades, medidas de seguridad, derechos de titulares, encargados y transferencias. Para servicios de salud y datos personales sensibles se exige un análisis jurídico especializado antes de la producción. Este plan no constituye asesoría jurídica. [E4]
+
+## 20.4. Ataques contra agentes y conectores
+
+El riesgo no se limita a «alucinaciones»: un documento o mensaje malicioso puede ordenar a un agente que ignore instrucciones, envíe información o ejecute herramientas fuera del propósito. Basarse en controles de identidad, scopes, validación, listas de acciones, revisión de efectos, aislamiento y trazabilidad; no en una frase de prompt. OWASP recoge prompt injection, divulgación de datos y autonomía excesiva como clases de riesgo. [E6]
+
+## 20.5. Respuesta a incidentes
+
+1. Detectar y clasificar: incidente de calidad, seguridad, dinero, datos o hardware.
+2. Contener: detener automatización, revocar credenciales o desconectar conmutadores seguros según protocolo.
+3. Preservar evidencia protegida: versión de flujo, actor, estado, momento y acciones realizadas.
+4. Recuperar: restaurar servicio o modo manual verificado; no repetir operaciones con riesgo de duplicidad.
+5. Comunicar: al responsable contractual y a interesados/autoridades cuando corresponda legalmente.
+6. Aprender: registrar causa, corregir control y añadir prueba de regresión.
+
+**Puertas inmediatas de suspensión:** acreditación sin evidencia, duplicación de movimientos, cambio no autorizado de acceso, fuga de datos personales, envío cruzado entre clientes o pérdida de trazabilidad de una acción crítica.
+
+# 21. Escenarios de fracaso, señales tempranas y respuesta
+
+## Fracaso 1. Más proyectos y el mismo ingreso
+
+**Señal:** crecimiento de demos, commits y personalizaciones, sin incremento de MRR ni margen. **Respuesta:** limitar proyectos simultáneos, cobrar descubrimiento, estandarizar módulos y revisar el embudo.
+
+## Fracaso 2. El hardware domina la agenda
+
+**Señal:** visitas y llamadas de caseta absorben tiempo de ingeniería. **Respuesta:** contratos de alcance, procedimientos de red y dispositivos, diagnósticos pagados, aliado instalador y plan de contingencia en sitio.
+
+## Fracaso 3. Automatización que produce incidentes
+
+**Señal:** comprobantes duplicados, respuestas no autorizadas o estados financieros inconsistentes. **Respuesta:** suspender la escritura automática, reconciliar datos, revisar idempotencia y mantener humanos en el bucle.
+
+## Fracaso 4. Precio mensual demasiado bajo
+
+**Señal:** margen de contribución negativo tras contabilizar mensajes, soporte y cambios. **Respuesta:** definir precio mínimo por sitio, cobrar instalación, delimitar bolsa de soporte, evitar personalización ilimitada.
+
+## Fracaso 5. Venta basada en «IA» sin utilidad demostrada
+
+**Señal:** prospectos piden «algo con IA», pero no aceptan un piloto pagado. **Respuesta:** volver a preguntas de costo, tiempo y calidad; demostrar un resultado con evidencia de negocio.
+
+## Fracaso 6. Dependencia del fundador
+
+**Señal:** ninguna entrega, venta o cambio de un sistema puede completarse sin una persona. **Respuesta:** crear habilidades, SOP, acceso responsable a información, matriz de permisos y aprobación por categoría.
+
+## Fracaso 7. Soluciones clínicas prematuras
+
+**Señal:** se solicita usar datos reales antes de pruebas, contratos y autorizaciones. **Respuesta:** mantener demostración con datos ficticios; contratar revisión y validación antes de migrar datos.
+
+## Fracaso 8. Dependencia técnica de una herramienta
+
+**Señal:** el proveedor cambia API/precio o deja de existir y el producto no puede operar. **Respuesta:** adaptadores, exportación documentada, alternativas de proveedor, pruebas de transición y modo manual controlado.
