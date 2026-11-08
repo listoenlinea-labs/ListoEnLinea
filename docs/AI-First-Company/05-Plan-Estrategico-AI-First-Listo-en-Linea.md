@@ -182,3 +182,196 @@ Floristería Magno evidencia trabajo en páginas de catálogo, carrito, pago, ra
 **IA útil:** clasificación de catálogo, borradores de fichas con supervisión, respuestas frecuentes basadas en políticas reales, análisis de patrones de consultas y ayuda interna para crear contenido. **No útil por defecto:** agente que garantiza existencias, fecha de entrega o reembolso sin consultar inventario y reglas vigentes.
 
 **Decisión de inversión:** continuar como servicio repetible siempre que la demanda pague personalización y soporte; no comenzar un SaaS de comercio horizontal si no hay ventaja distintiva probada frente a plataformas establecidas.
+
+
+# 7. HospitalOS y sistemas médicos: descubrimiento antes que producción
+
+HospitalOS muestra una propuesta de modernización con veinte pantallas y documentación de requisitos; el README la denomina **demo funcional con datos ficticios** y señala explícitamente que no está lista para un despliegue clínico o fiscal. La matriz de requisitos documenta funciones existentes, parciales y ausentes, y varias son aproximaciones de demostración. [R7]
+
+**Recomendación comercial:** ofrecer primero diagnóstico funcional y plan de migración, con sesiones de observación de recepción, caja, farmacia, inventario y facturación. Entregar matriz de procesos, brechas, costos estimados, plan de datos y riesgos, con precio de consultoría por etapa. No vender una licencia SaaS hospitalaria completa antes de contar con flujos de punta a punta aprobados, controles y presupuesto de implementación sostenido.
+
+**Uso razonable de IA durante descubrimiento:** indexar manuales autorizados, cruzar pantallas con requisitos, proponer pruebas, detectar contradicciones de especificación y redactar minutas para aprobación. Usar datos ficticios o anonimizados de forma robusta. Nunca ingresar expedientes reales en herramientas no autorizadas ni permitir un agente que genere decisiones clínicas.
+
+**Separar servicios distintos:** la instalación de red o software de monitorización de pacientes (CMS) es una responsabilidad de infraestructura y continuidad que no debe confundirse con el roadmap de IA ni con HospitalOS. Se necesitan alcances, contrato y procedimientos independientes para cada servicio, incluso cuando comparten cliente.
+
+**Condiciones para convertirlo en producto estratégico:** validación de demanda en varios hospitales similares, patrocinio económico, estándares clínico/administrativos aprobados, arquitectura local y offline claramente especificada, seguridad, soporte formal y estimación de costo total que justifique alejar capacidad del producto principal. Si faltan esos requisitos, mantener un laboratorio demostrativo sin prometer operación real.
+
+# 8. API de pagos: infraestructura crítica, no producto de IA
+
+El repositorio API-banco contiene un servicio experimental en Python/FastAPI que consulta el portal público de CEP de Banxico. Su documentación aclara: **no es API oficial, no mueve dinero, no cubre depósitos en efectivo y no confirma pagos sin CEP XML coincidente**. Puede detenerse ante CAPTCHA u otros cambios del portal y su disponibilidad no tiene SLA contractual. [R8]
+
+**Política corporativa recomendada:** la verificación financiera sólo puede quedar confirmada mediante evidencia bancaria suficiente y conciliación de reglas, nunca mediante OCR o la apariencia de un comprobante. El servicio experimental puede enriquecer un flujo de revisión, pero **no sustituye un proveedor bancario contratado** si se necesita disponibilidad garantizada.
+
+**Opciones de evolución:** mantener como auxiliar con límites y fallbacks; negociar acceso a mecanismos autorizados de conciliación bancaria; evaluar enlaces SPEI, CoDi o pasarelas según comisión, confirmación, reversos, cumplimiento y cobertura real; no decidir únicamente por evitar una comisión. Las alternativas requieren investigación comercial y contractual específica antes de cotizar.
+
+**Arquitectura de contingencia:** PENDIENTE → REINTENTAR_CON_LÍMITE → VERIFICADO_CON_EVIDENCIA / REQUIERE_REVISIÓN. No pasar de PENDIENTE a PAGADO por agotar reintentos ni por inferencia del modelo. Identificar duplicados por movimiento y beneficiario, conservar trazabilidad y separar el comprobante visual de la transacción comprobada.
+
+# 9. Arquitectura objetivo: plataforma modular con límites claros
+
+## 9.1. Principios de arquitectura
+
+1. **Dominio antes que proveedor de IA.** Las reglas de negocio viven en aplicaciones y bases de datos; el modelo sólo trabaja en tareas semánticas autorizadas.
+2. **Portabilidad por diseño.** Datos y procedimientos en formatos estándar, registros versionados y adaptadores para proveedores externos.
+3. **Aislamiento por cliente.** Cada comunidad, clínica o comercio tiene permisos, datos y claves independientes o particiones estrictamente controladas. No migrar a multitenencia sin pruebas de aislamiento.
+4. **Fuente de verdad explícita.** La base transaccional mantiene el estado de pagos, agenda o acceso; la IA no inventa estados.
+5. **Eventos idempotentes.** Webhooks y reintentos no deben duplicar pagos, mensajes, altas o efectos físicos.
+6. **Aprobación humana por riesgo.** El sistema puede preparar, pero los actos económicos y sensibles necesitan validación autorizada.
+7. **Observabilidad mínima real.** Registros de cambios, correlación de eventos, alertas, métricas y una guía de recuperación.
+8. **Evolución incremental.** No iniciar una costosa reescritura multi-tenant antes de tener múltiples clientes y requerimientos repetidos.
+
+## 9.2. Diagrama lógico por capas
+
+**Capa de experiencia:** portales para administración, usuarios, clientes comerciales y personal autorizado; componentes reutilizables y accesibilidad.
+
+**Capa de negocio determinista:** módulos de cuentas, estado de pago, roles, reglas, agenda, pedidos, reportes y autorizaciones. Cada operación expone validaciones y transacciones comprobables.
+
+**Capa de integración:** adaptadores para correo, WhatsApp Business Platform, calendarios, pasarelas, CEP/banca según alcance, ZKTeco y sistemas físicos mediante puente seguro. Cada adaptador controla permisos, reintentos y cuotas de API.
+
+**Capa de eventos y tareas:** un registro durable de eventos, un patrón outbox o cola donde haga falta, identificadores idempotentes, tareas pendientes y estado de conciliación. La interfaz no presupone que un envío o cambio remoto fue exitoso por haber iniciado el comando.
+
+**Capa opcional de IA:** gateway de modelos con proveedores intercambiables; clasificadores, extracción documental y asistentes con contexto. Su salida queda marcada como propuesta, con calidad estimada por pruebas y referencias rastreables.
+
+**Capa de seguridad y auditoría:** autenticación robusta, autorización por rol y contexto, cifrado, control de secretos, bitácoras, respaldos y procedimientos de incidentes.
+
+**Capa de observabilidad y finanzas:** logs con datos mínimos, métricas de tiempo y error, costo por solicitud, costo por cliente y panel de salud de integraciones.
+
+## 9.3. Tres decisiones sobre reutilización
+
+**Primera — catálogo común de módulos:** aprovechar autenticación, permisos, registros de auditoría, envío de mensajes, plantillas de correo y reportes, pero sin extraerlos a microservicios independientes antes de tener necesidad probada.
+
+**Segunda — despliegue gradual:** una arquitectura modular monolítica por producto con adaptadores bien separados puede resultar más barata de operar que muchos microservicios; la frontera del módulo importa más que la cantidad de servidores.
+
+**Tercera — multitenencia cuando se justifique:** iniciar nuevas cuentas con aislamiento verificable y un esquema de datos compatible con expansión. Migrar sólo después de planificar exportación, permisos, reconciliación y protección de datos.
+
+## 9.4. Ejemplo técnico: comprobante por WhatsApp
+
+A. Meta recibe un mensaje; se valida la autenticidad del webhook y se registra identificador único.  
+B. Se verifica tipo, tamaño y política de retención del archivo.  
+C. El sistema crea un registro NO_VERIFICADO; si es duplicado, no repite el evento.  
+D. Un extractor opcional sugiere campos; guarda valor, origen, confianza observada y evidencia.  
+E. Administración y/o un servicio autorizado verifican movimiento, identidad, monto, cuenta y duplicados.  
+F. El backend aplica reglas de cuota sin alterar fechas ni montos por aproximación.  
+G. La capa de integración calcula consecuencias del pago con reglas aprobadas; cualquier orden física requiere bitácora, reintentos y verificación del resultado.  
+H. Se envía confirmación únicamente cuando el estado transaccional autorizado lo justifica.
+
+La bitácora de Misión Jardines indica que el piloto de recepción de comprobantes por WhatsApp ya se incorporó en código **desactivado por defecto**, sin acreditación automática; faltan pruebas, configuración real y despliegue. Por tanto, el ejemplo representa un **diseño objetivo**, no un flujo totalmente operativo ya acreditado. [R2]
+
+## 9.5. Reglas de seguridad para integración con hardware
+
+- No publicar IP, contraseñas, tokens, puertos administrativos o credenciales de dispositivos en GitHub.
+- No inferir que una IP pública observada de un usuario pertenece a la caseta; validar identidad del sitio y del puente.
+- Preferir conexión saliente cifrada, autenticación mutua si es viable, permisos estrictos y monitoreo; evaluar VPN empresarial donde corresponda.
+- Diferenciar solicitud de acción, comando enviado, respuesta del controlador y resultado físico observado; no equipararlos.
+- Mantener operador humano y procedimiento local cuando se pierde nube, red o energía.
+- No usar visión o texto generado para decidir unilateralmente admisión de personas.
+- En pruebas, usar TAGs y escenarios autorizados; no bloquear residencias reales sin coordinación y plan de reversión.
+
+## 9.6. Paquetes de contexto y habilidades internas
+
+No es necesario crear una gran base vectorial desde el primer día. Iniciar con documentos cortos, versionados, auditables y recuperables por repositorio; sólo añadir RAG cuando exista volumen y preguntas que justifiquen búsqueda avanzada.
+
+**Conocimiento empresarial compartido:** propuesta de valor, productos, política de cotización, guía de servicio, procedimientos de soporte, criterios de QA, protección de datos, preguntas frecuentes y ejemplos aprobados.
+
+**Conocimiento por producto:** reglas, estados, permisos, diagramas, errores conocidos, aceptación y restricciones específicas. Separar un manual público de una configuración privada.
+
+**Habilidades de IA candidatas:** preparar propuesta comercial; elaborar matriz de requerimientos; transformar incidencias en tickets; redactar respuestas de soporte; resumir cambios de GitHub contra requisitos; auditar contenido SEO; proponer casos de prueba. Ninguna habilidad debe hacer commits automáticos a producción o escribir en sistemas de clientes sin autorización y pruebas.
+
+**Reglas de adopción:** cada habilidad debe tener dueño, versiones, casos de éxito y rechazo, tiempo de revisión, posibilidad de regresión y documentación de uso permitido.
+
+# 10. Plan de 90 días: entregables, fechas y puertas de decisión
+
+**Calendario de referencia:** 9 de noviembre de 2026 al 6 de febrero de 2027. Las fechas son una propuesta de planeación, no entregas ya comprometidas. La implantación debe cerrarse por evidencias, no por calendario.
+
+## Semanas 1–2 — línea base, inventario y protección
+
+**Objetivo:** construir la fotografía operativa real antes de adoptar nuevas herramientas.
+
+**Tareas:** registrar horas de desarrollo, soporte, ventas y administración por producto; inventariar clientes activos y obligaciones sin exponer datos personales en el repositorio público; confirmar costos actuales de nube, dominio, mensajería y viajes; realizar un mapa de procesos de cada servicio; seleccionar fuentes de verdad y dueños de los procedimientos.
+
+**Entregables:** tablero de seis KPIs, registro de riesgos y backlog con máximo dos iniciativas productivas. **Puerta:** existe un proceso con línea base, responsable y criterio cuantificable de éxito.
+
+## Semanas 3–4 — producto CondoOps y oferta comercial
+
+**Objetivo:** establecer límites entre plataforma reutilizable, personalización y hardware por sitio.
+
+**Tareas:** inventariar módulos del repositorio, identificar componentes comunes, documentar requisitos de instalación, construir checklist de migración y devolución de datos, preparar propuesta con tres capas y responsabilidades de soporte, redactar un caso de estudio publicable sólo con aprobación.
+
+**Entregables:** ficha de producto 1.0, catálogo de módulos, proceso de alta y propuesta comercial estándar. **Puerta:** una demostración reproduce un proceso normal y uno excepcional usando datos ficticios representativos.
+
+## Semanas 5–6 — pruebas de extremo a extremo y continuidad
+
+**Objetivo:** reducir incertidumbre del código ya desarrollado antes de agregar funciones.
+
+**Tareas:** diseñar y ejecutar pruebas de pago y morosidad en entorno controlado; verificar fallas de red, reintentos y bitácora C3 sin comprometer accesos reales; probar que un webhook repetido no duplica acciones; probar respaldos restaurables, permisos, login por rol y recuperación de servicio; documentar lo que sólo se pudo simular.
+
+**Entregables:** informe de aceptación, matriz de fallas, registro de pruebas y lista de bloqueos de producción. **Puerta:** cero defectos críticos abiertos antes de cualquier nueva exposición al cliente.
+
+## Semanas 7–8 — primer piloto de IA de bajo riesgo
+
+**Objetivo:** demostrar un beneficio real sin tocar dinero ni control físico.
+
+**Piloto preferente:** asistente interno de preparación de propuestas comerciales y respuestas de soporte con biblioteca de contexto. Entradas: requerimiento redactado y documentación oficial. Salidas: borrador con citas y banderas de información faltante. Un humano verifica y envía.
+
+**Medición:** comparar 30–50 tareas con línea base y revisar calidad, correcciones, tiempo hasta aprobación y costo por tarea; la cantidad de casos se ajusta a la variabilidad real. **Puerta:** ahorro neto positivo y ninguna divulgación o compromiso no autorizado.
+
+**Piloto opcional paralelo si hay tiempo:** recepción y extracción de comprobantes de prueba en WhatsApp, en un buzón **sin acreditación ni actualización de TAGs**. Su éxito se mide por integridad del registro, consentimiento, deduplicación, exactitud de campos y tiempo de revisión. [R2]
+
+## Semanas 9–10 — validación comercial del paquete recurrente
+
+**Objetivo:** confirmar que existe una oferta por la que un comprador pagaría.
+
+**Tareas:** contactar prospectos con perfil definido, realizar entrevistas de problema, demostrar caso con datos falsos, probar precio y alcances, documentar objeciones, proponer piloto pagado con fecha de aceptación y costos de hardware separados.
+
+**Indicadores de planificación — no pronósticos:** 40–60 contactos cualificados, 10–15 conversaciones de descubrimiento, 3–5 propuestas y 1–2 pilotos propuestos. Si los números reales son menores, estudiar segmento/oferta antes de aumentar gasto publicitario.
+
+**Entregable:** pipeline reproducible y al menos una decisión de compra/rechazo razonada por un prospecto. **Puerta:** evidencia de demanda, presupuesto y patrocinador; no basta con entusiasmo por IA.
+
+## Semanas 11–12 — corregir y estandarizar
+
+**Objetivo:** resolver los fallos de pilotos, reducir mantenimiento y dejar el proceso repetible.
+
+**Tareas:** optimizar el piloto de IA sólo si generó ahorro, estabilizar los flujos de CondoOps que todavía tengan fallas, auditar costos por cliente, revisar seguridad y procedimientos de respuesta, definir condiciones de contratación e instalación.
+
+**Entregables:** operación estándar, versión de producto candidata, tabla de costos y caso de estudio con datos autorizados. **Puerta:** pruebas completas y costo de atención compatible con precio.
+
+## Semana 13 — comité de inversión y siguiente trimestre
+
+**Objetivo:** decidir, no seguir construyendo por inercia.
+
+**Decisiones obligatorias:** mantener o cancelar piloto de IA, continuar o modificar oferta CondoOps, contratar soporte externo si la carga lo justifica, fijar capacidad para nuevas clínicas, definir presupuesto del siguiente trimestre y depurar backlog.
+
+**Salida:** acta ejecutiva con responsable, presupuesto, fecha, métricas, criterios de suspensión y próximos dos proyectos. Si falta evidencia de uso real, la respuesta correcta puede ser continuar validando y posponer expansión.
+
+# 11. Hoja de ruta de 12 meses con decisiones de inversión
+
+## Trimestre 1 — noviembre 2026 a enero/febrero 2027
+
+Estabilizar Misión Jardines, probar integraciones, documentar CondoOps, medir primer asistente interno, preparar paquetes y pipeline. No iniciar una reescritura completa ni una plataforma horizontal de IA. El éxito es demostrar reproducibilidad y reducción de riesgo, no añadir decenas de funciones.
+
+## Trimestre 2 — febrero a abril 2027
+
+Con los pilotos y controles validados: cerrar uno o más contratos recurrentes adicionales, diseñar una migración de datos semiautomatizada, formalizar monitoreo y soporte, separar entornos de pruebas y producción, usar una biblioteca común de ofertas y SOP. Definir un representante funcional por cliente para aprobaciones.
+
+La agenda dental puede entrar como segunda línea de producto si existe demanda y el paquete administrativo cumple seguridad y privacidad. Si no, mantenerla como proyecto de cliente con calendario acotado.
+
+## Trimestre 3 — mayo a julio 2027
+
+Evaluar patrones de personalización: qué módulos se repiten y cuáles deben configurarse por contrato. Sólo entonces decidir inversiones en multitenencia, catálogo de integraciones, panel de soporte y analítica transversal. Crear pruebas de regresión que reproduzcan escenarios financieros y de acceso. Evaluar un convenio de soporte de dispositivos y redes con un tercero.
+
+Ampliar IA hacia investigación documental de operaciones o borradores de comunicaciones, siempre que los primeros pilotos mantengan beneficio neto y no eleven incidentes.
+
+## Trimestre 4 — agosto a octubre/noviembre 2027
+
+Medir rentabilidad por producto y segmento. Tomar tres decisiones: (1) escalar CondoOps a más comunidades, (2) consolidar la oferta de automatización empresarial, y (3) promover la línea dental o continuarla de forma selectiva. El hospital queda condicionado a contrato de descubrimiento y evidencia de implantación realista.
+
+Definir presupuesto de 2028, objetivos de retención, crecimiento de ingresos recurrentes y cargas máximas de soporte. La expansión debe justificarse por margen y fiabilidad, no por visitas a demos.
+
+# 12. Horizonte 2028–2029: plataforma sin caer en el mito del ERP universal
+
+**2028 — consolidar activos propios.** Si existen varios clientes en el mismo segmento, invertir en módulos probados, herramientas de despliegue, monitoreo, reportes, exportación de datos, onboarding y formación. Fortalecer biblioteca de conocimiento sectorial y acuerdos con instaladores, proveedores de mensajería o integradores.
+
+**2029 — ampliar bajo evidencia.** Integrar más sectores sólo cuando puedan compartir auténticos módulos y procesos, no sólo porque ambos usen usuarios, botones y una tabla. Un ERP/CRM/e-commerce universal exige diversidad de requisitos, costo comercial y soporte superiores al de un SaaS vertical; no debe ser la meta automática del tercer año.
+
+**IA madura en 2029, si las pruebas lo autorizan:** clasificación automática de casos sencillos, extracción con controles, preparación de respuestas y planes de acción, búsqueda con trazabilidad y mejora experimental de procesos internos. La autonomía sobre pagos, salud o acceso continuará limitada por riesgos y legislación independientemente de avances de modelos.
+
+**Punto de revisión anual:** evaluar retención, margen de contribución, tiempo de soporte por cliente, tasa de incidentes, dependencia del fundador, capacidad real y demanda por cada módulo antes de abrir un nuevo frente.
