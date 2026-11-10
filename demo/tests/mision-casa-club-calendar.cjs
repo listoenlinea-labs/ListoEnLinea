@@ -53,8 +53,10 @@ const {chromium}=require('playwright');
    assert.equal(await frame.locator('#calendarDays button.available').count(),days-past,
      'Cancelar debe devolver la fecha al calendario verde');
    await frame.locator('#nextMonth').click();
+   await frame.locator('#calendarLabel').filter({hasNotText:title}).waitFor({timeout:15000});
    assert.notEqual((await frame.locator('#calendarLabel').innerText()).toLowerCase(),title.toLowerCase());
    await frame.locator('#prevMonth').click();
+   await frame.locator('#calendarLabel').filter({hasText:title}).waitFor({timeout:15000});
    assert.equal((await frame.locator('#calendarLabel').innerText()).toLowerCase(),title.toLowerCase());
    console.log('PASS '+width+'px: mes actual, fechas pasadas, reserva ámbar, cancelación y navegación');
    await context.close();
