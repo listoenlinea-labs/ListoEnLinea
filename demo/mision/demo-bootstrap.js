@@ -222,7 +222,7 @@ function extraCharges(c){
     monto:Math.max(0,amountCents/100-(paid.get(id)||0)),
     montoOriginal:amountCents/100,montoPagado:paid.get(id)||0,cuotaExtraordinariaId:project.id,
     estado:(paid.get(id)||0)>=amountCents/100?'PAGADO':paid.has(id)?'PAGO_PARCIAL':'PENDIENTE'};
-  }).filter(x=>x.monto>0);
+  }).filter(x=>x.montoOriginal>0);
  });
 }
 const extraDue=c=>cap(extraCharges(c).filter(x=>x.estado!=='PAGADO'&&x.periodoIndice<=curr).reduce((sum,x)=>sum+x.monto,0));
