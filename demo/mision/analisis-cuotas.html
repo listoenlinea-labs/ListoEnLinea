@@ -1,31 +1,104 @@
-<!doctype html><html lang="es"><head><script src="demo-bootstrap.js"></script><meta name="robots" content="noindex, nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Análisis de cuotas · Fraccionamiento Demo</title>
+<!doctype html><html lang="es"><head><script src="demo-bootstrap.js"></script><script src="demo-upgrade.js"></script><meta name="robots" content="noindex,nofollow"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Análisis de cuotas · Fraccionamiento Demo</title>
 <link rel="icon" href="assets/images/favicon.ico?v=20261005">
 <script src="assets/js/permissions.js?v=20261012-seguridad"></script><script src="assets/js/page-access.js?v=20261012-seguridad"></script>
-<link rel="stylesheet" href="assets/css/analisis-cuotas.css?v=20261024-exencion-checkline-2">
+<link rel="stylesheet" href="assets/css/analisis-cuotas.css?v=20261109-abono-estado-rojo-v2">
   <script src="assets/js/date-display.js?v=20261019"></script>
-</head><body class="page-analisis"><div style="position:fixed;z-index:2147483000;right:12px;bottom:10px;background:#183e4f;color:white;border-radius:17px;padding:9px 13px;font:700 12px system-ui;pointer-events:none">DEMO · Datos ficticios · Administrador</div>
+</head><body class="page-analisis">
 <main class="analysis-page">
 <header class="analysis-hero"><span class="eyebrow">ADMINISTRACIÓN Y FINANZAS</span><h1>Análisis de <em>cuotas</em></h1><p>Control mensual de cumplimiento, ingresos confirmados y egresos del fraccionamiento.</p></header>
 <nav class="analysis-tabs" hidden aria-label="Secciones de cuotas"><a href="cuotas.html">Cuotas</a><a href="analisis-cuotas.html" class="active" aria-current="page">Análisis</a></nav>
 <section class="analysis-card filters"><label>Año<input id="financeYear" type="number" min="2020" max="2100"></label><label>Mes<select id="financeMonth"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></label><button id="updateFinance" class="primary">Actualizar análisis</button></section>
 <div id="financeNotice" hidden role="status"></div>
-<div id="financialSummary" class="metric-grid" aria-label="Indicadores principales"></div><details class="analysis-more"><summary>Otros indicadores financieros</summary><div id="financialSecondary" class="metric-grid" aria-label="Indicadores adicionales"></div></details>
-<div class="analysis-columns"><section class="analysis-card"><span class="eyebrow">CUMPLIMIENTO GENERAL</span><h2>Casas que pagaron</h2><div class="donut-wrapper"><div id="financeDonut" class="donut"><div id="financeDonutText"></div></div><div id="financeLegend" class="legend-block"></div></div><p class="hint">El porcentaje corresponde al período seleccionado y al estado de las cuotas del padrón.</p></section>
-<section class="analysis-card"><span class="eyebrow">DESGLOSE POR CALLE</span><h2>Porcentaje de viviendas pagadas</h2><div id="financeStreetChart" class="bars"></div><p id="financePadronNote" class="hint" role="status" hidden></p></section></div>
-<section class="analysis-card"><div class="heading"><div><span class="eyebrow">CONSULTA DE VIVIENDAS</span><h2>Quién pagó y quién está pendiente</h2><p>Filtra por calle, casa, residente, estado y último mes pagado (mes seleccionado o posterior). Presiona los encabezados para ordenar. La columna Pagado muestra el último movimiento completo: tócala para consultar fechas, meses cubiertos e historial. Los saldos corresponden al período elegido; el estado de TAGs refleja el último dato del C3 y puede verificarse en el detalle.</p></div></div>
+<div id="financialSummary" class="metric-grid" aria-label="Indicadores principales"></div><p id="financeLiveStatus" class="hint" aria-live="polite">Actualización automática entre sesiones.</p><details class="analysis-more"><summary>Otros indicadores financieros</summary><div id="financialSecondary" class="metric-grid" aria-label="Indicadores adicionales"></div></details>
+<div class="analysis-columns"><section class="analysis-card analysis-chart-card"><button type="button" class="analysis-chart-toggle" aria-expanded="false" aria-controls="financeCompliancePanel"><span>Cumplimiento general</span><span class="analysis-chart-toggle-action"><span class="analysis-chart-toggle-label">Mostrar</span><span class="analysis-chart-toggle-arrow" aria-hidden="true"></span></span></button><div id="financeCompliancePanel" class="analysis-chart-panel" hidden><span class="eyebrow">CUMPLIMIENTO GENERAL</span><h2>Casas que pagaron</h2><div class="donut-wrapper"><div id="financeDonut" class="donut"><div id="financeDonutText"></div></div><div id="financeLegend" class="legend-block"></div></div><p class="hint">El porcentaje corresponde al período seleccionado y al estado de las cuotas del padrón.</p></div></section>
+<section class="analysis-card analysis-chart-card"><button type="button" class="analysis-chart-toggle" aria-expanded="false" aria-controls="financeStreetPanel"><span>Desglose por calle</span><span class="analysis-chart-toggle-action"><span class="analysis-chart-toggle-label">Mostrar</span><span class="analysis-chart-toggle-arrow" aria-hidden="true"></span></span></button><div id="financeStreetPanel" class="analysis-chart-panel" hidden><span class="eyebrow">DESGLOSE POR CALLE</span><h2>Porcentaje de viviendas pagadas</h2><div id="financeStreetChart" class="bars"></div><p id="financePadronNote" class="hint" role="status" hidden></p></div></section></div>
+<section class="analysis-card"><div class="heading finance-manual-heading"><div><span class="eyebrow">CONSULTA DE VIVIENDAS</span><h2>Quién pagó y quién está pendiente</h2></div><button type="button" id="financeManualReceiptOpen" class="primary finance-manual-trigger">Generar recibo manualmente</button></div>
 <div class="finance-concept-tabs" role="tablist" aria-label="Concepto de cobro para la consulta de viviendas"><button type="button" role="tab" id="financeTabMaintenance" data-finance-concept="MANTENIMIENTO" aria-selected="true" aria-controls="financeHousePanel" class="active">Mantenimiento</button><button type="button" role="tab" id="financeTabExtra" data-finance-concept="EXTRAORDINARIO" aria-selected="false" aria-controls="financeHousePanel">Cuotas extraordinarias</button><button type="button" role="tab" id="financeTabClub" data-finance-concept="CASA_CLUB" aria-selected="false" aria-controls="financeHousePanel">Casa club</button></div>
+<section id="financeProjectPanel" class="finance-project-panel finance-project-panel-compact" aria-label="Proyectos extraordinarios" hidden>
+ <div class="finance-project-top">
+  <label>Proyecto extraordinario<select id="financeProjectSelect" aria-label="Seleccionar proyecto extraordinario" data-has-selection="false"><option value="">Sin proyectos configurados</option></select></label>
+  <div class="finance-project-actions">
+    <button type="button" id="financeNewProjectToggle" class="primary">Nuevo proyecto</button>
+    <button type="button" id="financeProjectRulesEdit" class="soft" disabled title="Selecciona un proyecto para editar sus importes">Importes por vivienda</button>
+   </div>
+ </div>
+ <details id="financeProjectDetails" class="finance-project-details">
+  <summary><span>Resumen financiero del proyecto</span><span class="finance-project-expand-label">Ver indicadores</span></summary>
+  <div id="financeProjectMetrics" class="finance-project-metrics" aria-live="polite"></div>
+  <p id="financeProjectInfo" class="finance-project-info" role="status"></p>
+ </details>
+</section>
 <p id="financeConceptHint" class="finance-concept-hint" role="status">Mantenimiento: pagos mensuales, recargos y saldos acumulados hasta el período seleccionado.</p>
-<div class="filters residences-filter"><label>Buscar casa o residente<input id="financeSearch" type="search" placeholder="Ej. Gardenias, 5, nombre"></label><label>Calle<select id="financeStreet"><option value="">Todas las calles</option></select></label><label>Estado<select id="financeStatus"><option value="">Todos</option><option value="PAGADO">Pagadas</option><option value="PENDIENTE">Pendientes</option><option value="PAGO_ANUAL">Pago anual</option><option value="ADVERTENCIAS">Advertencias</option></select></label><fieldset class="paid-through-filter"><legend>Último mes pagado</legend><div class="paid-through-controls"><select id="financeLastPaidMonth" aria-label="Mes del último pago mínimo"><option value="">Todos los meses</option><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select><select id="financeLastPaidYear" aria-label="Año del último pago mínimo"></select></div></fieldset><label class="finance-register-order">Fecha de registro<select id="financeRegistrationOrder" aria-label="Ordenar por fecha y hora del último registro de pago"><option value="">Orden habitual</option><option value="registro_desc">Más reciente primero</option><option value="registro_asc">Más antiguo primero</option></select></label><button id="financeClear" type="button" class="soft">Limpiar</button></div>
-<div class="house-sort-mobile"><label>Ordenar por<select id="financeColumnSort"><option value="calle">Calle</option><option value="numero">Casa</option><option value="nombre">Residente registrado</option><option value="estatus">Estado</option><option value="pagado">Pagado</option><option value="registro">Fecha de registro</option><option value="mes">Último mes pagado</option><option value="saldo">Saldo pendiente</option><option value="tags">TAGs</option><option value="pago">Pago</option></select></label><button type="button" id="financeColumnDirection" class="soft">Ascendente ↑</button></div><p id="financeSortStatus" class="hint" role="status" aria-live="polite">Orden: Calle, ascendente. Presiona un encabezado para ordenar; vuelve a presionarlo para invertir.</p>
-<div id="financeReceiptToolbar" class="finance-receipt-toolbar"><span id="financeReceiptSelection" role="status" aria-live="polite">Selecciona una vivienda para emitir el recibo de su último pago.</span><button id="financeGenerateReceipt" type="button" class="primary" disabled>Generar recibo</button></div>
-<div id="financeHousePanel" role="tabpanel" aria-labelledby="financeTabMaintenance"><div class="table-scroll houses-scroll"><table><thead><tr><th scope="col" aria-sort="ascending"><button type="button" class="house-column-sort" data-house-sort="calle">Calle <span data-sort-indicator aria-hidden="true">↑</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="numero">Casa <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="nombre">Residente registrado <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="estatus">Estado <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="pagado">Pagado <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="mes">Último mes pagado <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="saldo">Saldo pendiente <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="tags">TAGs <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="pago">Pago <span data-sort-indicator aria-hidden="true">↓</span></button></th></tr></thead><tbody id="financeHouseRows"></tbody></table></div><nav class="analysis-pagination" id="financeHousePagination" aria-label="Páginas de viviendas"><button type="button" id="financePrev">Anterior</button><span id="financePageInfo" role="status" aria-live="polite"></span><button type="button" id="financeNext">Siguiente</button></nav></div></section>
-<div class="analysis-columns"><section class="analysis-card"><span class="eyebrow">MOVIMIENTOS</span><h2>Ingresos y egresos</h2><div id="financeCashChart" class="money-bars"></div><p class="hint" id="financeWarning"></p></section>
-<section class="analysis-card"><span class="eyebrow">EGRESOS</span><h2>Gastos por categoría</h2><div id="financeExpenseChart" class="bars"></div></section></div>
-<section class="analysis-card"><div class="heading"><div><span class="eyebrow">REGISTRO DE EGRESOS</span><h2>Registrar un gasto</h2><p>Captura luz, agua, jardinería y gastos de proyectos sin modificar cuotas históricas.</p></div></div>
-<form id="newExpense" class="expense-form"><label>Fecha<div class="mj-date-control"><span class="mj-date-display" aria-hidden="true">Seleccionar fecha</span><input id="expenseDate" type="date" required></div></label><label>Categoría<select id="expenseCategory" required><option value="LUZ">Luz</option><option value="AGUA">Agua</option><option value="JARDINERIA">Jardinería</option><option value="MANTENIMIENTO">Mantenimiento</option><option value="CUOTA_EXTRAORDINARIA">Cuota extraordinaria</option><option value="OTROS">Otros</option></select></label><label>Monto (MXN)<input id="expenseAmount" type="number" min=".01" step=".01" required></label><label>Concepto<input id="expenseConcept" maxlength="250" placeholder="Ej. Electricidad de áreas comunes" required></label><label class="extra-expense-option" hidden>Meses para cubrir el proyecto<input id="expenseMonths" type="number" min="1" max="36" value="1"></label><label class="extra-expense-option" hidden>Primer mes de cobro<input id="expenseStart" type="month" min="2026-10"></label><div class="expense-reference-note" role="note"><strong>Referencia automática</strong><span>Al guardar, el sistema genera un folio único para este egreso.</span></div><button id="saveExpense" class="primary">Registrar egreso</button></form>
+<div class="filters residences-filter"><label>Buscar casa o residente<input id="financeSearch" type="search" placeholder="Ej. Gardenias, 5, nombre"></label><label>Calle<select id="financeStreet"><option value="">Todas las calles</option></select></label><label>Estado<select id="financeStatus"><option value="">Todos</option><option value="PAGADO">Pagadas</option><option value="PENDIENTE">Pendientes</option><option value="NO_APLICA" hidden disabled>No aplica</option><option value="PAGO_ANUAL">Pago anual</option><option value="ABONO_CON_ADEUDO">Abono con adeudo</option><option value="ADVERTENCIAS">Advertencias</option></select></label><fieldset class="paid-through-filter"><legend>Último mes pagado</legend><div class="paid-through-controls"><select id="financeLastPaidMonth" aria-label="Mes del último pago mínimo"><option value="">Todos los meses</option><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select><select id="financeLastPaidYear" aria-label="Año del último pago mínimo"></select></div></fieldset><label class="finance-register-order">Fecha de registro<select id="financeRegistrationOrder" aria-label="Ordenar por fecha y hora del último registro de pago"><option value="">Orden habitual</option><option value="registro_desc">Más reciente primero</option><option value="registro_asc">Más antiguo primero</option></select></label><button id="financeClear" type="button" class="soft">Limpiar</button></div>
+<div class="house-sort-mobile"><label>Ordenar por<select id="financeColumnSort"><option value="calle">Calle</option><option value="numero">Casa</option><option value="nombre">Residente registrado</option><option value="estatus">Estado</option><option value="pagado">Pagado</option><option value="registro">Fecha de registro</option><option value="mes">Último mes pagado</option><option value="saldo">Saldo pendiente</option><option value="tags">TAGs</option><option value="pago">Pago</option></select></label><button type="button" id="financeColumnDirection" class="soft">Ascendente ↑</button></div><p id="financeSortStatus" class="finance-visually-hidden" role="status" aria-live="polite">Orden de viviendas actualizado.</p>
+<div class="finance-export-tools finance-actions-row" role="group" aria-label="Acciones de recibos y respaldos">
+  <button id="financeDownloadAllReceipts" class="soft" type="button">Descargar todos los recibos</button>
+  <button id="financeDriveConnect" class="soft" type="button">Conectar con Google Drive</button>
+  <button id="financeDriveBackup" class="primary" type="button">Generar respaldo en Drive</button>
+  <div id="financeReceiptToolbar" class="finance-receipt-toolbar finance-receipt-inline">
+    <button id="financeGenerateReceipt" type="button" class="primary" disabled>Generar recibo</button>
+    <span id="financeReceiptSelection" class="finance-visually-hidden" role="status" aria-live="polite">Selecciona una vivienda para emitir el recibo de su último pago.</span>
+  </div>
+</div>
+<div id="financeHousePanel" role="tabpanel" aria-labelledby="financeTabMaintenance"><div class="table-scroll houses-scroll"><table><thead><tr><th scope="col" aria-sort="ascending"><button type="button" class="house-column-sort" data-house-sort="calle">Calle <span data-sort-indicator aria-hidden="true">↑</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="numero">Casa <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="nombre">Residente registrado <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="estatus">Estado <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="pagado">Pagado <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="mes"><span id="financeLastPeriodTitle">Último mes pagado</span> <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="saldo">Saldo pendiente <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="tags">TAGs <span data-sort-indicator aria-hidden="true">↓</span></button></th><th scope="col" aria-sort="none"><button type="button" class="house-column-sort" data-house-sort="pago">Pago <span data-sort-indicator aria-hidden="true">↓</span></button></th></tr></thead><tbody id="financeHouseRows"></tbody></table></div><nav class="analysis-pagination" id="financeHousePagination" aria-label="Páginas de viviendas"><button type="button" id="financePrev">Anterior</button><span id="financePageInfo" role="status" aria-live="polite"></span><button type="button" id="financeNext">Siguiente</button></nav></div></section>
+<div class="analysis-columns finance-monthly-columns" id="financeMonthlyColumns" role="region" aria-label="Gráficas financieras, desliza horizontalmente para cambiar de gráfica" tabindex="0">
+<section class="analysis-card finance-chart-card" id="financeIncomeCard"><span class="eyebrow">MANTENIMIENTO</span><h2>Ingresos</h2>
+<p class="finance-card-subtitle">Ingresos por calle</p>
+<p class="hint finance-chart-description">Los pagos anticipados se distribuyen por cada mensualidad cubierta, con su recargo real.</p>
+<div id="financeIncomeTotals" class="finance-period-summary" role="status" aria-live="polite"></div>
+<p class="hint finance-history-hint finance-graph-help">Haz clic en una calle para comparar las cuotas pagadas de enero al mes seleccionado.</p>
+<div id="financeCashChart" class="money-bars" aria-label="Cuotas de mantenimiento pagadas por calle en el mes cubierto"></div>
+<p class="hint" id="financeWarning"></p></section>
+<section class="analysis-card finance-chart-card finance-balance-card" id="financeBalanceCard" aria-label="Diferencia mensual entre ingresos y egresos"><span class="eyebrow">BALANCE INFORMATIVO</span><h2>Diferencia del período</h2><p class="finance-card-subtitle" id="financeBalanceSubtitle">Ingresos menos egresos</p><p class="hint finance-chart-description" id="financeBalanceDescription">Cálculo del período seleccionado.</p><div class="finance-period-summary" id="financeBalanceTotals" role="status" aria-live="polite"></div><div class="finance-balance-visual" id="financeBalanceVisual" role="img" aria-label="Comparación de ingresos y egresos"><div class="finance-balance-rows"><div><span>Ingresos</span><strong id="financeBalanceIncome">$0</strong></div><div class="finance-balance-track"><i id="financeBalanceIncomeBar" class="finance-balance-fill income"></i></div><div><span id="financeBalanceExpenseLabel">Egresos</span><strong id="financeBalanceExpense">$0</strong></div><div class="finance-balance-track"><i id="financeBalanceExpenseBar" class="finance-balance-fill expense"></i></div></div><div class="finance-balance-result"><small>Diferencia del período</small><strong id="financeBalanceDifference">$0</strong><span id="financeBalanceStatus">En equilibrio</span></div></div><p id="financeBalanceWarning" class="hint"></p></section>
+ <section class="analysis-card finance-chart-card" id="financeExpenseCard"><span class="eyebrow">EGRESOS</span><h2>Egresos</h2>
+<p class="finance-card-subtitle">Gastos por concepto</p>
+<p class="hint finance-chart-description">CFE, SIAPA, Jardinería, Mantenimiento, Cuota extraordinaria, Proyecto, Internet, Servicios y Otros.</p>
+<div id="financeExpenseTotals" class="finance-period-summary" role="status"></div>
+<p class="hint finance-expense-click-hint finance-graph-help">Haz clic en un concepto para consultar su historial mensual del año seleccionado.</p>
+<div id="financeExpenseChart" class="money-bars" aria-label="Gastos del mes por concepto"></div>
+
+</section></div>
+<nav id="financeMonthlyPagination" class="finance-monthly-pagination" aria-label="Seleccionar gráfica financiera">
+ <button type="button" class="finance-monthly-jump is-active" data-finance-slide="0" aria-current="true" aria-label="Ir a gráfica 1 de 3: Ingresos">Ingresos</button>
+ <button type="button" class="finance-monthly-jump" data-finance-slide="1" aria-label="Ir a gráfica 2 de 3: Diferencia">Diferencia</button>
+ <button type="button" class="finance-monthly-jump" data-finance-slide="2" aria-label="Ir a gráfica 3 de 3: Egresos">Egresos</button>
+</nav>
+<!-- Los comparativos se abren fuera de los paneles: no aumentan su altura. -->
+<section id="financeIncomeHistoryModal" class="finance-pay-overlay finance-history-overlay" hidden
+ aria-label="Historial mensual de ingresos por calle" aria-hidden="true">
+ <div class="finance-pay-dialog finance-historical-dialog" role="dialog" aria-modal="true"
+  aria-labelledby="financeIncomeHistoryTitle" tabindex="-1">
+  <div class="finance-pay-heading">
+   <div><span class="eyebrow">INGRESOS DE MANTENIMIENTO</span><h2 id="financeIncomeHistoryTitle">Historial de calle</h2></div>
+   <button type="button" id="financeIncomeHistoryClose" class="soft" aria-label="Cerrar historial de calle">Cerrar ×</button>
+  </div>
+  <p class="hint" id="financeIncomeHistoryDescription"></p>
+  <div class="table-scroll finance-historical-table">
+   <table><thead><tr><th>Calle</th><th>Mes</th><th>Total pagado</th></tr></thead>
+    <tbody id="financeIncomeHistoryRows"></tbody><tfoot id="financeIncomeHistoryTotal"></tfoot></table>
+  </div>
+ </div>
+</section>
+<section id="financeExpenseHistory" class="finance-pay-overlay finance-history-overlay" hidden
+ aria-label="Historial mensual de egresos por concepto" aria-hidden="true">
+ <div class="finance-pay-dialog finance-historical-dialog" role="dialog" aria-modal="true"
+  aria-labelledby="financeExpenseHistoryTitle" tabindex="-1">
+  <div class="finance-pay-heading">
+   <div><span class="eyebrow">EGRESOS POR CONCEPTO</span><h2 id="financeExpenseHistoryTitle">Historial mensual</h2></div>
+   <button type="button" id="financeExpenseHistoryClose" class="soft" aria-label="Cerrar historial de concepto">Cerrar ×</button>
+  </div>
+  <p class="hint" id="financeExpenseHistoryDescription"></p>
+  <div class="table-scroll finance-historical-table">
+   <table><thead><tr><th>Concepto</th><th>Mes</th><th>Total pagado</th></tr></thead>
+    <tbody id="financeExpenseHistoryRows"></tbody><tfoot id="financeExpenseHistoryTotal"></tfoot></table>
+  </div>
+ </div>
+</section>
+<section class="analysis-card"><div class="heading"><div><span class="eyebrow">REGISTRO DE EGRESOS</span><h2>Registrar un gasto</h2><p>Registra gastos por concepto, sin modificar cuotas ni movimientos anteriores.</p></div></div>
+<form id="newExpense" class="expense-form"><label>Fecha<div class="mj-date-control"><span class="mj-date-display" aria-hidden="true">Seleccionar fecha</span><input id="expenseDate" type="date" required></div></label><label>Categoría<select id="expenseCategory" required><option value="CFE">CFE</option><option value="SIAPA">SIAPA</option><option value="JARDINERIA">Jardinería</option><option value="MANTENIMIENTO">Mantenimiento</option><option value="CUOTA_EXTRAORDINARIA">Cuota extraordinaria</option><option value="PROYECTO">Proyecto</option><option value="INTERNET">Internet</option><option value="SERVICIOS">Servicios</option><option value="OTROS">Otros</option></select></label><label>Monto (MXN)<input id="expenseAmount" type="number" min=".01" step=".01" required></label><label class="expense-concept-field">Concepto<input id="expenseConcept" maxlength="250" placeholder="Ej. Electricidad de áreas comunes" required></label><label class="extra-expense-option" hidden>Meses para cubrir el proyecto<input id="expenseMonths" type="number" min="1" max="36" value="1"></label><label class="extra-expense-option" hidden>Primer mes de cobro<input id="expenseStart" type="month" min="2026-10"></label><button id="saveExpense" class="primary">Registrar egreso</button></form>
 <div class="expense-filters" role="search" aria-label="Filtrar y ordenar egresos">
   <label>Buscar concepto<input type="search" id="expenseFilterConcept" placeholder="Ej. Internet, limpieza"></label>
-  <label>Categoría<select id="expenseFilterCategory"><option value="">Todas</option><option value="LUZ">Luz</option><option value="AGUA">Agua</option><option value="JARDINERIA">Jardinería</option><option value="MANTENIMIENTO">Mantenimiento</option><option value="CUOTA_EXTRAORDINARIA">Cuota extraordinaria</option><option value="OTROS">Otros</option></select></label>
+  <label>Categoría<select id="expenseFilterCategory"><option value="">Todas</option><option value="CFE">CFE</option><option value="SIAPA">SIAPA</option><option value="JARDINERIA">Jardinería</option><option value="MANTENIMIENTO">Mantenimiento</option><option value="CUOTA_EXTRAORDINARIA">Cuota extraordinaria</option><option value="PROYECTO">Proyecto</option><option value="INTERNET">Internet</option><option value="SERVICIOS">Servicios</option><option value="OTROS">Otros</option></select></label>
   <label>Fecha desde<div class="mj-date-control"><span class="mj-date-display" aria-hidden="true">Seleccionar fecha</span><input type="date" id="expenseFilterFrom"></div></label>
   <label>Fecha hasta<div class="mj-date-control"><span class="mj-date-display" aria-hidden="true">Seleccionar fecha</span><input type="date" id="expenseFilterTo"></div></label>
   <label>Ordenar por<select id="expenseSort"><option value="fecha_desc">Fecha: más reciente</option><option value="fecha_asc">Fecha: más antigua</option><option value="monto_asc">Monto: menor a mayor</option><option value="monto_desc">Monto: mayor a menor</option><option value="categoria_asc">Categoría: A–Z</option><option value="categoria_desc">Categoría: Z–A</option></select></label>
@@ -34,21 +107,80 @@
 <p id="expenseResultCount" class="expense-results" role="status" aria-live="polite"></p>
 <div class="table-scroll expense-table-scroll"><table><thead><tr><th>Fecha</th><th>Categoría</th><th>Concepto</th><th>Referencia</th><th>Monto</th><th>Cobro</th></tr></thead><tbody id="financeExpenseRows"></tbody></table></div></section>
 <section id="historicalExtraModal" class="finance-pay-overlay" hidden aria-label="Programar cuota extraordinaria histórica"><div class="finance-pay-dialog" role="dialog" aria-modal="true"><div class="finance-pay-heading"><div><span class="eyebrow">CUOTA EXTRAORDINARIA</span><h2>Programar proyecto anterior</h2><p id="historicalExtraName" class="hint"></p></div><button id="historicalExtraClose" class="soft" type="button">Cerrar</button></div><form id="historicalExtraForm" class="house-payment-form"><label>Meses para cubrir el egreso<input id="historicalExtraMonths" type="number" min="1" max="36" value="1" required></label><label>Primer mes de cobro<input id="historicalExtraStart" type="month" min="2026-10" required></label><p class="hint">Se cobrarán las mensualidades entre las 231 viviendas del padrón, conservando cada centavo y sin actualizar TAGs.</p><button type="submit" class="primary">Generar mensualidades</button></form><p id="historicalExtraStatus" role="status"></p></div></section>
+<section id="financeProjectBulkModal" class="finance-pay-overlay" hidden aria-label="Modificar importes de las viviendas del proyecto">
+ <div class="finance-pay-dialog finance-rules-dialog finance-bulk-dialog" role="dialog" aria-modal="true" aria-labelledby="financeBulkTitle" tabindex="-1">
+  <div class="finance-pay-heading"><h2 id="financeBulkTitle">Modificar metas de proyecto</h2>
+   <button type="button" id="financeBulkClose" class="soft" aria-label="Cerrar edición de importes">Cerrar ×</button></div>
+  <div class="finance-rules-controls">
+   <label>Cuota general (MXN)<input id="financeBulkBase" type="number" min="0" max="10000000" step="1" inputmode="numeric" required></label>
+   <label>Buscar vivienda<input id="financeBulkSearch" type="search" placeholder="Ej. Gardenias 5"></label>
+  </div>
+  <p class="hint">Todas las viviendas reciben la cuota general. «Generar excepción» permite ajustar cada casa, incluso a $0 cuando no haya pagos acreditados.</p>
+  <p id="financeBulkTotal" class="finance-bulk-total" role="status" aria-live="polite"></p>
+  <div class="finance-rules-scroll"><table aria-label="Importes del proyecto por vivienda"><thead>
+   <tr><th scope="col">Vivienda</th><th scope="col">Cuota</th><th scope="col">Excepción</th></tr></thead>
+   <tbody id="financeBulkRows"></tbody></table></div>
+  <p id="financeBulkStatus" role="status" aria-live="polite"></p>
+  <div class="finance-rules-actions">
+   <button type="button" id="financeBulkCancel" class="soft">Cancelar</button>
+   <button type="button" id="financeBulkApply" class="primary">Guardar importes</button>
+  </div>
+ </div>
+</section>
+<section id="financeProjectRulesModal" class="finance-pay-overlay" hidden aria-label="Nuevo proyecto extraordinario">
+ <div class="finance-pay-dialog finance-rules-dialog" role="dialog" aria-modal="true" aria-labelledby="financeRulesTitle" tabindex="-1">
+  <div class="finance-pay-heading">
+   <div><span class="eyebrow">CUOTAS EXTRAORDINARIAS</span><h2 id="financeRulesTitle">Nuevo proyecto</h2><p class="hint">Distribución transparente entre las 231 viviendas, con excepciones individuales.</p></div>
+   <button type="button" id="financeRulesClose" class="soft" aria-label="Cerrar nuevo proyecto">Cerrar ×</button>
+  </div>
+  <div class="finance-rules-controls">
+   <label>Nombre del proyecto<input id="financeNewProjectName" type="text" maxlength="300" placeholder="Ej. Rehabilitación de áreas comunes" required></label>
+   <label>Costo total del proyecto (MXN)<input id="financeRulesBudget" type="number" min="3" max="10000000" step="1" inputmode="numeric" placeholder="231000" required></label>
+   <label>Mes de inicio<input id="financeNewProjectMonth" type="month" required></label>
+  </div>
+  <div class="finance-rules-overview">
+   <div><span>Meta del proyecto</span><strong id="financeRulesBudgetDisplay">$0</strong></div>
+   <div><span>Casas incluidas</span><strong id="financeRulesHouses">231</strong></div>
+   <div><span>Reglas especiales</span><strong id="financeRulesSpecialCount">0</strong></div>
+   <div><span>Reparto exacto</span><strong id="financeRulesDiff">Sin diferencia</strong></div>
+  </div>
+  <div class="finance-rules-list-heading">
+   <div><strong>Importe por vivienda</strong><p class="hint">Una excepción fija el importe de esa casa. Puedes poner $0 para exentar a una vivienda; el saldo se redistribuye entre las demás para conservar el costo total exacto.</p></div>
+   <label>Buscar vivienda<input id="financeRulesSearch" type="search" placeholder="Calle, número o residente"></label>
+  </div>
+  <div class="finance-rules-scroll"><table aria-label="Distribución de cuotas del nuevo proyecto"><thead><tr><th>Vivienda</th><th>Cuota calculada</th><th>Regla especial</th></tr></thead><tbody id="financeRulesRows"></tbody></table></div>
+  <p id="financeRulesStatus" role="status" aria-live="polite"></p>
+  <div class="finance-rules-actions"><button type="button" id="financeRulesCancel" class="soft">Cancelar</button><button type="button" id="financeRulesApply" class="primary">Crear proyecto para las 231 casas</button></div>
+ </div>
+</section>
 <section id="houseReceiptModal" class="finance-pay-overlay" hidden aria-label="Recibo de mantenimiento">
   <div class="finance-pay-dialog finance-receipt-dialog" role="dialog" aria-modal="true" aria-labelledby="houseReceiptTitle" tabindex="-1">
     <div class="finance-pay-heading"><div><span class="eyebrow">COMPROBANTE DE MANTENIMIENTO</span><h2 id="houseReceiptTitle">Recibo de pago</h2><p id="houseReceiptAddress" class="hint"></p></div><button type="button" id="houseReceiptClose" class="soft">Cerrar</button></div>
-    <label id="houseReceiptPeriod" class="finance-receipt-period" for="houseReceiptMonth" hidden>Mes pagado del recibo<select id="houseReceiptMonth" aria-label="Elegir mes pagado para generar recibo"></select></label>
+    <label id="houseReceiptPeriod" class="finance-receipt-period" for="houseReceiptMonth" hidden>Mes incluido en el pago (se emitirá el movimiento completo)<select id="houseReceiptMonth" aria-label="Elegir mes pagado para generar recibo"></select></label>
     <p id="houseReceiptStatus" class="finance-receipt-status" role="status" aria-live="polite">Preparando recibo…</p>
     <iframe id="houseReceiptPreview" class="finance-receipt-preview" title="Vista previa del recibo PDF" hidden></iframe>
     <div id="houseReceiptSendSection" class="finance-receipt-send" hidden>
       <label id="houseReceiptPhoneLabel" for="houseReceiptPhoneInput">Teléfono celular de destino</label>
-      <input id="houseReceiptPhoneInput" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="13" autocomplete="off" placeholder="10 dígitos o 52 + 10 dígitos" aria-describedby="houseReceiptPhoneHint" aria-label="Número de celular para enviar el recibo">
-      <small id="houseReceiptPhoneHint">Puedes editar el número para este envío; no se cambiará el teléfono registrado.</small>
-      <small id="houseReceiptHelp">Se descargará el PDF. Adjunta el archivo y confirma el envío en WhatsApp.</small>
+      <div class="finance-receipt-contact-row">
+        <input id="houseReceiptPhoneInput" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="13" autocomplete="off" placeholder="10 dígitos o 52 + 10 dígitos" aria-describedby="houseReceiptPhoneHint" aria-label="Número de celular para enviar el recibo">
+        <button type="button" class="soft finance-receipt-contact-save" id="houseReceiptPhoneSave" disabled>Guardar teléfono</button>
+      </div>
+      <small id="houseReceiptPhoneHint" role="status" aria-live="polite">Pulsa Guardar teléfono para conservarlo en la vivienda y usarlo en futuros recibos.</small>
+      <label for="houseReceiptEmailInput" class="finance-receipt-email-label">Correo de destino del recibo</label>
+      <div class="finance-receipt-contact-row">
+        <input id="houseReceiptEmailInput" type="email" autocomplete="email" inputmode="email" maxlength="150"
+         placeholder="correo@ejemplo.com" aria-describedby="houseReceiptEmailHint" aria-required="true">
+        <button type="button" class="soft finance-receipt-contact-save" id="houseReceiptEmailSave" disabled>Guardar correo</button>
+      </div>
+      <small id="houseReceiptEmailHint" role="status" aria-live="polite">Puedes enviarlo una sola vez o pulsar Guardar correo para futuras ocasiones.</small>
     </div>
-    <div class="finance-receipt-actions"><button type="button" id="houseReceiptDownload" class="soft" disabled>Guardar recibo PDF</button><button type="button" id="houseReceiptWhatsApp" class="primary" disabled>Enviar recibo por WhatsApp Web</button></div>
+    <div class="finance-receipt-actions"><button type="button" id="houseReceiptDownload" class="soft" disabled>Guardar recibo PDF</button><button type="button" id="houseReceiptWhatsApp" class="primary" disabled>Enviar recibo por WhatsApp Web</button><button type="button" id="houseReceiptEmailSend" class="primary finance-receipt-email-button" disabled>Enviar recibo por correo</button></div>
   </div>
 </section>
+<div id="financeReceiptEmailSuccess" class="finance-receipt-email-success" hidden role="status" aria-live="polite" aria-atomic="true">
+  <span class="finance-receipt-email-success-icon" aria-hidden="true">✓</span>
+  <div><strong>Recibo enviado correctamente</strong><span id="financeReceiptEmailSuccessDestination"></span></div>
+</div>
 <section id="houseTagsModal" class="finance-pay-overlay" hidden aria-label="Estado de TAGs de vivienda">
   <div class="finance-pay-dialog tags-dialog" role="dialog" aria-modal="true" aria-labelledby="houseTagsTitle" tabindex="-1">
     <div class="finance-pay-heading"><div><span class="eyebrow">ZKTECO · CONSULTA DE ACCESOS</span>
@@ -66,6 +198,387 @@
     </div>
   </div>
 </section>
+<style>
+  .house-payment-type-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:13px;align-items:end}
+  .house-payment-type-row>label{min-width:0}
+  .house-abono-open{align-self:end;min-height:51px;margin:0;white-space:nowrap;background:#fff6e9!important;border-color:#ecbc85!important;color:#ad600c!important}
+  .house-abono-heading{padding:14px;border-radius:12px;background:#fff6ec;border:1px solid #f1d7ba}
+  .house-abono-heading h3{margin:0 0 4px;color:#ab5a0b}
+  .house-abono-heading p{margin:0;line-height:1.5}
+  .house-abono-confirm{display:flex!important;align-items:flex-start;gap:10px;line-height:1.5}
+  .house-abono-confirm input{width:18px!important;min-width:18px;height:18px;flex:0 0 18px;margin-top:3px}
+  .house-abono-panel[hidden],.house-payment-form[hidden],.house-abono-open[hidden]{display:none!important}
+  @media(max-width:650px){.house-payment-type-row{grid-template-columns:minmax(0,1fr)}.house-abono-open{justify-self:start;margin-bottom:7px}.house-abono-panel{padding:0 2px}}
+
+  /* Alta rápida de residentes sin abandonar el análisis ni sus filtros. */
+  .finance-resident-register{display:inline-flex;align-items:center;justify-content:center;gap:5px;
+    min-height:36px;padding:7px 10px;border:1px solid #edb675;border-radius:10px;
+    background:#fff4e7;color:#a65d0e;font-size:11px;font-weight:850;cursor:pointer;white-space:nowrap}
+  .finance-resident-register:hover{background:#ffe8d0;border-color:#dc903b}
+  .finance-resident-register:focus-visible{outline:3px solid #efb76f;outline-offset:2px}
+  #financeResidentModal .finance-resident-dialog{width:min(440px,100%);max-height:calc(100dvh - 32px);overflow-y:auto}
+  #financeResidentModal .finance-resident-form{display:grid;gap:14px;margin-top:18px}
+  #financeResidentModal .finance-resident-form label{display:grid;gap:7px;color:#34435e;font-size:12px;font-weight:800}
+  #financeResidentModal .finance-resident-form input{width:100%;min-width:0;height:49px;padding:11px 13px;border-radius:11px;
+    border:1px solid #d7e0ee;background:white;color:#243449;font-size:16px}
+  #financeResidentModal .finance-resident-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:9px}
+  #financeResidentModal .finance-resident-actions button{min-height:44px}
+  #financeResidentModal #financeResidentStatus{min-height:0;margin:0;color:#ab3344;font-size:12px;line-height:1.5}
+  #financeResidentModal .finance-resident-hint{margin:0;font-size:11px;line-height:1.55;color:#7a8498}
+  @media(max-width:600px){
+    #financeResidentModal .finance-resident-dialog{padding:18px;border-radius:16px}
+    #financeResidentModal .finance-resident-actions{display:grid;grid-template-columns:1fr 1fr}
+    #financeResidentModal .finance-resident-actions button{width:100%;padding:11px 9px}
+    .finance-resident-register{white-space:normal;text-align:center}
+  }
+
+
+
+  #manualReceiptsModal .manual-receipt-house-number{display:grid;gap:6px;min-width:0;position:relative}
+  #manualReceiptsModal .manual-receipt-house-number>label{font-weight:750;font-size:12px;color:#384b66}
+  #manualReceiptsModal .manual-receipt-house-number>small{font-size:11px;line-height:1.35;color:#68788e}
+  #manualReceiptsModal .manual-receipt-number-combo{position:relative;min-width:0}
+  #manualReceiptsModal .manual-receipt-number-options{
+    position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:100;
+    max-height:230px;overflow-y:auto;overscroll-behavior:contain;
+    background:#fff;border:1px solid #d7dfe9;border-radius:12px;
+    padding:5px;box-shadow:0 12px 30px #24374d30
+  }
+  #manualReceiptsModal .manual-receipt-number-options button{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;
+    border:0;background:transparent;border-radius:8px;padding:11px 10px;
+    color:#273951;font-size:13px;line-height:1.3;text-align:left;cursor:pointer
+  }
+  #manualReceiptsModal .manual-receipt-number-options button:hover,
+  #manualReceiptsModal .manual-receipt-number-options button[aria-selected="true"]{
+    background:#fff2e3;color:#8e4c04
+  }
+  #manualReceiptsModal .manual-receipt-number-options button small{
+    color:#78869a;font-size:11px;font-weight:500;text-align:right
+  }
+  #manualReceiptsModal .manual-receipt-number-options .manual-receipt-number-empty{
+    margin:0;padding:10px 12px;font-size:12px;color:#68788e
+  }
+
+  /* Generador independiente. Botón siempre visible en la cabecera de Viviendas. */
+  .finance-manual-heading{align-items:flex-start;gap:14px;flex-wrap:wrap}
+  .finance-manual-trigger{margin-left:auto;min-height:45px;white-space:nowrap}
+  #manualReceiptsModal .manual-receipt-dialog{width:min(940px,100%);max-height:min(94dvh,900px);overflow:auto;padding:23px}
+  #manualReceiptsModal .manual-receipt-subtitle{font-size:12px;line-height:1.5;color:#63748e;margin:5px 0 0}
+  #manualReceiptsModal .manual-receipt-tabs{display:flex;gap:8px;margin:18px 0;border-bottom:1px solid #e1e6ef;padding-bottom:10px}
+  #manualReceiptsModal .manual-receipt-tabs button{border:1px solid #dce3ec;background:#fff;border-radius:10px;padding:10px 15px;font-weight:800;font-size:12px;color:#596984}
+  #manualReceiptsModal .manual-receipt-tabs button.active{color:#a65a07;background:#fff3e7;border-color:#edb984}
+  #manualReceiptsModal .manual-receipt-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px 16px;border:1px solid #e2e7ee;background:#fcfdff;padding:16px;border-radius:15px;margin-bottom:14px}
+  #manualReceiptsModal .manual-receipt-section h3{grid-column:1/-1;margin:0 0 2px;color:#253651;font-size:15px}
+  #manualReceiptsModal label{display:grid;gap:6px;font-weight:750;font-size:12px;color:#384b66;min-width:0}
+  #manualReceiptsModal .wide{grid-column:1/-1}
+  #manualReceiptsModal input,#manualReceiptsModal select{width:100%;min-height:45px;border-radius:10px;border:1px solid #d9e1ec;padding:10px 12px;background:#fff;color:#24364d;font-size:15px;min-width:0}
+  #manualReceiptsModal input:focus-visible,#manualReceiptsModal select:focus-visible{outline:2px solid #df8e34;outline-offset:1px}
+  #manualReceiptsModal input[readonly]{background:#f4f7fc}
+  #manualReceiptsModal .manual-receipt-preview-code{padding:12px 14px;border-radius:10px;border:1px dashed #e8ba81;background:#fff8ed;display:grid;gap:4px;overflow-wrap:anywhere}
+  #manualReceiptsModal .manual-receipt-preview-code strong{font-size:15px;color:#8b4e09}
+  #manualReceiptsModal .manual-receipt-preview-code small,#manualReceiptsModal .manual-receipt-hint{color:#67758c;font-size:11px;line-height:1.5}
+  #manualReceiptsModal #manualReceiptStatus{font-size:12px;color:#a9393b;margin:0;min-height:0}
+  #manualReceiptsModal .manual-receipt-actions{display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:-23px;background:#fff;padding:14px 0;z-index:2;border-top:1px solid #e0e5ee}
+  #manualReceiptsModal button:disabled{opacity:.48;cursor:not-allowed}
+  #manualReceiptsModal [hidden]{display:none!important}
+  #manualReceiptsModal .manual-receipt-history-search{margin-bottom:12px}
+  #manualReceiptsModal .manual-receipt-history-list{display:grid;gap:9px;margin:16px 0}
+  #manualReceiptsModal .manual-receipt-history-item{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid #e0e7ef;border-radius:12px;padding:12px 14px}
+  #manualReceiptsModal .manual-receipt-history-item strong{font-size:13px}
+  #manualReceiptsModal .manual-receipt-history-item p{margin:3px 0;color:#68768c;font-size:12px}
+  #manualReceiptsModal .manual-receipt-view-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}
+  #manualReceiptsModal .manual-receipt-view-heading strong{font-size:13px;overflow-wrap:anywhere}
+  #manualReceiptsModal .manual-receipt-view-heading p{font-size:12px;color:#67758c;margin:5px 0}
+  #manualReceiptsModal .manual-receipt-view-buttons{display:flex;gap:8px;flex-wrap:wrap}
+  #manualReceiptsModal #manualReceiptPdfPreview{width:100%;height:min(63dvh,680px);border:1px solid #dce3ef;border-radius:10px;background:white}
+  @media(max-width:670px){
+    .finance-manual-trigger{width:100%;margin:0}
+    #manualReceiptsModal{padding:0;align-items:stretch;place-items:stretch}
+    #manualReceiptsModal .manual-receipt-dialog{width:100%;max-height:100dvh;height:100dvh;border-radius:0;padding:14px 13px}
+    #manualReceiptsModal .manual-receipt-section{grid-template-columns:minmax(0,1fr);padding:12px;gap:11px}
+    #manualReceiptsModal .manual-receipt-actions{bottom:-14px;display:grid;grid-template-columns:1fr 1fr}
+    #manualReceiptsModal .manual-receipt-actions button{padding:11px 7px;min-height:49px}
+    #manualReceiptsModal .manual-receipt-history-item{align-items:flex-start}
+    #manualReceiptsModal .manual-receipt-view-buttons{width:100%}
+    #manualReceiptsModal .manual-receipt-view-buttons button{flex:1}
+  }
+
+
+  #manualReceiptsModal .manual-receipt-draft{margin:12px auto;padding:22px;border:2px solid #525252;background:#fff;
+    width:min(612px,100%);box-shadow:0 4px 14px #24374d16;color:#141414;font-size:12px}
+  #manualReceiptsModal .manual-receipt-draft-heading{display:flex;gap:20px;align-items:center;justify-content:space-between;text-align:center}
+  #manualReceiptsModal .manual-receipt-draft-heading img{width:110px;height:48px;object-fit:contain}
+  #manualReceiptsModal .manual-receipt-draft-heading strong{display:block;font-size:13px}
+  #manualReceiptsModal .manual-receipt-draft-heading span{display:block;font-size:11px;margin-top:6px}
+  #manualReceiptsModal .manual-receipt-draft-block{border-top:1px solid #a0a0a0;margin-top:18px;padding-top:11px}
+  #manualReceiptsModal .manual-receipt-draft-block p{margin:6px 0;overflow-wrap:anywhere}
+  #manualReceiptsModal .manual-receipt-draft-seal{border-top:1px solid #aaa;margin:18px 0 10px;
+    padding-top:15px;text-align:center;font-size:12px}
+  #manualReceiptsModal .manual-receipt-draft-seal strong{display:block;margin-top:7px;text-decoration:underline}
+  #manualReceiptsModal .manual-receipt-draft>small{display:block;text-align:center;color:#777;font-size:10px}
+  @media(max-width:670px){#manualReceiptsModal .manual-receipt-draft{padding:14px 11px}
+    #manualReceiptsModal .manual-receipt-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+    #manualReceiptsModal .manual-receipt-actions #manualReceiptSave{grid-column:1/-1}}
+
+  /* Revisión responsive: tarjetas sin desbordes, campos e indicadores alineados. */
+  #manualReceiptsModal,
+  #manualReceiptsModal *{box-sizing:border-box}
+  #manualReceiptsModal .manual-receipt-dialog{
+    width:min(960px,calc(100vw - 30px));
+    max-width:100%;max-height:calc(100dvh - 26px);
+    padding:clamp(14px,2vw,24px);overflow-x:hidden;overflow-y:auto;
+    overscroll-behavior:contain;scrollbar-gutter:stable
+  }
+  #manualReceiptsModal .manual-receipt-section{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:start;column-gap:clamp(10px,1.5vw,18px);
+    row-gap:14px;min-width:0;width:100%;
+  }
+  #manualReceiptsModal .manual-receipt-section > label:not(.wide),
+  #manualReceiptsModal .manual-receipt-house-number{
+    display:flex;flex-direction:column;gap:8px;
+    min-width:0;min-height:86px;justify-content:flex-end;
+    align-self:stretch;
+  }
+  #manualReceiptsModal .manual-receipt-section > label.wide{
+    display:grid;grid-template-columns:minmax(0,1fr);
+    align-content:start;gap:8px;min-width:0;
+  }
+  #manualReceiptsModal .manual-receipt-house-number>label{
+    display:block;margin:0;flex:0 0 auto;line-height:1.5
+  }
+  #manualReceiptsModal .manual-receipt-number-combo{margin-top:auto;flex:0 0 auto}
+  #manualReceiptsModal .manual-receipt-section > label:not(.wide) > input,
+  #manualReceiptsModal .manual-receipt-section > label:not(.wide) > select{
+    margin-top:auto
+  }
+  #manualReceiptsModal .manual-receipt-section input,
+  #manualReceiptsModal .manual-receipt-section select{
+    display:block;width:100%;min-width:0;max-width:100%;
+    min-height:48px;height:48px;
+    font-size:16px;line-height:1.25
+  }
+  #manualReceiptsModal .manual-receipt-preview-code{
+    width:100%;overflow-wrap:anywhere;word-break:break-word
+  }
+  #manualReceiptsModal .manual-receipt-actions{
+    bottom:0;gap:10px;flex-wrap:wrap;
+    margin-top:18px;padding:12px 0 4px;
+    border-top:1px solid #e2e7ef;background:#fff;
+    box-shadow:0 -6px 15px rgba(255,255,255,.9);
+  }
+  #manualReceiptsModal .manual-receipt-actions button{
+    min-height:46px;max-width:100%;white-space:normal;line-height:1.3
+  }
+  #manualReceiptsModal #manualReceiptNew form{min-width:0;width:100%;padding-bottom:8px}
+  #manualReceiptsModal .manual-receipt-history-item>div:first-child{
+    flex:1 1 260px;min-width:0;overflow-wrap:anywhere
+  }
+  #manualReceiptsModal .manual-receipt-history-actions{
+    display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap;
+    flex:0 1 auto
+  }
+  #manualReceiptsModal .manual-receipt-history-actions button{min-height:42px}
+  #manualReceiptsModal .manual-receipt-delete{
+    background:#fff5f5;border:1px solid #e9b2b9;border-radius:10px;
+    color:#a12b37;padding:10px 14px;font-size:12px;font-weight:800;cursor:pointer
+  }
+  #manualReceiptsModal .manual-receipt-delete:hover:not(:disabled){
+    background:#ffe7e7;border-color:#cf747e;color:#8c1525
+  }
+  #manualReceiptsModal .manual-receipt-delete:focus-visible{
+    outline:3px solid #edacb5;outline-offset:2px
+  }
+  @media(max-width:800px){
+    #manualReceiptsModal .manual-receipt-section{
+      grid-template-columns:repeat(2,minmax(0,1fr));padding:14px
+    }
+    #manualReceiptsModal .manual-receipt-dialog{width:calc(100vw - 18px)}
+  }
+  @media(max-width:720px){
+    #manualReceiptsModal{padding:0;align-items:stretch;place-items:stretch}
+    #manualReceiptsModal .manual-receipt-dialog{
+      width:100%;max-width:100%;height:100dvh;max-height:100dvh;
+      border-radius:0;padding:14px 12px;scrollbar-gutter:auto
+    }
+    #manualReceiptsModal .manual-receipt-section{
+      grid-template-columns:minmax(0,1fr);padding:12px;row-gap:12px
+    }
+    #manualReceiptsModal .manual-receipt-section > label:not(.wide),
+    #manualReceiptsModal .manual-receipt-house-number{min-height:auto;gap:6px}
+    #manualReceiptsModal .manual-receipt-section > label:not(.wide) > input,
+    #manualReceiptsModal .manual-receipt-section > label:not(.wide) > select{margin-top:0}
+    #manualReceiptsModal .manual-receipt-tabs{gap:7px}
+    #manualReceiptsModal .manual-receipt-tabs button{
+      flex:1 1 0;min-width:0;padding:11px 8px;white-space:normal
+    }
+    #manualReceiptsModal .manual-receipt-actions{
+      bottom:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;padding:10px 0 8px;margin-top:12px;
+    }
+    #manualReceiptsModal .manual-receipt-actions button{
+      width:100%;min-height:46px;min-width:0;padding:10px 5px
+    }
+    #manualReceiptsModal .manual-receipt-actions #manualReceiptSave{grid-column:1/-1}
+    #manualReceiptsModal .manual-receipt-history-item{
+      flex-direction:column;align-items:stretch;gap:10px
+    }
+    #manualReceiptsModal .manual-receipt-history-actions{
+      width:100%;justify-content:flex-start
+    }
+    #manualReceiptsModal .manual-receipt-history-actions button{
+      flex:1 1 0
+    }
+    #manualReceiptsModal .manual-receipt-draft{max-width:100%;padding:13px 10px}
+    #manualReceiptsModal .manual-receipt-draft-heading{gap:10px;flex-wrap:wrap}
+  }
+
+</style>
+
+
+
+<section id="manualReceiptsModal" class="finance-pay-overlay" hidden aria-label="Generar e historial de recibos manuales">
+ <div class="finance-pay-dialog manual-receipt-dialog" role="dialog" aria-modal="true"
+      aria-labelledby="manualReceiptTitle" tabindex="-1">
+  <div class="finance-pay-heading">
+   <div><span class="eyebrow">DOCUMENTOS INDEPENDIENTES</span>
+    <h2 id="manualReceiptTitle">Recibos manuales</h2>
+    <p class="manual-receipt-subtitle">Estos documentos no modifican saldos, pagos, gráficas, Excel ni TAGs.</p>
+   </div>
+   <button type="button" class="soft" id="manualReceiptsClose" aria-label="Cerrar generador de recibos">Cerrar ×</button>
+  </div>
+  <div class="manual-receipt-tabs" role="tablist" aria-label="Secciones de recibos manuales">
+   <button type="button" id="manualReceiptTabNew" class="active" role="tab" aria-selected="true" aria-controls="manualReceiptNew">Nuevo recibo</button>
+   <button type="button" id="manualReceiptTabHistory" role="tab" aria-selected="false" aria-controls="manualReceiptHistory">Historial de recibos</button>
+  </div>
+  <section id="manualReceiptNew" role="tabpanel" aria-labelledby="manualReceiptTabNew">
+   <form id="manualReceiptForm">
+    <div class="manual-receipt-section">
+     <h3>1. Vivienda y destinatario</h3>
+     <label for="manualReceiptStreet">Calle *
+      <select id="manualReceiptStreet" required><option value="">Selecciona una calle</option></select>
+     </label>
+     <div class="manual-receipt-house-number">
+       <label for="manualReceiptNumber">Número de casa *</label>
+       <div class="manual-receipt-number-combo">
+         <input id="manualReceiptNumber" type="text" required maxlength="20" placeholder="Escribe el número"
+           autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false"
+           aria-controls="manualReceiptNumberOptions" aria-haspopup="listbox">
+         <div id="manualReceiptNumberOptions" class="manual-receipt-number-options" role="listbox"
+           aria-label="Números de vivienda de la calle seleccionada" hidden></div>
+       </div>
+     </div>
+     <label class="wide" id="manualReceiptOtherStreetWrap" for="manualReceiptOtherStreet" hidden>
+       Nombre de otra calle *
+       <input id="manualReceiptOtherStreet" type="text" maxlength="100" placeholder="Escribe la calle">
+     </label>
+     <label class="wide">Nombre en el recibo *<input id="manualReceiptName" type="text" required maxlength="150" autocomplete="off" placeholder="Nombre completo"></label>
+    </div>
+    <div class="manual-receipt-section">
+     <h3>2. Folio y fecha de emisión</h3>
+     <label>Mes del folio *<select id="manualReceiptFolioMonth"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></label>
+     <label>Año del folio *<input id="manualReceiptFolioYear" type="number" min="2000" max="2100" step="1" required></label>
+     <label>Inicial de la calle para el folio *<input id="manualReceiptInitial" type="text" maxlength="1" required placeholder="R" autocapitalize="characters"></label>
+     <label>Fecha de emisión (automática)<input id="manualReceiptDate" type="text" readonly></label>
+     <div class="wide manual-receipt-preview-code"><span>Folio que se generará</span><strong id="manualReceiptFolioPreview">MJ-NOV-2026-XXXXXXXXXX-R18-M</strong>
+       <small>Los diez caracteres aleatorios y la referencia se asignan al guardar.</small></div>
+    </div>
+    <div class="manual-receipt-section">
+     <h3>3. Concepto e importe</h3>
+     <label class="wide">Concepto del pago *<input id="manualReceiptConceptTitle" type="text" required maxlength="150" value="Pago de mantenimiento" list="manualReceiptConceptOptions">
+      <datalist id="manualReceiptConceptOptions"><option value="Pago de mantenimiento"></option><option value="APORTACIÓN"></option><option value="Pago de cuota extraordinaria"></option></datalist>
+     </label>
+     <label>Mes cubierto *<select id="manualReceiptCoveredMonth"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select></label>
+     <label>Año cubierto *<input id="manualReceiptCoveredYear" type="number" min="2000" max="2100" step="1" required></label>
+     <label class="wide">Concepto en el detalle del pago *<input id="manualReceiptConceptDetail" type="text" required maxlength="120" value="Mantenimiento" placeholder="Ej. Aportación parque"></label>
+     <label>Monto recibido (MXN, sin centavos) *<input id="manualReceiptAmount" type="number" step="1" min="1" max="999999999" required inputmode="numeric" placeholder="300"></label>
+     <label>Forma de pago *<select id="manualReceiptMethod"><option value="EFECTIVO">EFECTIVO</option><option value="TRANSFERENCIA">TRANSFERENCIA</option></select></label>
+    </div>
+    <div class="manual-receipt-section">
+     <h3>4. Sello y emisión</h3>
+     <label class="wide">Sello del recibo (texto libre) *<input id="manualReceiptSeal" type="text" maxlength="100" required value="PAGADO" placeholder="Ej. PAGADO CON ADEUDO, ABONO, APORTACIÓN"></label>
+     <p class="wide manual-receipt-hint">Este recibo será independiente de la contabilidad. No equivale a registrar un pago en Análisis de cuotas.</p>
+     <p id="manualReceiptStatus" class="wide" role="status" aria-live="polite"></p>
+    </div>
+    <section id="manualReceiptDraft" class="manual-receipt-draft" hidden aria-label="Borrador del recibo">
+      <div class="manual-receipt-draft-heading">
+       <img src="assets/images/logo-mision-jardines.png" alt="Fraccionamiento Demo" width="110" height="48">
+       <div><strong>FRACCIONAMIENTO FRACCIONAMIENTO DEMO</strong><span>Recibo de pago · Borrador manual</span></div>
+      </div>
+      <div class="manual-receipt-draft-block">
+       <p><b>Folio:</b> <span id="manualDraftFolio"></span></p>
+       <p><b>Fecha de emisión:</b> <span id="manualDraftDate"></span></p>
+      </div>
+      <div class="manual-receipt-draft-block">
+       <p><b>Nombre:</b> <span id="manualDraftName"></span></p>
+       <p><b>Calle:</b> <span id="manualDraftStreet"></span> · <b>Número:</b> <span id="manualDraftNumber"></span></p>
+      </div>
+      <div class="manual-receipt-draft-block">
+       <p><b>Concepto del pago:</b> <span id="manualDraftConcept"></span></p>
+       <p><b>Mes cubierto:</b> <span id="manualDraftPeriod"></span></p>
+      </div>
+      <div class="manual-receipt-draft-block">
+       <p><b>Detalle:</b> <span id="manualDraftDetail"></span> · <b>Monto:</b> <span id="manualDraftAmount"></span></p>
+       <p><b>Forma de pago:</b> <span id="manualDraftMethod"></span></p>
+       <p><b>Referencia:</b> Se generará automáticamente al guardar.</p>
+      </div>
+      <p class="manual-receipt-draft-seal">SELLO: <strong id="manualDraftSeal"></strong></p>
+      <small>Borrador sin validez de registro contable. El PDF definitivo se crea al guardar.</small>
+    </section>
+    <div class="manual-receipt-actions">
+     <button type="button" class="soft" id="manualReceiptClear">Limpiar datos</button>
+     <button type="button" class="soft" id="manualReceiptReview" aria-expanded="false" aria-controls="manualReceiptDraft">Ver borrador</button>
+     <button type="submit" class="primary" id="manualReceiptSave">Guardar y generar PDF</button>
+    </div>
+   </form>
+  </section>
+  <section id="manualReceiptHistory" role="tabpanel" aria-labelledby="manualReceiptTabHistory" hidden>
+   <label class="manual-receipt-history-search">Buscar por folio, vivienda o nombre<input id="manualReceiptSearch" type="search" placeholder="Ej. Rosas 18, Julissa, MJ-NOV…"></label>
+   <p id="manualReceiptHistoryStatus" role="status" aria-live="polite">Selecciona Historial para consultar tus recibos.</p>
+   <div id="manualReceiptHistoryList" class="manual-receipt-history-list"></div>
+   <button type="button" class="soft" id="manualReceiptHistoryMore" hidden>Cargar recibos anteriores</button>
+  </section>
+  <section id="manualReceiptView" role="tabpanel" aria-label="Vista del recibo manual" hidden>
+   <div class="manual-receipt-view-heading">
+    <div><strong id="manualReceiptViewFolio"></strong><p id="manualReceiptViewStatus" role="status"></p></div>
+    <div class="manual-receipt-view-buttons">
+     <button type="button" class="soft" id="manualReceiptViewBack">Volver al historial</button>
+     <button type="button" class="primary" id="manualReceiptDownload" disabled>Guardar PDF</button>
+    </div>
+   </div>
+   <iframe id="manualReceiptPdfPreview" title="Vista previa del recibo manual" referrerpolicy="no-referrer"></iframe>
+  </section>
+ </div>
+</section>
+
+<section id="financeResidentModal" class="finance-pay-overlay" hidden aria-label="Registrar residente">
+  <div class="finance-pay-dialog finance-resident-dialog" role="dialog" aria-modal="true"
+       aria-labelledby="financeResidentTitle" aria-describedby="financeResidentHouse" tabindex="-1">
+    <div class="finance-pay-heading">
+      <div>
+        <span class="eyebrow">PADRÓN DE VIVIENDAS</span>
+        <h2 id="financeResidentTitle">Registrar residente</h2>
+        <p class="hint" id="financeResidentHouse">Selecciona una vivienda.</p>
+      </div>
+      <button type="button" class="soft" id="financeResidentClose" aria-label="Cerrar registro de residente">Cerrar ×</button>
+    </div>
+    <form id="financeResidentForm" class="finance-resident-form">
+      <label for="financeResidentName">Nombre completo del residente *
+        <input id="financeResidentName" name="nombreCompleto" type="text" maxlength="150"
+          minlength="2" autocomplete="off" required placeholder="Ej. María López García">
+      </label>
+      <p class="finance-resident-hint">El nombre se guardará en el padrón de esta vivienda.
+        No se modificarán cuotas, pagos, TAGs, teléfonos ni contraseñas.</p>
+      <p id="financeResidentStatus" role="status" aria-live="polite"></p>
+      <div class="finance-resident-actions">
+        <button type="button" class="soft" id="financeResidentCancel">Cancelar</button>
+        <button type="submit" class="primary" id="financeResidentSubmit">Guardar residente</button>
+      </div>
+    </form>
+  </div>
+</section>
+
 <section id="housePaymentModal" class="finance-pay-overlay" hidden aria-label="Registrar pago por vivienda">
   <div class="finance-pay-dialog" role="dialog" aria-modal="true" aria-labelledby="housePaymentTitle">
     <div class="finance-pay-heading">
@@ -73,7 +586,7 @@
       <button type="button" id="housePaymentClose" class="soft" aria-label="Cerrar formulario">Cerrar</button>
     </div>
     <form id="housePaymentForm" class="house-payment-form">
-      <label>Concepto de pago<select id="housePaymentType"><option value="MANTENIMIENTO">Cuota de mantenimiento</option><option value="EXTRAORDINARIO">Cuota extraordinaria</option><option value="CASA_CLUB">Casa club</option></select></label>
+      <div class="house-payment-type-row"><label>Concepto de pago<select id="housePaymentType"><option value="MANTENIMIENTO">Cuota de mantenimiento</option><option value="EXTRAORDINARIO">Cuota extraordinaria</option><option value="CASA_CLUB">Casa club</option></select></label><button type="button" id="houseAbonoAdeudoOpen" class="soft house-abono-open" hidden>Abono con adeudo</button></div>
       <label id="houseConceptWrap" hidden>Proyecto o reservación pendiente<select id="houseConceptSelect"></select></label>
       <div class="house-last-payment" id="houseLastPayment" data-maintenance-only role="status">Consultando último mes pagado…</div>
       <label data-maintenance-only>¿Hasta qué mes está pagando?
@@ -90,7 +603,7 @@
         <p id="houseAnnualHint">Selecciona diciembre del año actual. Se cobrarán únicamente las mensualidades pendientes, sin duplicar meses ya pagados. Al confirmar, todos los TAGs recibirán la vigencia del 10 de enero siguiente, incluso si actualmente tienen una fecha posterior.</p>
       </div>
       <label data-maintenance-only>Meses pendientes calculados<input type="number" id="housePaymentCount" readonly aria-readonly="true" value="0"></label>
-      <label>Monto total recibido (MXN)<input type="number" id="housePaymentAmount" required min="0" step="0.01" inputmode="decimal" placeholder="Ej. 600.00"></label>
+      <label>Monto total recibido (MXN)<input type="number" id="housePaymentAmount" required min="0" step="1" inputmode="numeric" placeholder="Ej. 600"></label>
       <label>Forma de pago<select id="housePaymentMethod"><option value="EFECTIVO">Efectivo</option><option value="TRANSFERENCIA">Transferencia</option><option value="DEPOSITO">Depósito</option><option value="OTRO">Otro</option></select></label>
       <div id="housePaymentPreview" class="house-payment-preview" role="status" aria-live="polite">Calculando mensualidades pendientes…</div>
       <div id="housePaymentTariffReconcileWrap" class="house-payment-review tariff-reconciliation" data-maintenance-only hidden>
@@ -104,32 +617,55 @@
       <p class="hint house-payment-notice" id="housePaymentNotice" data-maintenance-only>Se calcula desde el último mes completamente pagado en MySQL hasta el mes seleccionado. El monto sugerido depende de la cuota de esta vivienda y puede editarse, con un máximo de $50 de recargo por mes. No se puede marcar como pagado un período con abonos, comprobantes o cobros previos. La sincronización con el C3 se confirma por separado. La fecha de los TAGs se ajustará al corte seleccionado aunque actualmente sea posterior.</p>
       <div class="house-payment-actions"><button type="button" class="soft" id="housePaymentRefreshC3" data-maintenance-only>Verificar vigencias de TAGs</button><button type="submit" class="primary" id="housePaymentSubmit" disabled>Confirmar pago</button></div>
     </form>
+
+    <form id="houseAbonoAdeudoPanel" class="house-payment-form house-abono-panel" hidden>
+      <div class="house-abono-heading"><h3>Abono con adeudo</h3>
+        <p>Pago del mes actual, sin condonar los meses anteriores ni actualizar los TAGs.</p>
+      </div>
+      <label>Mes que se reconoce<input id="houseAbonoAdeudoPeriod" type="text" readonly></label>
+      <label>Monto recibido (MXN)<input id="houseAbonoAdeudoAmount" type="number" min="1" step="1" inputmode="numeric" readonly required></label>
+      <label>Forma de pago<select id="houseAbonoAdeudoMethod">
+        <option value="EFECTIVO">Efectivo</option><option value="TRANSFERENCIA">Transferencia</option>
+        <option value="DEPOSITO">Depósito</option><option value="OTRO">Otro</option>
+      </select></label>
+      <label class="house-abono-confirm"><input id="houseAbonoAdeudoConfirm" type="checkbox" required>
+        Confirmo haber recibido esta cantidad. Los adeudos anteriores siguen pendientes y el recibo incluirá “Deudas pendientes por aclarar”.</label>
+      <p id="houseAbonoAdeudoStatus" role="status" aria-live="polite" class="house-payment-status"></p>
+      <div class="house-payment-actions"><button id="houseAbonoAdeudoBack" class="soft" type="button">Volver</button>
+        <button id="houseAbonoAdeudoSave" class="primary" type="submit" disabled>Registrar y generar recibo</button></div>
+    </form>
+
     <p id="housePaymentStatus" role="status" aria-live="polite" class="house-payment-status"></p>
   </div>
 </section>
+<section id="financeBackupModal" class="finance-pay-overlay" hidden aria-label="Respaldos y recibos"><div class="finance-pay-dialog" role="dialog" aria-modal="true" aria-labelledby="financeBackupTitle"><div class="finance-pay-heading"><h2 id="financeBackupTitle">Respaldos y recibos</h2><button type="button" id="financeBackupClose" class="soft">Cerrar ×</button></div><p id="financeBackupDescription" class="hint"></p><div id="financeDriveFolderSection" class="finance-drive-folder" hidden><p id="financeDriveFolderStatus" class="hint" role="status" aria-live="polite">Consultando carpeta de destino…</p><button type="button" id="financeDriveChooseFolder" class="soft">Elegir carpeta 02_Recibos_PDF</button><p class="hint">Selecciona en Google Drive: Fraccionamiento Demo - Administración → 02_Recibos_PDF. La plataforma creará dentro la carpeta 2026 y guardará cada recibo como PDF independiente.</p><a id="financeDriveFolderLink" target="_blank" rel="noopener noreferrer" hidden>Ver carpeta de recibos en Drive</a></div><label>Mes y año <select id="financeBackupPeriod" aria-describedby="financeBackupPeriodsNote" required><option value="">Consultando meses disponibles…</option></select></label><p id="financeBackupPeriodsNote" class="hint" role="status" aria-live="polite"></p><label class="finance-backup-check"><input id="financeBackupAllMonths" type="checkbox"> Respaldar recibos de todos los meses históricos en Drive</label><p id="financeDriveConfig" class="hint" hidden>Configura en Hostinger GOOGLE_DRIVE_CLIENT_ID, GOOGLE_DRIVE_CLIENT_SECRET y GOOGLE_DRIVE_REDIRECT_URI. En Google Cloud autoriza esta URL de retorno exacta; concede permiso para crear archivos con la aplicación, sin acceso a otros archivos de tu Drive.</p><p id="financeBackupStatus" role="status"></p><div class="finance-backup-actions"><button id="financeBackupConfirm" class="primary" type="button">Continuar</button></div></div></section>
 <section id="houseHistoryModal" class="finance-pay-overlay" hidden aria-label="Historial de pagos de vivienda">
  <div class="history-dialog-layout" id="historyDialogLayout">
   <div class="finance-pay-dialog history-dialog" role="dialog" aria-modal="true" aria-labelledby="houseHistoryTitle" tabindex="-1">
     <div class="finance-pay-heading"><div><span class="eyebrow">MOVIMIENTOS POR VIVIENDA</span><h2 id="houseHistoryTitle">Historial de pagos</h2><p id="houseHistoryAddress" class="hint"></p></div><button id="houseHistoryClose" type="button" class="soft" aria-label="Cerrar historial de pagos">×</button></div>
-    <div class="history-tariff-toolbar" style="display:flex;justify-content:flex-end;align-items:center;width:100%;margin:14px 0 10px"><button type="button" id="houseTariffOpen" class="soft">Modificar cuotas</button></div>
+    <div class="history-tariff-toolbar" style="display:flex;justify-content:flex-end;align-items:center;gap:9px;flex-wrap:wrap;width:100%;margin:14px 0 10px">
+      <button type="button" id="houseTariffOpen" class="soft">Modificar cuotas</button>
+      <button type="button" id="houseProjectNoAplica" class="soft house-project-no-aplica-button" aria-pressed="false" hidden>No aplica</button>
+    </div>
+    <p id="houseProjectNoAplicaStatus" class="hint house-project-no-aplica-status" role="status" aria-live="polite" hidden></p>
     <div id="houseHistorySummary" class="history-summary" role="status" aria-live="polite" style="width:100%;margin:0 0 20px"></div>
-    <div id="houseHistoryTimeline" class="history-timeline" aria-label="Línea de tiempo de pagos"></div>
+    <p id="houseHistoryDeleteStatus" class="hint" role="status"></p><div id="houseHistoryTimeline" class="history-timeline" aria-label="Línea de tiempo de pagos"></div>
     <div id="houseHistoryDebts" class="history-debts"></div>
   </div>
   <aside id="houseTariffPanel" class="finance-pay-dialog history-tariff-panel" hidden aria-label="Modificar cuota de mantenimiento">
-    <div class="finance-pay-heading"><div><span class="eyebrow">TARIFA POR VIVIENDA</span><h2 id="houseTariffTitle">Modificar cuotas</h2><p id="houseTariffAddress" class="hint"></p><div id="houseTariffSavedState" class="history-tariff-save-indicator" data-state="unknown" role="status" aria-live="polite"><span class="history-tariff-status-dot" aria-hidden="true"></span><span id="houseTariffSavedText">Consultando estado…</span></div></div><button type="button" class="soft" id="houseTariffClose">Cerrar ×</button></div>
+    <div class="finance-pay-heading"><div><span class="eyebrow" id="houseTariffConceptLabel">TARIFA POR VIVIENDA</span><h2 id="houseTariffTitle">Modificar cuotas</h2><p id="houseTariffAddress" class="hint"></p><div id="houseTariffSavedState" class="history-tariff-save-indicator" data-state="unknown" role="status" aria-live="polite"><span class="history-tariff-status-dot" aria-hidden="true"></span><span id="houseTariffSavedText">Consultando estado…</span></div></div><button type="button" class="soft" id="houseTariffClose">Cerrar ×</button></div>
     <form id="houseTariffForm">
-      <label class="history-tariff-label" for="houseTariffInput">Cuota mensual de mantenimiento (MXN)
-        <input id="houseTariffInput" name="cuotaPorCobrar" type="number" min="1" max="10000" step="1" inputmode="numeric" required placeholder="300">
+      <label class="history-tariff-label" for="houseTariffInput"><span id="houseTariffAmountLabel">Cuota mensual de mantenimiento (MXN)</span>
+        <input id="houseTariffInput" name="cuotaPorCobrar" type="number" min="0" max="10000" step="1" inputmode="numeric" required placeholder="300">
       </label>
-      <label class="history-tariff-checkline" for="houseTariffNoFee">
+      <label class="history-tariff-checkline" id="houseTariffNoFeeWrap" for="houseTariffNoFee">
         <input id="houseTariffNoFee" type="checkbox">
         <span>Exentar recargo de $50 por mora desde el mes actual y en meses futuros</span>
       </label>
-      <p id="houseTariffStatus" class="hint" role="status" aria-live="polite"></p>
+      <p id="houseProjectTariffInfo" class="hint" hidden>La meta individual de este proyecto es independiente de mantenimiento y no modifica los TAGs. No puedes establecer una cuota de $0 si esa vivienda tiene abonos recibidos o en validación.</p><p id="houseTariffStatus" class="hint" role="status" aria-live="polite"></p>
       <button class="primary" id="houseTariffSave" type="submit">Guardar cuota mensual</button>
     </form>
   </aside>
  </div>
 </section>
-</main><script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script><script src="assets/js/analisis-excel-charts.js?v=20261022-recuperar-graficas" defer></script><script src="assets/js/analisis-excel.js?v=20261022-calle-pagadas-total" defer></script><script src="assets/js/analisis-orden-viviendas.js?v=20261021-registro-pago" defer></script><script src="assets/js/analisis-cuotas.js?v=20261024-exencion-checkline-2" defer></script><script src="assets/js/site-sidebar.js?v=20261021-refresco-scroll" defer></script></body></html>
+</main><script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js" defer></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script><script src="assets/js/analisis-balance.js?v=20261109-saldo" defer></script><script src="assets/js/analisis-excel-charts.js?v=20261022-recuperar-graficas-20261109-pesos-enteros" defer></script><script src="assets/js/analisis-excel.js?v=20261109-abono-estados-v2" defer></script><script src="assets/js/analisis-excel-proyectos.js?v=20261109-balance-recibos-v1" defer></script><script src="assets/js/analisis-orden-viviendas.js?v=20261021-registro-pago" defer></script><script src="assets/js/proyectos-presupuesto.js?v=20261103-proyecto-cero-v1" defer></script><script src="assets/js/analisis-cuotas.js?v=20261109-recibos-manuales-v1" defer></script><script src="assets/js/recibos-manuales.js?v=20261110-responsive-borrar-v1" defer></script><script src="assets/js/site-sidebar.js?v=20261021-refresco-scroll" defer></script></body></html>

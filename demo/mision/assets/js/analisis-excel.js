@@ -8,16 +8,29 @@
   // No interpretar datos externos (nombre/referencia) como fórmulas de Excel.
   return /^[\s]*[=+@-]/.test(value)?"'"+value:value;
  };
- const mesUltimo=h=>h.ultimoMesPagado?`${h.ultimoMesPagado.mes} ${h.ultimoMesPagado.anio}`:'Sin pago';
+ const abonoVigente=h=>Boolean(h.abonoConAdeudo&&Number(h.saldoPendiente)>0&&h.ultimoAbonoConAdeudo);
+  const abonoEtiqueta=h=>abonoVigente(h)?'Sí':'No';
+  const periodoAbono=h=>abonoVigente(h)?h.ultimoAbonoConAdeudo.mes+' '+h.ultimoAbonoConAdeudo.anio:'';
+  const mesUltimo=h=>h.ultimoMesPagado?`${h.ultimoMesPagado.mes} ${h.ultimoMesPagado.anio}`:'Sin pago';
+ // No mostrar la referencia histórica del último pago como si acreditara
+ // el mes seleccionado. La API entrega el folio REAL de ese período.
+ const folioComprobante=h=>{
+  if(String(h.estatus||'').toUpperCase()!=='PAGADO'||Number(h.saldoPendiente||0)>0)return '';
+  const folio=String(h.reciboPeriodo?.folio||'').trim();
+  return /^MJ-(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)-\d{4}-[A-F0-9]{10}-[A-Z][A-Z0-9]+-M$/.test(folio)?folio:'';
+ };
  const datosVivienda=h=>[h.casaId,texto(h.calle),texto(h.numero),texto(h.nombre),texto(h.estatus),
   dinero(h.montoPagado),dinero(h.ultimoPago?.monto),mesUltimo(h),
   dinero(h.saldoPendiente),h.ultimoPago?.fecha?fecha(h.ultimoPago.fecha):'',
-  texto(h.ultimoPago?.referencia),Array.isArray(h.mesesPendientes)?h.mesesPendientes.length:Number(h.mesesPendientes||0),
+  folioComprobante(h),Array.isArray(h.mesesPendientes)?h.mesesPendientes.length:Number(h.mesesPendientes||0),
   dinero(h.recargosPendientes),Number(h.tags?.detalle?.length||0),dinero(h.tarifaMensual||300),
-  h.ultimoMesPagado?.pagoAnual?'Pago anual':String(h.estatus||'').toUpperCase()==='PAGO_PARCIAL'?'Abono parcial':'Mensual'];
+  h.ultimoMesPagado?.pagoAnual?'Pago anual':abonoVigente(h)?'Abono con adeudo':String(h.estatus||'').toUpperCase()==='PAGO_PARCIAL'?'Abono parcial':'Mensual',
+   abonoEtiqueta(h),periodoAbono(h),abonoVigente(h)?dinero(h.ultimoAbonoConAdeudo.monto):0,
+   abonoVigente(h)?texto(h.ultimoAbonoConAdeudo.folio||''):''];
  const headersVivienda=['ID vivienda','Calle','Número','Residente','Estado del mes','Pagado en el mes (MXN)',
   'Último movimiento (MXN)','Último mes pagado','Saldo pendiente (MXN)',
-  'Fecha último movimiento','Referencia','Meses pendientes','Recargos pendientes (MXN)','TAGs','Cuota mensual por cobrar (MXN)','Modalidad'];
+  'Fecha último movimiento','Referencia','Meses pendientes','Recargos pendientes (MXN)','TAGs','Cuota mensual por cobrar (MXN)','Modalidad',
+   'Abono con adeudo','Mes reconocido (abono)','Importe del abono (MXN)','Folio abono con adeudo'];
 
 
  // La anualidad es un subconjunto de viviendas pagadas, NO una tercera clase
@@ -31,6 +44,7 @@
  function prepararDashboard(data,viviendas){
   const completas=viviendas.filter(pagoCompleto);
   const pendientes=viviendas.filter(h=>!pagoCompleto(h));
+   const abonos=viviendas.filter(abonoVigente);
   const anuales=completas.filter(anualConfirmado);
   const historico=Boolean(data.esCargaHistorica);
   const bank=data.ingresosReportados||{};
@@ -57,12 +71,14 @@
   const calles=[...agrupadas].sort(([a],[b])=>a.localeCompare(b,'es-MX',{numeric:true}))
    .map(([calle,conteo])=>[calle,conteo.pagadas,conteo.pendientes]);
   if(!calles.length)calles.push(['Sin viviendas',0,0]);
+  const balanceMensual=root.MJFinanceBalance?.mensual(data)||null;
   return {
+   balanceMensual,
    status:[['Pagado completo',completas.length],['Sin pago completo',pendientes.length]],
    anual:[['Pago anual',anuales.length],['Pago mensual',completas.length-anuales.length]],
    ingresos,egresos,calles,
    indicadores:{
-    completas:completas.length,pendientes:pendientes.length,anuales:anuales.length,
+    completas:completas.length,pendientes:pendientes.length,anuales:anuales.length,abonos:abonos.length,
     totalIngresos:monto(data.ingresosParaBalance),totalEgresos:monto(data.totalEgresos),
     saldoInicial:monto(data.saldoInicial),saldoDisponible:monto(data.balanceReportado)
    },
@@ -77,9 +93,16 @@
   const sheet=(nombre,columnas,filas)=>({nombre,columnas,filas});
   const hojaViviendas=(nombre,filas)=>sheet(nombre,headersVivienda,filas.map(datosVivienda));
   const conteoPagadas=todas.filter(h=>h.pagada).length;
+   const abonosAdeudo=todas.filter(abonoVigente);
+   const enlacesAbonos=Object.fromEntries(abonosAdeudo.filter(h=>
+    h.ultimoAbonoConAdeudo?.folio && h.ultimoAbonoConAdeudo?.referencia).map(h=>[
+      String(h.casaId),{folio:h.ultimoAbonoConAdeudo.folio,referencia:h.ultimoAbonoConAdeudo.referencia}
+   ]));
   const resumen=[['Período de análisis',periodo],['Viviendas en padrón',todas.length],
    ['Con pago registrado',conteoPagadas],['Sin pago registrado',todas.length-conteoPagadas],
-   ['Nota','La exportación incluye todas las viviendas; ignora búsqueda, filtros y paginación.']];
+   ['Viviendas con abono con adeudo (siguen pendientes)',abonosAdeudo.length],
+    ['Nota','Los abonos con adeudo registran ingresos, pero no liquidan la deuda anterior.'],
+    ['Alcance','La exportación incluye todas las viviendas; ignora búsqueda, filtros y paginación.']];
   if(tipo==='padron'){
    const completas=todas.filter(pagoCompleto),pendientes=todas.filter(h=>!pagoCompleto(h));
    const dashboard=prepararDashboard(data,todas);
@@ -90,6 +113,11 @@
     ['Total','Egresos registrados',dashboard.indicadores.totalEgresos,'Suma del período seleccionado'],
     ['Saldo','Saldo inicial',dashboard.indicadores.saldoInicial,'Saldo anterior, NO es ingreso recaudado en el período'],
     ['Saldo','Saldo disponible',dashboard.indicadores.saldoDisponible,'Indicador financiero reportado por el servidor'],
+    ...(dashboard.balanceMensual?[
+     ['Balance informativo','Ingresos por mensualidad cubierta',dashboard.balanceMensual.ingresos,'No equivale necesariamente a lo depositado este mes'],
+     ['Balance informativo','Egresos del período',dashboard.balanceMensual.egresos,'Gastos del mes seleccionado'],
+     ['Balance informativo',dashboard.balanceMensual.estado==='SALDO_EN_CONTRA'?'Saldo en contra':dashboard.balanceMensual.estado==='SALDO_A_FAVOR'?'Saldo a favor':'En equilibrio',dashboard.balanceMensual.diferencia,dashboard.balanceMensual.criterio]
+    ]:[]),
     ...(data.esCargaHistorica?[
      ['Informativo','Mantenimiento · banco validado',dinero(data.ingresosReportados?.mantenimiento),'No sumar automáticamente; puede estar incluido en cuotas históricas'],
      ['Informativo','Extraordinarias · banco validado',dinero(data.ingresosReportados?.extraordinarios),'No sumar automáticamente; consultar conciliación'],
@@ -98,27 +126,45 @@
    ];
    return {nombre:'Casas_en_padron',titulo:'Padrón y dashboard financiero',
     hojas:[hojaViviendas('Todas las viviendas',todas),
-     hojaViviendas('Pago registrado',completas),
+     hojaViviendas('Pago registrado',todas.filter(h=>h.pagada)),
      hojaViviendas('Sin Pagar',pendientes),
+      hojaViviendas('Abono con adeudo',abonosAdeudo),
      sheet('Finanzas',['Tipo','Concepto','Monto (MXN)','Procedencia / criterio'],finanzas),
      sheet('Desglose por calle',['Calle','Pagadas','Sin pago completo','Total','Porcentaje pagado'],
       dashboard.calles.map(([calle,pagadas,ped])=>[texto(calle),pagadas,ped,pagadas+ped,
        pagadas+ped?Math.round(pagadas/(pagadas+ped)*10000)/100:0]))],
     dashboard,
+     enlacesAbonos,
+    // Referencia del movimiento reservada sólo para construir el hipervínculo;
+    // el texto visible en Excel siempre es el folio de recibo.
+    enlacesRecibos:Object.fromEntries(todas.filter(h=>folioComprobante(h)&&
+      String(h.reciboPeriodo?.referencia||'').trim()).map(h=>[
+       String(h.casaId),{folio:folioComprobante(h),referencia:h.reciboPeriodo.referencia}
+      ])),
     resumen:[...resumen,
      ['Pagaron cuota completa',dashboard.indicadores.completas],
-     ['Sin pago completo (incluye abonos parciales)',dashboard.indicadores.pendientes],
+     ['Sin pago completo (incluye abonos y deudas previas)',dashboard.indicadores.pendientes],
+      ['Viviendas con abono con adeudo',dashboard.indicadores.abonos],
      ['Pago anual confirmado (subconjunto pagadas)',dashboard.indicadores.anuales],
      ['Nota de corte','El último mes pagado muestra todo el historial; el estado pagado corresponde al período seleccionado.'],
      ['Criterio de ingresos',dashboard.origenIngresos],
-     ['Nota contable','Los ingresos por cuotas históricas y depósitos pueden representar el mismo dinero. No se suman dos veces.']]};
+     ['Nota contable','Los ingresos por cuotas históricas y depósitos pueden representar el mismo dinero. No se suman dos veces.'],
+     ...(dashboard.balanceMensual?[
+      ['Ingresos informativos del período (MXN)',dashboard.balanceMensual.ingresos],
+      ['Egresos informativos del período (MXN)',dashboard.balanceMensual.egresos],
+      ['Diferencia del período (MXN)',dashboard.balanceMensual.diferencia],
+      ['Estado del balance',dashboard.balanceMensual.estado==='SALDO_EN_CONTRA'?'Saldo en contra':dashboard.balanceMensual.estado==='SALDO_A_FAVOR'?'Saldo a favor':'En equilibrio']
+     ]:[])]};
   }
   if(tipo==='pagadas')return {nombre:'Con_pago_registrado',titulo:'Viviendas con pago registrado',
-   hojas:[hojaViviendas('Con pago',todas.filter(h=>h.pagada))],resumen};
-  if(tipo==='pendientes')return {nombre:'Sin_pago_completo',titulo:'Viviendas sin pago registrado',
-   hojas:[hojaViviendas('Sin pago',todas.filter(h=>!h.pagada)),
-    hojaViviendas('Abonos parciales',todas.filter(h=>String(h.estatus).toUpperCase()==='PAGO_PARCIAL'))],
-   resumen:[...resumen,['Nota de abonos','Los abonos parciales cuentan en la tarjeta «Con pago registrado», pero se detallan por separado.']]};
+   hojas:[hojaViviendas('Con pago',todas.filter(h=>h.pagada)),
+    hojaViviendas('Abono con adeudo',abonosAdeudo)],resumen,enlacesAbonos};
+  if(tipo==='pendientes')return {nombre:'Sin_pago_completo',titulo:'Viviendas con cuota pendiente',
+   hojas:[hojaViviendas('Sin Pagar',todas.filter(h=>!pagoCompleto(h))),
+    hojaViviendas('Abonos parciales',todas.filter(h=>String(h.estatus).toUpperCase()==='PAGO_PARCIAL')),
+    hojaViviendas('Abono con adeudo',abonosAdeudo)],
+   resumen:[...resumen,['Nota de abonos','Las viviendas con abono con adeudo siguen pendientes y no cuentan como cuota completa.']],
+   enlacesAbonos};
   if(tipo!=='historicas')throw Error('Tipo de reporte inválido');
   const cuotas=data.cuotasPeriodoDetalle||[];
   const pagos=data.pagosPeriodoDetalle||[];
@@ -129,7 +175,7 @@
     'Pagado (MXN)','Recargo (MXN)','Saldo (MXN)','Fecha pago','Forma de pago','Referencia','Folio','Origen'],
    cuotas.map(q=>[q.id,q.casaId,texto(q.calle),texto(q.numero),texto(q.nombre),q.anio,texto(q.mes),
     texto(q.estatus),dinero(q.montoCuota),dinero(q.montoPagado),dinero(q.recargo),
-    dinero(q.saldoPendiente),fecha(q.fechaPago),texto(q.formaPago),texto(q.referencia),texto(q.folio),texto(q.origen)])),
+    dinero(q.saldoPendiente),fecha(q.fechaPago),texto(q.formaPago),texto(q.referencia),texto(q.folio),texto(q.origen==='MANUAL_ABONO_ADEUDO'?'Abono con adeudo':q.origen)])),
    sheet('Bancos validados',
     ['ID operación','ID vivienda','Calle','Número','Residente','Concepto','Monto (MXN)',
      'Recargo (MXN)','Fecha de operación','Referencia'],
@@ -141,21 +187,32 @@
     ['ID movimiento','ID vivienda','Calle','Número','Concepto','Monto (MXN)','Forma de pago','Fecha','Referencia'],
     manuales.map(p=>[p.id,p.casaId,texto(p.calle),texto(p.numero),texto(p.tipo),
      dinero(p.monto),texto(p.formaPago),fecha(p.fecha),texto(p.referencia)]))];
-  const detalles=[['Base del indicador',data.esCargaHistorica?'Cuotas históricas':'Bancos validados'],
+  hojas.push(hojaViviendas('Abono con adeudo',abonosAdeudo));
+   const cobrado=data.ingresosMantenimientoCalles;
+  if(cobrado){
+   hojas.unshift(sheet('Mantenimiento por calle',
+    ['Calle','Cuotas pagadas del mes (MXN)','Total acumulado (MXN)','Movimientos'],
+    [...(cobrado.calles||[]).map(c=>[texto(c.calle),dinero(c.mes),dinero(c.acumulado),Number(c.movimientos||0)]),
+     ['TOTAL',dinero(cobrado.mes),dinero(cobrado.acumulado),'']]));
+  }
+  const detalles=[['Base del indicador',cobrado?'Mensualidades de mantenimiento cubiertas':(data.esCargaHistorica?'Cuotas históricas':'Bancos validados')],
+   ['Cuotas cubiertas del mes (MXN)',dinero(cobrado?.mes||0)],
+   ['Mantenimiento acumulado (MXN)',dinero(cobrado?.acumulado||0)],
    ['Cuotas históricas registradas (MXN)',dinero(data.cobrosCuotasRegistrados)],
    ['Ingresos bancarios validados (MXN)',dinero(data.ingresosValidados)],
    ['Ingresos adicionales (MXN)',dinero(data.ingresosAdicionales)],
    ['Pagos manuales por concepto (MXN)',dinero(data.totalManualConcepto)],
    ['Importe del indicador (MXN)',dinero(data.ingresosParaBalance)],
    ['Advertencia','Los abonos históricos y depósitos bancarios pueden ser el mismo dinero; no sumarlos si el período está importado.']];
-  return {nombre:data.esCargaHistorica?'Cuotas_historicas':'Ingresos_validados',
-   titulo:data.esCargaHistorica?'Cuotas históricas e ingresos':'Ingresos validados y conciliación',
-   hojas,resumen:[...resumen,...detalles]};
+  return {nombre:cobrado?'Mantenimiento_por_calle':data.esCargaHistorica?'Cuotas_historicas':'Ingresos_validados',
+   titulo:cobrado?'Mantenimiento pagado por mes y calle':data.esCargaHistorica?'Cuotas históricas e ingresos':'Ingresos validados y conciliación',
+   hojas,resumen:[...resumen,...detalles],enlacesAbonos};
  }
 
- async function descargarReporte(data,tipo,ExcelJS){
+ async function descargarReporte(data,tipo,ExcelJS,options={}){
   if(!ExcelJS?.Workbook)throw Error('No se cargó el generador de archivos Excel. Actualiza la página e inténtalo nuevamente.');
-  const reporte=prepararReporte(data,tipo);
+  const reporte=options.report||prepararReporte(data,tipo);
+  const projectReport=Boolean(reporte.dashboard?.esProyecto);
   const workbook=new ExcelJS.Workbook();
   workbook.creator='Administración Fraccionamiento Demo';
   workbook.title=reporte.titulo;
@@ -169,14 +226,86 @@
     cell.alignment={vertical:'middle',wrapText:true};});
    filas.forEach((values,index)=>{
     const row=ws.addRow(values);
+    // Resumen y Finanzas contienen importes de moneda junto a cantidades.
+    // Excel conserva valores numéricos y fórmulas precisos, solo los muestra
+    // sin centavos (incluye proyectos extraordinarios y recibos históricos).
+    if(nombre==='Resumen'&&typeof values[1]==='number'&&
+      /(MXN|saldo|ingreso|egreso|monto|recaud|aportaci[oó]n|costo|diferencia)/i.test(String(values[0]||'')))
+      row.getCell(2).numFmt='"$"#,##0';
+    if(nombre==='Finanzas'&&cabeceras.includes('Monto / viviendas')&&
+      typeof values[2]==='number'&&String(values[1]||'')!=='No aplica')
+      row.getCell(3).numFmt='"$"#,##0';
+    if(nombre==='Todas las viviendas'&&reporte.nombre==='Casas_en_padron'){
+     const referenceIndex=cabeceras.indexOf('Referencia');
+     const houseIndex=cabeceras.indexOf('ID vivienda');
+     const folio=String(values[referenceIndex]||'').trim();
+     const casaId=Number(values[houseIndex]);
+     const recibo=Number.isSafeInteger(casaId)&&casaId>0?
+      reporte.enlacesRecibos?.[String(casaId)]:null;
+     // En deudores, pagos parciales o movimientos de otro mes no se crea
+     // enlace ni se recupera el último recibo histórico.
+     if(referenceIndex>=0&&houseIndex>=0&&folio&&recibo?.folio===folio&&
+       String(recibo.referencia||'').trim()){
+      const params=new URLSearchParams({casaId:String(casaId),
+       referencia:String(recibo.referencia),concepto:'MANTENIMIENTO'});
+      const url=new URL('recibo-excel.html',root.location?.href||
+       'https://listoenlinea-labs.github.io/MisionJardines/analisis-cuotas.html');
+      url.search=params.toString();
+      const cell=row.getCell(referenceIndex+1);
+      cell.value={text:folio,hyperlink:url.href,
+       tooltip:'Abrir comprobante del período seleccionado (requiere sesión de administrador)'};
+      cell.font={color:{argb:'FF176CBE'},underline:true};
+     }
+    }
+    if(nombre==='Todas las viviendas'&&reporte.dashboard?.esProyecto){
+     const referenceIndex=cabeceras.indexOf('Referencia último abono');
+     const houseIndex=cabeceras.indexOf('ID vivienda');
+     const ref=String(values[referenceIndex]||'').trim();
+     const casaId=Number(values[houseIndex]);
+     const proyectoId=Number(reporte.dashboard.proyectoId);
+     if(referenceIndex>=0&&houseIndex>=0&&ref&&!ref.startsWith("'")&&
+      Number.isSafeInteger(casaId)&&casaId>0&&Number.isSafeInteger(proyectoId)&&proyectoId>0){
+      const params=new URLSearchParams({casaId:String(casaId),referencia:ref,
+       concepto:'EXTRAORDINARIO',proyectoId:String(proyectoId)});
+      const url=new URL('recibo-excel.html',root.location?.href||'https://listoenlinea-labs.github.io/MisionJardines/analisis-cuotas.html');
+      url.search=params.toString();
+      const cell=row.getCell(referenceIndex+1);
+      cell.value={text:ref,hyperlink:url.href,tooltip:'Abrir recibo PDF (requiere sesión de administrador)'};
+      cell.font={color:{argb:'FF176CBE'},underline:true};
+     }
+    }
     if(index%2===1)row.eachCell(cell=>{cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFF7FAF8'}};});
+
+     // Se recibió un abono aislado, pero la vivienda continúa con deuda.
+     const abonoIndex=cabeceras.indexOf('Abono con adeudo');
+     const abonoFolioIndex=cabeceras.indexOf('Folio abono con adeudo');
+     const saldoIndex=cabeceras.indexOf('Saldo pendiente (MXN)');
+     const esAbono=abonoIndex>=0&&values[abonoIndex]==='Sí'&&saldoIndex>=0&&Number(values[saldoIndex])>0;
+     if(esAbono){
+      row.eachCell(cell=>{cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFE9EB'}};});
+      const estadoIndex=cabeceras.indexOf('Estado del mes');
+      if(estadoIndex>=0)row.getCell(estadoIndex+1).font={bold:true,color:{argb:'FFAA3346'}};
+      if(abonoFolioIndex>=0){
+       const folio=String(values[abonoFolioIndex]||'');
+       const casa=String(values[cabeceras.indexOf('ID vivienda')]||'');
+       const link=reporte.enlacesAbonos?.[casa];
+       if(link?.folio===folio&&/^MJ-(ENE|FEB|MAR|ABR|MAY|JUN|JUL|AGO|SEP|OCT|NOV|DIC)-\d{4}-[A-F0-9]{10}-[A-Z][A-Z0-9]+-M$/.test(folio)){
+        const url=new URL('recibo-excel.html',root.location?.href||
+         'https://listoenlinea-labs.github.io/MisionJardines/analisis-cuotas.html');
+        url.search=new URLSearchParams({casaId:casa,referencia:link.referencia,concepto:'MANTENIMIENTO'}).toString();
+        const cell=row.getCell(abonoFolioIndex+1);
+        cell.value={text:folio,hyperlink:url.href,tooltip:'Abrir el recibo del abono con adeudo (requiere sesión)'};
+        cell.font={underline:true,color:{argb:'FF176CBE'}};
+       }
+      }
+     }
    });
    ws.autoFilter={from:{row:1,column:1},to:{row:1,column:cabeceras.length}};
    ws.columns.forEach((column,index)=>{
     const longest=Math.max(String(cabeceras[index]||'').length,
      ...filas.map(row=>String(row[index]??'').length));
     column.width=Math.min(43,Math.max(14,longest+2));
-    if(/\(MXN\)|^Monto/.test(cabeceras[index]))column.numFmt='"$"#,##0.00;[Red]("$"#,##0.00)';
+    if(/\(MXN\)|^Monto/.test(cabeceras[index]))column.numFmt='"$"#,##0;[Red]("$"#,##0)';
    });
    ws.pageSetup={fitToPage:true,fitToWidth:1,fitToHeight:0,orientation:'landscape'};
    ws.getColumn(4).width=Math.max(ws.getColumn(4).width||14,Math.min(36,ws.getColumn(4).width||14));
@@ -197,7 +326,7 @@
     values.forEach((entry,i)=>entry.forEach((value,j)=>{
      const cell=resumenWs.getCell(row+2+i,col+j);
      cell.value=value;
-     if(typeof value==='number')cell.numFmt=j===1&&/INGRESOS|EGRESOS/.test(title)?'"$"#,##0.00':'#,##0.##';
+     if(typeof value==='number')cell.numFmt=j===1&&/INGRESOS|EGRESOS/.test(title)?'"$"#,##0':'#,##0';
     }));
     const letter=n=>{let out='';while(n){n--;out=String.fromCharCode(65+n%26)+out;n=Math.floor(n/26)}return out;};
     const ref=(c)=>"'Resumen'!$"+letter(c)+"$"+(row+2)+":$"+letter(c)+"$"+(row+1+values.length);
@@ -210,24 +339,32 @@
    const calles=table(22,4,'CUMPLIMIENTO POR CALLE',['Calle','Pagadas','Pendientes'],info.calles);
    const egresosOrdenados=[...info.egresos].sort((a,b)=>b[1]-a[1]);
    const egresos=table(37,1,'EGRESOS POR CATEGORÍA',['Categoría','Monto (MXN)'],egresosOrdenados);
+   const balance=info.balanceMensual;
+   const balanceRows=balance?[
+    ['Ingresos del período',balance.ingresos],
+    [projectReport?'Meta del proyecto':'Egresos del período',balance.egresos],
+    [balance.estado==='SALDO_EN_CONTRA'?(projectReport?'Saldo en contra · por recaudar':'Saldo en contra'):
+     balance.estado==='SALDO_A_FAVOR'?(projectReport?'Saldo a favor · sobre la meta':'Saldo a favor'):'En equilibrio',Math.abs(balance.diferencia)]
+   ]:null;
+   const balanceTable=balanceRows?table(53,1,projectReport?'DIFERENCIA CONTRA META':'BALANCE INFORMATIVO',['Indicador','Monto (MXN)'],balanceRows):null;
    resumenWs.getColumn(1).width=38;resumenWs.getColumn(2).width=25;
    resumenWs.getColumn(4).width=34;resumenWs.getColumn(5).width=17;
    resumenWs.getColumn(6).width=17;
    for(let i=7;i<=25;i++)resumenWs.getColumn(i).width=12;
-   resumenWs.getCell('A47').value='Importe del indicador de ingresos';
+   resumenWs.getCell('A47').value=projectReport?'Aportaciones del proyecto':'Importe del indicador de ingresos';
    resumenWs.getCell('B47').value=info.indicadores.totalIngresos;
-   resumenWs.getCell('A48').value='Egresos registrados';
+   resumenWs.getCell('A48').value=projectReport?'Por recaudar del proyecto':'Egresos registrados';
    resumenWs.getCell('B48').value=info.indicadores.totalEgresos;
-   resumenWs.getCell('A49').value='Saldo inicial (se presenta aparte)';
+   resumenWs.getCell('A49').value=projectReport?'Casas No aplica (informativo)':'Saldo inicial (se presenta aparte)';
    resumenWs.getCell('B49').value=info.indicadores.saldoInicial;
-   resumenWs.getCell('A50').value='Saldo reportado';
+   resumenWs.getCell('A50').value=projectReport?'Meta del proyecto':'Saldo reportado';
    resumenWs.getCell('B50').value=info.indicadores.saldoDisponible;
-   for(let n=47;n<=50;n++)resumenWs.getCell('B'+n).numFmt='"$"#,##0.00';
+   for(let n=47;n<=50;n++)resumenWs.getCell('B'+n).numFmt='"$"#,##0';
    // Los valores visibles se mantienen fuera del XML de etiquetas ChartML:
    // la leyenda (donas) y el eje de categorías (barras) leen fórmulas de
    // Excel, de modo que editar importes/contadores refresca el texto.
    const formatMoney=n=>new Intl.NumberFormat('es-MX',
-    {style:'currency',currency:'MXN',minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
+    {style:'currency',currency:'MXN',minimumFractionDigits:0,maximumFractionDigits:0}).format(Number(n)||0);
    const letter=n=>{let value=n,result='';while(value>0){
     value--;result=String.fromCharCode(65+value%26)+result;
     value=Math.floor(value/26);
@@ -262,31 +399,37 @@
      '/SUM($E$17:$E$18),0),"0.0%")'));
    const incomeLabels=info.ingresos.map(row=>row[0]+' · '+formatMoney(row[1]));
    const ingresoEtiquetas=prepararEtiquetas(ingresos,34,24,incomeLabels,
-    info.ingresos.map((_,i)=>'A'+(24+i)+'&" · "&TEXT(B'+(24+i)+',"$#,##0.00")'));
+    info.ingresos.map((_,i)=>'A'+(24+i)+'&" · "&TEXT(B'+(24+i)+',"$#,##0")'));
    const streetLabels=info.calles.map(etiquetaCumplimientoCalle);
    const callesEtiquetas=prepararEtiquetas(calles,35,24,streetLabels,
     info.calles.map((_,i)=>'D'+(24+i)+'&" ("&E'+(24+i)+'&"/"&SUM(E'+(24+i)+':F'+(24+i)+')&")"'));
+   const balanceLabels=balanceRows?.map(row=>row[0]+' · '+formatMoney(row[1]));
+   const balanceEtiquetas=balanceTable?prepararEtiquetas(balanceTable,37,55,balanceLabels,
+    balanceRows.map((_,i)=>'A'+(55+i)+'&" · "&TEXT(B'+(55+i)+',"$#,##0")')):null;
    const expenseLabels=egresosOrdenados.map(row=>row[0]+' · '+formatMoney(row[1]));
    const egresosEtiquetas=prepararEtiquetas(egresos,36,39,expenseLabels,
-    egresosOrdenados.map((_,i)=>'A'+(39+i)+'&" · "&TEXT(B'+(39+i)+',"$#,##0.00")'));
+    egresosOrdenados.map((_,i)=>'A'+(39+i)+'&" · "&TEXT(B'+(39+i)+',"$#,##0")'));
    // Gráficas nativas editables con espacio para título, ejes y leyenda
    // inferior. Datos sin etiquetas sobre las series para evitar solapamiento.
    // Coordenadas 0-based de la zona de dibujo, separadas sin superponerse.
    chartSpecs=[
-    {title:'Cumplimiento de mantenimiento',kind:'doughnut',
+    {title:projectReport?'Cumplimiento de la meta del proyecto':'Cumplimiento de mantenimiento',kind:'doughnut',
      source:estadoEtiquetas,from:[7,2],to:[18,21],colors:['76B79B','E9B38D']},
-    {title:'Anualidades entre las viviendas pagadas',kind:'doughnut',
+    {title:projectReport?'Casas con aportaciones: completas y parciales':'Anualidades entre las viviendas pagadas',kind:'doughnut',
      source:anualEtiquetas,from:[19,2],to:[30,21],colors:['8CA9D7','76B79B']},
-    {title:'Ingresos por concepto (sin duplicar)',kind:'bar',
+    {title:projectReport?'Aportaciones por origen':'Ingresos por concepto (sin duplicar)',kind:'bar',
      source:ingresoEtiquetas,from:[7,24],to:[18,50],xTitle:'Monto (MXN)',yTitle:'Concepto',
      colors:['76B79B']},
-    {title:'Cumplimiento por calle',kind:'stacked',
+    {title:projectReport?'Cumplimiento del proyecto por calle':'Cumplimiento por calle',kind:'stacked',
      source:callesEtiquetas,from:[19,24],to:[30,50],xTitle:'Viviendas',yTitle:'Calle',
      colors:['76B79B','E9B38D']},
-    {title:'Egresos por categoría',kind:'bar',
+    {title:projectReport?'Meta, recaudación y saldos del proyecto':'Egresos por categoría',kind:'bar',
      source:egresosEtiquetas,from:[7,53],to:[20,81],xTitle:'Monto (MXN)',yTitle:'Categoría',
      colors:['AE9AC9']}
    ];
+   if(balanceEtiquetas)chartSpecs.push({title:projectReport?'Aportaciones contra meta':'Balance informativo: saldo a favor o en contra',kind:'bar',
+    source:balanceEtiquetas,from:[21,53],to:[34,81],xTitle:'Monto (MXN)',yTitle:'Concepto',
+    colors:['76B79B']});
   }
   let buffer=await workbook.xlsx.writeBuffer();
   if(chartSpecs.length){
@@ -294,10 +437,11 @@
     throw Error('No se cargó el complemento de gráficas editables para Excel. Actualiza la página.');
    buffer=await root.MJFinanceExcelCharts.insertarGraficas(buffer,chartSpecs,root.JSZip);
   }
-  const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  if(options.returnBuffer)return buffer;
+   const blob=new Blob([buffer],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
-  a.href=url;a.download=`MJ_${reporte.nombre}_${data.anio}_${String(data.mes).padStart(2,'0')}.xlsx`;
+  a.href=url;a.download=(reporte.archivo||`MJ_${reporte.nombre}_${data.anio}_${String(data.mes).padStart(2,'0')}.xlsx`).replace(/[^a-zA-Z0-9._-]/g,'_');
   document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),20000);
   return reporte;

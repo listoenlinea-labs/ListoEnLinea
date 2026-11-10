@@ -1,21 +1,29 @@
 (async()=>{
- if(!await window.MJAccessReady)return;
- const API=window.MJ_API_URL||'https://demo.invalid/api';
+ const API=window.MJ_API_URL||'https://api-misionjardines.listoenlinea.host/api';
  const $=id=>document.getElementById(id);
  const token=localStorage.getItem('misionJardinesToken')||sessionStorage.getItem('misionJardinesToken');
  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
- const money=v=>Number(v||0).toLocaleString('es-MX',{style:'currency',currency:'MXN'});
+ const money=v=>Number(v||0).toLocaleString('es-MX',{style:'currency',currency:'MXN',minimumFractionDigits:0,maximumFractionDigits:0});
  const fmt=d=>window.MJDateDisplay.format(d);
  const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Mexico_City',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
- const user=(()=>{try{return JSON.parse(localStorage.getItem('misionJardinesUsuario')||sessionStorage.getItem('misionJardinesUsuario')||'{}')}catch{return {}}})();
- const role=user?.rol?.nombre||user?.rol;
- const admin=['SUPER_ADMIN','ADMINISTRADOR'].includes(role);
- let currentMonth=today().slice(0,7),selectedDate='',occupied=new Map(),profile=null,adminRows=[],activeReview=null,activeTab='reservar';
+ let profile=null,admin=false;
+ let currentMonth=today().slice(0,7),selectedDate='',occupied=new Map(),adminRows=[],activeReview=null;
+ let calendarRequest=0,submitting=false,calendarReady=false;
+ const tomorrow=()=>new Date(Date.parse(today()+'T12:00:00Z')+86400000).toISOString().slice(0,10);
+ const lastDay=()=>new Date(Date.parse(today()+'T12:00:00Z')+365*86400000).toISOString().slice(0,10);
+ const whatsappValido=value=>/^(?:52)?[0-9]{10}$/.test(value.replace(/[\s()+-]/g,''));
+ const canSubmit=()=>!submitting&&calendarReady&&Boolean(selectedDate)&&!(profile&&!profile.casa)
+  &&(admin||(whatsappValido($('clubPhone').value)&&$('clubOptIn').checked));
+ const syncSubmit=()=>{$('clubSubmit').disabled=!canSubmit();};
+ $('clubPhone').addEventListener('input',syncSubmit);
+ $('clubPhone').addEventListener('change',syncSubmit);
+ $('clubOptIn').addEventListener('change',syncSubmit);
  const headers=(json=false)=>({Authorization:'Bearer '+token,...(sessionStorage.getItem('mjCasaSeleccionada')?{'X-Casa-Id':sessionStorage.getItem('mjCasaSeleccionada')}:{}) ,...(json?{'Content-Type':'application/json'}:{})});
  async function api(path,method='GET',body){
-  const r=await fetch(API+'/casa-club'+path,{method,headers:headers(!!body),...(body?{body:JSON.stringify(body)}:{})});
+  const publico=path.startsWith('/publico/');
+  const r=await fetch(API+'/casa-club'+path,{method,headers:publico?(body?{'Content-Type':'application/json'}:{}):headers(!!body),...(body?{body:JSON.stringify(body)}:{})});
   const d=await r.json().catch(()=>({}));
-  if(r.status===401){location.replace('login.html');throw Error('Sesión expirada');}
+  if(r.status===401&&!publico){location.replace('login.html');throw Error('Sesión expirada');}
   if(!r.ok||!d.ok){
    const err=Error(d.message||'No fue posible realizar la operación');
    err.codigo=d.codigo||null;err.adeudos=d.adeudos||null;
@@ -51,7 +59,6 @@
  $('closeClubDebt').addEventListener('click',closeDebt);
  $('ackClubDebt').addEventListener('click',closeDebt);
  function tab(name){
-  activeTab=name;
   document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===name?'page':'false'));
   document.querySelectorAll('.club-panel').forEach(x=>x.hidden=x.id!=='tab-'+name);
   if(name==='mis-reservas')void mine();
@@ -59,65 +66,88 @@
   if(name==='aprobacion')void adminList();
  }
  document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>tab(b.dataset.tab)));
- if(admin)document.querySelectorAll('[data-admin]').forEach(x=>x.hidden=false);
  function monthShift(offset){
   const [y,m]=currentMonth.split('-').map(Number);
   const dt=new Date(Date.UTC(y,m-1+offset,1));
-  const target=dt.toISOString().slice(0,7);
-  // Ningún control puede desplazar el calendario a un mes anterior al actual.
-  if(target<today().slice(0,7))return;
-  currentMonth=target;
+  currentMonth=dt.toISOString().slice(0,7);
   selectedDate='';$('clubDate').value='';
-  void calendar();
+  void calendar().catch(e=>notify(e.message,true));
  }
  $('prevMonth').addEventListener('click',()=>monthShift(-1));
  $('nextMonth').addEventListener('click',()=>monthShift(1));
  async function calendar(){
   const [year,month]=currentMonth.split('-').map(Number);
   const start=currentMonth+'-01',end=new Date(Date.UTC(year,month,0)).toISOString().slice(0,10);
-  const monthStart=today().slice(0,7),cutoff=today();
-  // El encabezado debe verse incluso mientras se consultan fechas ficticias.
+  const request=++calendarRequest;
+  calendarReady=false;syncSubmit();
+  $('calendarDays').replaceChildren();
+  const response=await api('/publico/fechas?desde='+start+'&hasta='+end);
+  if(request!==calendarRequest)return;
+  calendarReady=true;
+  $('nextMonth').disabled=!admin&&currentMonth>=lastDay().slice(0,7);
+  occupied=new Map(response.ocupadas.map(x=>[x.fecha,x.estatus]));
   $('calendarLabel').textContent=new Intl.DateTimeFormat('es-MX',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(start+'T12:00:00Z'));
-  $('prevMonth').disabled=currentMonth<=monthStart;
-  const response=await api('/fechas?desde='+start+'&hasta='+end);
-  // Defensa ante datos antiguos de caché: ambos formatos permitidos sin llamar a servicios reales.
-  const entries=Array.isArray(response.ocupadas)?response.ocupadas:
-    Array.isArray(response.data)?response.data:[];
-  occupied=new Map(entries.filter(x=>x&&['PENDIENTE','APROBADA'].includes(x.estatus))
-    .map(x=>[x.fecha,x.estatus]));
-  const days=$('calendarDays');days.replaceChildren();
+  $('prevMonth').disabled=start.slice(0,7)<=today().slice(0,7);
+  if(occupied.has(selectedDate)){selectedDate='';$('clubDate').value='';}
+  syncSubmit();
+  const days=$('calendarDays');
   const offset=(new Date(Date.UTC(year,month-1,1)).getUTCDay()+6)%7;
   for(let n=0;n<offset;n++){let gap=document.createElement('div');gap.className='calendar-blank';days.append(gap);}
   for(let n=1;n<=new Date(Date.UTC(year,month,0)).getUTCDate();n++){
-   const date=currentMonth+'-'+String(n).padStart(2,'0'),status=occupied.get(date),past=date<cutoff;
+   const date=currentMonth+'-'+String(n).padStart(2,'0'),status=occupied.get(date),past=admin?date<today():date<tomorrow()||date>lastDay();
    const btn=document.createElement('button');btn.type='button';
    btn.className=past?'past':status==='APROBADA'?'booked':status?'waiting':'available';
    if(date===selectedDate)btn.classList.add('selected');
    btn.disabled=Boolean(status)||past;
-   btn.setAttribute('aria-label',fmt(date)+' · '+(past?'Fecha pasada':status==='APROBADA'?'Reservada':status?'Pendiente de aprobación':'Disponible'));
-   const day=document.createElement('span');day.textContent=n;const sub=document.createElement('small');
-   sub.textContent=past?'Pasada':status==='APROBADA'?'Reservada':status?'En revisión':'Libre';
-   btn.append(day,sub);btn.addEventListener('click',()=>{selectedDate=date;$('clubDate').value=fmt(date);days.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');});
+   btn.setAttribute('aria-label',fmt(date)+' · '+(past?'No disponible':status==='APROBADA'?'Reservada':status?'Pendiente de aprobación':'Disponible'));
+   btn.textContent=n;
+   btn.addEventListener('click',()=>{selectedDate=date;$('clubDate').value=fmt(date);days.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');syncSubmit();});
    days.append(btn);
   }
  }
  function homeText(r){return r?.casa?((r.casa.calleCorrecta||r.casa.calle)+' · Casa '+r.casa.numero):'Sin vivienda';}
  function statusBadge(status){return '<span class="state-pill '+esc(status)+'">'+esc(({PENDIENTE:'Pendiente',APROBADA:'Aprobada',RECHAZADA:'Rechazada',CANCELADA:'Cancelada'})[status]||status)+'</span>';}
+ function showPayment(result){
+  const p=result.pago, host=$('clubPaymentDetails');
+  host.replaceChildren();
+  const rows=[
+   ['Fecha apartada',fmt(result.fecha)+' · '+p.folio],
+   ['Importe',money(p.monto)],
+   ['Banco y cuenta/CLABE',p.banco+' · '+p.cuenta],
+   ['Titular',p.titular],
+   ['Fecha límite de pago',fmt(p.fechaLimitePago)+' (hora de Guadalajara)'],
+   ['Comprobante','Envíalo a '+p.correoAdministracion+' con el folio '+p.folio+'. La fecha se libera si el pago no queda confirmado a tiempo.']
+  ];
+  const h=document.createElement('strong');h.textContent='Instrucciones de depósito';host.append(h);
+  for(const [nombre,valor] of rows){const line=document.createElement('p');line.textContent=nombre+': '+valor;host.append(line);}
+  const noEnviados=[['correo','correo'],['whatsapp','WhatsApp'],['administracion','correo a Administración']]
+   .filter(([k])=>!result.notificaciones[k]).map(([,label])=>label);
+  if(noEnviados.length){const warning=document.createElement('p');warning.textContent='No se pudo confirmar el envío por: '+noEnviados.join(', ')+'. Guarda estas instrucciones.';host.append(warning);}
+  host.hidden=false;
+ }
  $('clubForm').addEventListener('submit',async e=>{
-  e.preventDefault();if(!selectedDate)return notify('Selecciona una fecha disponible del calendario.',true);
-  const button=$('clubSubmit');button.disabled=true;
-  const values={fecha:selectedDate,casaId:profile?.casa?.id,solicitante:$('clubName').value.trim(),telefono:$('clubPhone').value.trim(),correo:$('clubEmail').value.trim(),propietario:$('clubOwner').value==='SI',motivo:$('clubReason').value.trim()};
-  try{await api('/reservas','POST',values);notify('Solicitud enviada. La fecha está apartada provisionalmente hasta revisión de Administración.');$('clubForm').reset();$('clubDate').value='';selectedDate='';await calendar();tab('mis-reservas');}
-  catch(err){if(!showDebtAlert(err))notify(err.message,true);await calendar();}
-  finally{button.disabled=false;}
+  e.preventDefault();if(!canSubmit())return;
+  submitting=true;syncSubmit();
+  const values={fecha:selectedDate,calle:$('clubStreet').value.trim(),numero:$('clubNumber').value.trim(),
+   solicitante:$('clubName').value.trim(),telefono:$('clubPhone').value.trim(),correo:$('clubEmail').value.trim(),
+   propietario:$('clubOwner').value==='SI',motivo:$('clubReason').value.trim(),aceptaWhatsApp:$('clubOptIn').checked};
+  try{
+   const result=await api(profile?'/reservas':'/publico/solicitudes','POST',values);
+   if(result.data?.pago)showPayment(result.data);
+   notify(result.data?.estatus==='APROBADA'?'Reserva confirmada. El pago se registra por separado.':
+    'Fecha apartada. Consulta las instrucciones de depósito. Administración aprobará la reserva al verificar tu pago.');
+   $('clubForm').reset();$('clubDate').value='';selectedDate='';fillProfile();
+   if(admin)tab('mis-reservas');
+  }catch(err){if(!showDebtAlert(err))notify(err.message,true);}
+  finally{submitting=false;await calendar().catch(e=>notify(e.message,true));syncSubmit();}
  });
  async function mine(){
   try{const d=await api('/mias');const host=$('myReservations');host.innerHTML=d.data.length?d.data.map(r=>
    '<article class="reserve-card"><h3>'+esc(fmt(r.fecha))+'</h3>'+statusBadge(r.estatus)+
    '<p><b>'+esc(r.solicitante)+'</b> · '+esc(homeText(r))+'</p><p>'+esc(r.motivo)+' · '+(r.pagado?'Pago confirmado':r.estatus==='PENDIENTE'?'Esperando aprobación':'Pago sin confirmar')+'</p>'+
-   (r.estatus==='APROBADA'?'<div class="club-bill"><strong>'+(r.pagado?'Importes confirmados':'Autorizada · Paga antes del '+esc(r.fechaLimitePago||'plazo indicado'))+'</strong>'+
+   ((r.estatus==='APROBADA'||(r.estatus==='PENDIENTE'&&r.fechaLimitePago))?'<div class="club-bill"><strong>'+(r.pagado?'Importes confirmados':'Paga a más tardar el '+esc(r.fechaLimitePago||'plazo indicado'))+'</strong>'+
     '<p>Renta: '+money(r.cuotaRecuperacion)+'</p><p>Depósito de garantía: '+money(r.depositoGarantia)+'</p><p>Limpieza: '+money(r.limpieza)+'</p><strong>Total: '+money(Number(r.cuotaRecuperacion)+Number(r.depositoGarantia)+Number(r.limpieza))+'</strong>'+
-    (!r.pagado?'<p><a href="pagos.html?tab=CASA_CLUB" class="primary" style="display:inline-block;padding:10px 16px;text-decoration:none">Subir comprobante en Pagos</a></p>':'')+'</div>':'')+
+    (!r.pagado&&r.estatus==='APROBADA'?'<p><a href="pagos.html?tab=CASA_CLUB" class="primary" style="display:inline-block;padding:10px 16px;text-decoration:none">Subir comprobante en Pagos</a></p>':'')+'</div>':'')+
    '<footer><small>Reserva #'+Number(r.id)+'</small>'+(['PENDIENTE','APROBADA'].includes(r.estatus)?'<button type="button" class="danger" data-cancel="'+Number(r.id)+'">Cancelar</button>':'')+'</footer></article>').join(''):'<div class="reserve-card">Todavía no tienes reservas registradas.</div>';
   }catch(e){notify(e.message,true);}
  }
@@ -125,25 +155,66 @@
   const btn=e.target.closest('[data-cancel]');if(!btn||!confirm('¿Cancelar esta reserva? Si ya se pagó, Administración deberá revisar cualquier devolución.'))return;
   btn.disabled=true;try{await api('/reservas/'+Number(btn.dataset.cancel)+'/cancelar','PATCH');notify('Reserva cancelada.');await Promise.all([mine(),calendar()]);}catch(err){notify(err.message,true);btn.disabled=false;}
  });
- function editReview(r){
-  activeReview=r;$('clubReviewTitle').textContent='Revisión · '+fmt(r.fecha);
-  $('clubReviewDetails').textContent=r.solicitante+' · '+homeText(r)+' · '+r.telefono+' · '+r.motivo;
-  $('clubRecovery').value='700';$('clubGuarantee').value='700';$('clubCleaning').value='0';$('clubNotes').value='';
-  $('clubDueDate').min=today();$('clubDueDate').max=new Date(Date.parse(r.fecha+'T12:00:00Z')-86400000).toISOString().slice(0,10);
-  $('clubDueDate').value=$('clubDueDate').max>=today()?$('clubDueDate').max:'';
-  $('clubReviewModal').showModal();
+ const reviewModal=$('clubReviewModal');
+ const paymentStatus=r=>r.pagado?'Pagado':(['PENDIENTE','APROBADA'].includes(r.estatus)?'Pendiente de pago':'Sin pago');
+ const folioValido=()=>/^[a-z0-9-]{3,60}$/i.test($('clubBankFolio').value.trim());
+ let reviewing=false;
+ const syncReview=()=>{
+  $('clubApprove').disabled=reviewing||!$('clubPaymentVerified').checked||!folioValido();
+  $('clubReject').disabled=reviewing;
+ };
+ async function loadReviewWhatsApp(r){
+  const link=$('clubReviewWhatsApp'),status=$('clubReviewWhatsAppStatus');
+  link.hidden=true;link.removeAttribute('href');status.hidden=true;
+  if(!['PENDIENTE','APROBADA'].includes(r.estatus))return;
+  status.textContent='Preparando mensaje de WhatsApp…';status.hidden=false;
+  try{
+   const d=await api('/administracion/'+Number(r.id)+'/whatsapp');
+   if(!reviewModal.open||activeReview!==r)return;
+   link.href='https://wa.me/'+d.telefono+'?text='+encodeURIComponent(d.mensaje);
+   link.textContent=d.tipo==='CONFIRMACION'?'Enviar confirmación por WhatsApp':'Enviar instrucciones por WhatsApp';
+   link.hidden=false;status.hidden=true;
+  }catch(e){if(reviewModal.open&&activeReview===r)status.textContent=e.message;}
  }
- $('closeClubReview').addEventListener('click',()=>$('clubReviewModal').close());
+ function editReview(r){
+  activeReview=r;$('clubReviewTitle').textContent='Reservación CC-'+r.id+' · '+fmt(r.fecha);
+  const detalles=[
+   ['Nombre',r.solicitante],['Vivienda',homeText(r)],['WhatsApp',r.telefono],['Correo',r.correo],
+   ['Propietario',r.propietario?'Sí':'No'],['Motivo del evento',r.motivo],
+   ['Estado de la reserva',({PENDIENTE:'Solicitud pendiente',APROBADA:'Confirmada',CANCELADA:'Cancelada',RECHAZADA:'Rechazada'})[r.estatus]],
+   ['Estado del pago',paymentStatus(r)],['Renta',money(r.cuotaRecuperacion)],['Garantía',money(r.depositoGarantia)],
+   ['Limpieza',money(r.limpieza)],['Total del depósito',money(Number(r.cuotaRecuperacion)+Number(r.depositoGarantia)+Number(r.limpieza))],
+   ['Fecha límite de pago',r.fechaLimitePago&&fmt(r.fechaLimitePago)],['Fecha de pago',r.fechaPago&&fmt(r.fechaPago)],
+   ['Folio de pago',r.folio],['Observaciones',r.notas]
+  ];
+  $('clubReviewDetails').innerHTML=detalles.map(([label,value])=>'<div><dt>'+esc(label)+'</dt><dd>'+esc(value||'—')+'</dd></div>').join('');
+  $('clubReviewActions').hidden=r.estatus!=='PENDIENTE';
+  $('clubNotes').value=r.notas||'';$('clubPaymentVerified').checked=false;$('clubBankFolio').value='';
+  $('clubReviewError').hidden=true;syncReview();
+  if(!reviewModal.open)reviewModal.showModal();
+  void loadReviewWhatsApp(r);
+ }
+ $('closeClubReview').addEventListener('click',()=>reviewModal.close());
+ reviewModal.addEventListener('close',()=>{if(!reviewModal.open)activeReview=null;});
+ $('clubPaymentVerified').addEventListener('change',syncReview);
+ $('clubBankFolio').addEventListener('input',syncReview);
  $('clubReviewForm').addEventListener('submit',e=>{e.preventDefault();void review('APROBAR');});
  $('clubReject').addEventListener('click',()=>void review('RECHAZAR'));
  async function review(action){
-  if(!activeReview)return;
-  if(!confirm((action==='APROBAR'?'Aprobar':'Rechazar')+' reservación de '+activeReview.solicitante+' para '+fmt(activeReview.fecha)+'?'))return;
-  const info={accion:action,cuotaRecuperacion:Number($('clubRecovery').value),depositoGarantia:Number($('clubGuarantee').value),limpieza:Number($('clubCleaning').value),fechaLimitePago:$('clubDueDate').value,notas:$('clubNotes').value};
-  $('clubApprove').disabled=$('clubReject').disabled=true;
-  try{await api('/administracion/'+Number(activeReview.id),'PATCH',info);$('clubReviewModal').close();notify('Reserva revisada correctamente.');await Promise.all([adminList(),calendar()]);}
-  catch(err){if(!showDebtAlert(err))notify(err.message,true);}
-  finally{activeReview=null;$('clubApprove').disabled=$('clubReject').disabled=false;}
+  const r=activeReview,approve=action==='APROBAR';
+  if(!r||r.estatus!=='PENDIENTE'||reviewing||(approve&&$('clubApprove').disabled))return;
+  if(!confirm((approve?'Confirmar':'Rechazar')+' reservación de '+r.solicitante+' para '+fmt(r.fecha)+'?'))return;
+  const info={accion:action,notas:$('clubNotes').value,pagoVerificado:$('clubPaymentVerified').checked,folio:$('clubBankFolio').value.trim()};
+  const error=$('clubReviewError');error.hidden=true;
+  reviewing=true;syncReview();
+  try{
+   await api('/administracion/'+Number(r.id),'PATCH',info);
+   if(reviewModal.open&&activeReview===r)editReview({...r,estatus:approve?'APROBADA':'RECHAZADA',
+    pagado:approve,fechaPago:approve?today():null,folio:approve?info.folio:r.folio,notas:info.notas});
+   notify(approve?'Pago verificado y reservación confirmada.':'Solicitud rechazada. La fecha se liberó.');
+   await Promise.all([adminList(),calendar().catch(e=>notify(e.message,true))]);
+  }catch(err){if(reviewModal.open&&activeReview===r){error.textContent=err.message;error.hidden=false;}}
+  finally{reviewing=false;syncReview();}
  }
  const mon=d=>new Intl.DateTimeFormat('es-MX',{month:'long',timeZone:'UTC'}).format(new Date(d+'T12:00:00Z'));
  async function adminList(){
@@ -155,10 +226,10 @@
        guarantee=paid.reduce((a,r)=>a+Number(r.depositoGarantia),0),
        cleaning=paid.reduce((a,r)=>a+Number(r.limpieza),0);
    $('clubTotals').innerHTML=[['Total de reservas',adminRows.length],['Reservas aprobadas',adminRows.filter(r=>r.estatus==='APROBADA').length],['Recuperación cobrada',money(income)],['Garantías recibidas',money(guarantee)],['Limpieza cobrada',money(cleaning)]].map(([name,value])=>'<div class="stat"><small>'+esc(name)+'</small><strong>'+esc(value)+'</strong></div>').join('');
-   const tableRows=adminRows.filter(r=>r.estatus==='APROBADA' && (r.pagado || $('includeUnpaid').checked));
-   $('clubAdminRows').innerHTML=tableRows.map(r=>'<tr>'+
-    [r.casa?.numero,r.casa?.calleCorrecta||r.casa?.calle,r.telefono,mon(r.fecha),fmt(r.fecha),money(r.cuotaRecuperacion),r.folio||'—',money(r.depositoGarantia)+(r.garantiaDevuelta?' · Devuelta':''),money(r.limpieza),r.solicitante,r.propietario?'Sí':'No',r.pagado?'PAGADO':'PENDIENTE',r.notas||'—',r.estatus].map(v=>'<td>'+esc(v)+'</td>').join('')+
-    '<td>'+(r.estatus==='APROBADA'?(r.pagado?'<span class="state-pill APROBADA">Pago confirmado</span>':'<button type="button" class="soft" data-paid="'+Number(r.id)+'">Registrar pago</button>')+' <button type="button" class="soft" data-return="'+Number(r.id)+'">'+(r.garantiaDevuelta?'Garantía devuelta':'Devolver garantía')+'</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="15">Aún no hay reservas registradas.</td></tr>';
+   const tableRows=[...adminRows].sort((a,b)=>Number(b.estatus==='PENDIENTE')-Number(a.estatus==='PENDIENTE'));
+   $('clubAdminRows').innerHTML=tableRows.map(r=>'<tr data-reserva="'+Number(r.id)+'">'+
+    [r.casa?.numero,r.casa?.calleCorrecta||r.casa?.calle,r.telefono,mon(r.fecha),fmt(r.fecha),money(r.cuotaRecuperacion),r.folio||'—',money(r.depositoGarantia)+(r.garantiaDevuelta?' · Devuelta':''),money(r.limpieza),r.solicitante,r.propietario?'Sí':'No',paymentStatus(r),r.notas||'—',r.estatus].map(v=>'<td>'+esc(v)+'</td>').join('')+
+    '<td><button type="button" class="soft">Ver detalles</button> '+(r.estatus==='APROBADA'?(r.pagado?'<span class="state-pill APROBADA">Pago confirmado</span>':'<button type="button" class="soft" data-paid="'+Number(r.id)+'">Registrar pago</button>')+' <button type="button" class="soft" data-return="'+Number(r.id)+'">'+(r.garantiaDevuelta?'Garantía devuelta':'Devolver garantía')+'</button>':'—')+'</td></tr>').join('')||'<tr><td colspan="15">Aún no hay reservas registradas.</td></tr>';
    $('clubRequests').innerHTML=adminRows.filter(r=>r.estatus==='PENDIENTE').map(r=>
     '<article class="reserve-card"><h3>'+esc(fmt(r.fecha))+'</h3>'+statusBadge(r.estatus)+
     '<p><b>'+esc(r.solicitante)+'</b> · '+esc(homeText(r))+'</p><p>'+esc(r.motivo)+' · '+esc(r.telefono)+'</p>'+
@@ -178,7 +249,12 @@
     finally{refund.disabled=false;}
     return;
   }
-  const b=e.target.closest('[data-paid]');if(!b)return;
+  const b=e.target.closest('[data-paid]');
+  if(!b){
+   const row=e.target.closest('[data-reserva]'),r=adminRows.find(x=>Number(x.id)===Number(row?.dataset.reserva));
+   if(r)editReview(r);
+   return;
+  }
   const r=adminRows.find(x=>Number(x.id)===Number(b.dataset.paid));if(!r)return;
   const folio=prompt('Folio de pago verificado (puede quedar vacío):',r.folio||'');if(folio===null)return;
   const ok=confirm('¿Confirmas que verificaste este pago en la cuenta bancaria? Se guardará como pago manual conciliado.');
@@ -188,18 +264,48 @@
   catch(err){notify(err.message,true);}
   finally{b.disabled=false;}
  });
- $('includeUnpaid').addEventListener('change',adminList);
  $('refreshMine').addEventListener('click',mine);
  $('refreshAdmin').addEventListener('click',adminList);$('refreshReview').addEventListener('click',adminList);
- try{
-  const response=await fetch(API+'/auth/perfil',{headers:headers()});
-  const d=await response.json();
-  if(!response.ok||!d.ok)throw Error(d.message||'No se pudo consultar tu vivienda');
-  profile=d.usuario;$('clubName').value=[profile.nombre,profile.apellidoPaterno,profile.apellidoMaterno].filter(Boolean).join(' ');
-  $('clubPhone').value=profile.telefono||'';$('clubEmail').value=profile.correo||'';
+ function fillProfile(){
+  if(!profile)return;
+  $('clubName').value=[profile.nombre,profile.apellidoPaterno,profile.apellidoMaterno].filter(Boolean).join(' ');
+  $('clubPhone').value=profile.telefono||'';
+  $('clubEmail').value=profile.correo||'';
   $('clubHouse').value=profile.casa?homeText({casa:profile.casa}):'Selecciona una vivienda en el menú';
-  if(!profile.casa){$('clubSubmit').disabled=true;}
-  await calendar();
- }catch(e){notify(e.message,true);}
+ }
+ if(token){
+  try{
+   const d=await (await fetch(API+'/auth/perfil',{headers:headers(),signal:AbortSignal.timeout(5000)})).json();
+   const role=d.usuario?.rol?.nombre||d.usuario?.rol;
+   if(d.ok&&['SUPER_ADMIN','ADMINISTRADOR','CONDOMINO'].includes(role)){
+    profile=d.usuario;
+    admin=['SUPER_ADMIN','ADMINISTRADOR'].includes(role);
+    window.MJVerifiedRole=role;
+    for(const storage of [localStorage,sessionStorage])
+     if(storage.getItem('misionJardinesToken')===token)storage.setItem('misionJardinesUsuario',JSON.stringify(profile));
+    const script=document.createElement('script');
+    script.src='assets/js/site-sidebar.js?v=20261021-refresco-scroll';
+    document.head.append(script);
+   }
+  }catch(_){/* Un visitante puede reservar aunque una sesión previa haya caducado. */}
+ }
+ if(profile){
+  $('clubTabs').hidden=false;
+  document.querySelector('[data-tab="mis-reservas"]').hidden=false;
+  $('clubLinkedHouse').hidden=false;
+  $('clubStreetField').hidden=$('clubNumberField').hidden=true;
+  $('clubStreet').required=$('clubNumber').required=false;
+  fillProfile();
+ }
+ if(!profile)window.MJClubAddress?.(api);
+ if(admin){
+  document.querySelectorAll('[data-admin]').forEach(x=>x.hidden=false);
+  $('clubWhatsAppConsent').hidden=true;$('clubOptIn').required=false;
+  $('clubSubmit').textContent='Reservar';
+  $('clubRequestEyebrow').textContent='RESERVACIÓN DIRECTA';
+  $('clubCalendarHint').textContent='Al reservar como administrador, la fecha se confirma de inmediato. El pago se gestiona por separado.';
+  $('clubFormHint').textContent='La reserva se confirma al presionar Reservar. Se mantienen las reglas de adeudos y disponibilidad.';
+ }
+ try{await calendar();}catch(e){notify(e.message,true);}
  tab('reservar');
 })();

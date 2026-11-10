@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="es">
-<head><script src="demo-bootstrap.js"></script><meta name="robots" content="noindex, nofollow">
+<head><script src="demo-bootstrap.js"></script><script src="demo-upgrade.js"></script><meta name="robots" content="noindex,nofollow">
   <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico?v=20261005">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png?v=20261005">
   <link rel="icon" type="image/png" sizes="16x16" href="assets/images/favicon-16x16.png?v=20261005">
@@ -51,16 +51,16 @@
     @media(max-width:560px){
       .house-actions .btn{max-width:100%}
     }
-    /* Los cuatro filtros se agrupan en una única fila cuando hay espacio.
+    /* Los tres filtros (calle+número, TAG, orden) se agrupan cuando hay espacio.
        Los botones conservan sus acciones y se envuelven al reducir la vista. */
-    .toolbar{grid-template-columns:minmax(155px,1.25fr) minmax(105px,.62fr)
-      minmax(120px,.73fr) minmax(180px,1.2fr) repeat(4,auto);
+    .toolbar{grid-template-columns:minmax(230px,1.7fr) minmax(150px,.8fr)
+      minmax(190px,1.1fr) repeat(5,auto);
       gap:8px;min-width:0}
     .toolbar .zk-order-field select{padding:0 29px 0 11px;min-width:0;
       font-size:10px;text-overflow:ellipsis;white-space:nowrap}
     @media(max-width:1350px){
       .toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}
-      .toolbar .field:first-child{grid-column:auto}
+      .toolbar .field:first-child{grid-column:span 2}
       .toolbar .btn{width:100%}
     }
     @media(max-width:820px){
@@ -71,15 +71,74 @@
     @media(max-width:560px){
       .toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
       .toolbar .field:first-child,.toolbar .zk-order-field{grid-column:1/-1}
-      .toolbar>.field:nth-child(2),.toolbar>.field:nth-child(3){grid-column:auto}
+      .toolbar .field{grid-column:1/-1}
       .toolbar .btn{min-width:0;white-space:normal}
     }
-  </style>
+  .back-to-finance{display:inline-flex;align-items:center;justify-content:center;
+ margin:0 0 14px;text-decoration:none;font-weight:800;border-color:#d8e6de!important;
+ background:#eef8f2!important;color:#226c4a!important}
+.back-to-finance[hidden]{display:none!important}
+
+    /* TAGs: filtros en la primera fila y sus cinco botones uniformes en
+       una segunda fila. El resto del sitio conserva sus estilos existentes. */
+    #accessTagsPanel .toolbar{grid-template-columns:minmax(220px,1.6fr) minmax(145px,.8fr) minmax(180px,1fr)}
+    #accessTagsPanel .toolbar .field:first-child,
+    #accessTagsPanel .toolbar .zk-order-field{grid-column:auto}
+    #accessTagsPanel .zk-tag-toolbar-actions{
+      display:grid;grid-column:1/-1;
+      grid-template-columns:repeat(5,minmax(0,1fr));
+      gap:9px;min-width:0;
+    }
+    #accessTagsPanel .zk-tag-toolbar-actions .btn{
+      display:flex;align-items:center;justify-content:center;
+      width:100%;min-width:0;height:42px;min-height:42px;
+      padding:7px 9px;white-space:nowrap;
+    }
+    @media(max-width:820px){
+      #accessTagsPanel .toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+      #accessTagsPanel .toolbar .field:first-child,
+      #accessTagsPanel .toolbar .zk-order-field{grid-column:1/-1}
+      #accessTagsPanel .zk-tag-toolbar-actions{
+        grid-template-columns:repeat(5,minmax(128px,1fr));
+        overflow-x:auto;padding-bottom:4px;scrollbar-width:thin;
+      }
+    }
+    @media(max-width:560px){
+      #accessTagsPanel .toolbar{grid-template-columns:1fr}
+      #accessTagsPanel .toolbar .field,
+      #accessTagsPanel .toolbar .field:first-child,
+      #accessTagsPanel .toolbar .zk-order-field{grid-column:1}
+      #accessTagsPanel .zk-tag-toolbar-actions{grid-column:1;grid-template-columns:repeat(5,128px)}
+    }
+</style>
 <link rel="stylesheet" href="assets/css/zkteco-calles.css?v=20261009-buscador">
   <script src="assets/js/date-display.js?v=20261019"></script>
+  <style id="remoteControlTabsStyles">
+    .access-tabs{display:flex;gap:10px;align-items:center;margin:0 0 16px;padding:6px;border:1px solid #e6eaf1;border-radius:15px;background:#f3f6fa}
+    .access-tab{flex:1;min-height:43px;border:1px solid transparent;border-radius:11px;background:transparent;color:#59677e;font-size:12px;font-weight:850;cursor:pointer}
+    .access-tab[aria-selected="true"]{background:#fff;color:#ca6810;border-color:#f3d7bb;box-shadow:0 4px 15px #21334810}
+    .access-panel[hidden]{display:none!important}
+    .remote-toolbar{display:grid;grid-template-columns:minmax(220px,2fr) minmax(130px,1fr) minmax(150px,1fr) auto auto;gap:9px;align-items:end;margin-bottom:15px}
+    .remote-house-state,.remote-house-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .remote-house-actions{justify-content:flex-end}
+    .remote-note{margin-bottom:14px;border:1px solid #f3cf9d;background:#fff8ed;color:#8a5316;padding:13px 15px;border-radius:12px;font-size:11px;line-height:1.6}
+    .remote-control-buttons{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+    .remote-control-buttons label{display:block;font-size:10px;font-weight:800;color:#556176}
+    .remote-control-buttons select{width:100%;height:40px;padding:6px;border:1px solid #dce3eb;border-radius:9px;background:white;font-size:10px}
+    .remote-code{font-size:11px;font-weight:900;overflow-wrap:anywhere}
+    .remote-detail{display:grid;grid-template-columns:minmax(135px,1.3fr) minmax(100px,.75fr) minmax(180px,1.25fr) minmax(95px,.65fr) minmax(135px,1fr);gap:10px;align-items:center;padding:12px;border:1px solid #e4e9ef;border-radius:11px;background:#fff;font-size:10px}
+    .remote-detail .remote-buttons-text{line-height:1.55;color:#536174;overflow-wrap:anywhere}
+    .remote-detail-actions{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+    .remote-modal-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+    .remote-warning{color:#a6540a;font-weight:800}
+    @media(max-width:1100px){.remote-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.remote-detail{grid-template-columns:repeat(2,minmax(0,1fr))}.remote-detail-actions{grid-column:1/-1;justify-content:flex-start}}
+    @media(max-width:600px){.access-tabs{gap:5px}.access-tab{font-size:11px}.remote-toolbar{grid-template-columns:1fr}.remote-detail,.remote-control-buttons{grid-template-columns:1fr 1fr}.remote-house-actions{justify-content:flex-start}}
+    @media(max-width:390px){.remote-control-buttons{grid-template-columns:1fr}}
+  </style>
 </head>
-<body><div style="position:fixed;z-index:2147483000;right:12px;bottom:10px;background:#183e4f;color:white;border-radius:17px;padding:9px 13px;font:700 12px system-ui;pointer-events:none">DEMO · Datos ficticios · Administrador</div>
+<body>
 <main class="wrap">
+  <a id="backToFinance" class="btn clear back-to-finance" href="analisis-cuotas.html?from=zkteco" hidden>← Volver a Análisis de cuotas con mis filtros</a>
   <section class="hero">
     <div>
       <span class="eyebrow">CONTROL DE ACCESO · ZKTECO C3-200</span>
@@ -120,6 +179,11 @@
       </div>
     </details>
 
+    <div class="access-tabs" role="tablist" aria-label="Administración de accesos">
+      <button id="accessTabTags" class="access-tab" type="button" role="tab" aria-selected="true" aria-controls="accessTagsPanel">TAGs</button>
+      <button id="accessTabRemotes" class="access-tab" type="button" role="tab" aria-selected="false" aria-controls="accessRemotesPanel">Controles</button>
+    </div>
+    <div id="accessTagsPanel" class="access-panel" role="tabpanel" aria-labelledby="accessTabTags">
     <section class="card">
       <div class="card-head"><span class="eyebrow">VIVIENDAS Y CONTROLES</span><h2>Administración de TAGs</h2><p>Busca por calle, número de casa o número de TAG; agrega controles, bloquea temporalmente o elimina definitivamente un TAG del C3-200.</p></div>
       <div class="card-body">
@@ -129,14 +193,16 @@
           <div class="metric bad"><small>Bloqueadas</small><strong id="mBlocked">0</strong></div>
         </div>
         <div class="toolbar">
-          <div class="field"><label for="street">CALLE</label><input id="street" placeholder="Escribe o selecciona una calle" autocomplete="off" role="combobox" aria-autocomplete="list" aria-haspopup="listbox" aria-expanded="false" aria-controls="streetOptions" aria-describedby="streetHint"><div id="streetOptions" class="zk-street-options" role="listbox" aria-label="Calles para buscar TAGs" hidden></div><span id="streetHint" class="zk-street-sr" role="status">Escribe o selecciona una calle del padrón.</span></div>
-          <div class="field"><label>NÚMERO DE CASA</label><input id="houseNumber" placeholder="Ej. 11"></div>
-          <div class="field"><label>NÚMERO DE TAG</label><input id="tagNumber" inputmode="numeric" autocomplete="off" placeholder="Ej. 5112343"></div>
+          <div class="field"><label for="street">CALLE Y NÚMERO</label><input id="street" type="text" placeholder="Ej. Gardenias 5 o solo Gardenias" autocomplete="off" spellcheck="false" aria-label="Buscar por calle y número de casa"></div>
+          <div class="field"><label>NÚMERO DE TAG</label><input id="tagNumber" name="zk_access_tag_lookup" type="search" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" data-1p-ignore="true" data-lpignore="true" placeholder="Ej. 5112343" aria-label="Buscar número de TAG"></div>
           <div class="field zk-order-field"><label for="zkTagOrder">ORDENAR TAGs</label><select id="zkTagOrder" aria-label="Ordenar por incorporación de TAGs a la base de datos"><option value="alta_desc">TAGs agregados más recientemente</option><option value="alta_asc">TAGs agregados más antiguos</option></select></div>
-          <button id="applyFilters" class="btn">Buscar</button>
-          <button id="clearFilters" class="btn clear">Limpiar filtros</button>
-          <button id="openLogs" class="btn clear">Logs</button>
-          <button id="sync" class="btn primary">Sincronizar ZKTeco</button>
+          <div class="zk-tag-toolbar-actions" role="group" aria-label="Acciones de administración de TAGs">
+            <button id="applyFilters" class="btn">Buscar</button>
+            <button id="clearFilters" class="btn clear">Limpiar filtros</button>
+            <button id="diagnoseConnection" class="btn clear" type="button">Diagnosticar C3</button>
+            <button id="openLogs" class="btn clear">Logs</button>
+            <button id="sync" class="btn primary">Sincronizar ZKTeco</button>
+          </div>
         </div>
         <div class="house-list-shell">
           <div class="house-list-header" aria-hidden="true"><span>Vivienda</span><span>Estado</span><span>Última lectura</span><span>Acciones</span></div>
@@ -148,8 +214,85 @@
         </div>
       </div>
     </section>
+    </div>
+    <div id="accessRemotesPanel" class="access-panel" role="tabpanel" aria-labelledby="accessTabRemotes" hidden>
+      <section class="card">
+        <div class="card-head"><span class="eyebrow">VIVIENDAS Y CONTROLES</span>
+          <h2>Administración de controles remotos</h2>
+          <p>Busca por calle, número de casa o código del control; asigna botones A–D, bloquea, activa, edita vigencias o elimina controles del inventario.</p>
+        </div>
+        <div class="card-body">
+          <div class="remote-note"><strong>Inventario administrativo · Sin conexión física PO1000.</strong>
+            Los controles empiezan en 0 por vivienda. Guardar, bloquear, activar, editar y eliminar se reflejan exclusivamente en MySQL.
+            <strong>Un control bloqueado aquí todavía podría abrir físicamente el portón.</strong> La integración por receptor y la aplicación física de permisos se harán después de validar el hardware.</div>
+          <div class="metrics">
+            <div class="metric"><small>Viviendas visibles</small><strong id="remoteHouses">0</strong></div>
+            <div class="metric good"><small>Controles habilitados (registro)</small><strong id="remoteEnabled">0</strong></div>
+            <div class="metric bad"><small>Controles bloqueados (registro)</small><strong id="remoteBlocked">0</strong></div>
+          </div>
+          <div class="remote-toolbar">
+            <div class="field"><label for="remoteStreet">CALLE Y NÚMERO</label><input id="remoteStreet" type="search" autocomplete="off" placeholder="Ej. Gardenias 5 o solo Gardenias"></div>
+            <div class="field"><label for="remoteCodeSearch">CÓDIGO DEL CONTROL</label><input id="remoteCodeSearch" type="search" autocomplete="off" placeholder="Ej. CT-001"></div>
+            <div class="field"><label for="remoteOrder">ORDENAR CONTROLES</label><select id="remoteOrder"><option value="alta_desc">Más recientes</option><option value="alta_asc">Más antiguos</option><option value="vivienda">Por vivienda</option></select></div>
+            <button id="remoteSearch" class="btn" type="button">Buscar</button>
+            <button id="remoteClear" class="btn clear" type="button">Limpiar filtros</button>
+          </div>
+          <div class="remote-toolbar" style="grid-template-columns:auto auto 1fr">
+            <button id="remoteRefresh" class="btn primary" type="button">Actualizar controles</button>
+            <button id="remoteLogs" class="btn clear" type="button">Historial</button>
+            <div id="remotePhysicalStatus" class="status-pill" style="justify-self:end"><i></i><span>PO1000: pendiente de integración</span></div>
+          </div>
+          <div class="house-list-shell">
+            <div class="house-list-header" aria-hidden="true"><span>Vivienda</span><span>Estado</span><span>Última modificación</span><span>Acciones</span></div>
+            <div id="remoteRows" class="house-list"><div class="empty">Abre la pestaña Controles para cargar viviendas…</div></div>
+          </div>
+          <div class="pagination-bar">
+            <div class="pagination-meta"><span id="remotePageInfo">Página 1</span><span id="remotePageStatus"></span></div>
+            <div id="remotePages" class="pagination-buttons" aria-label="Paginación de controles"></div>
+          </div>
+        </div>
+      </section>
+    </div>
   </section>
 </main>
+<div id="remoteEditModal" class="modal-shell" hidden>
+  <section class="modal-box wide" role="dialog" aria-modal="true" aria-labelledby="remoteModalTitle">
+    <div class="modal-head"><div><span class="eyebrow">CONTROLES · REGISTRO ADMINISTRATIVO</span><h3 id="remoteModalTitle">Agregar control</h3><p class="sub">No sincroniza ni modifica el receptor PO1000.</p></div><button id="remoteClose" type="button" class="close" aria-label="Cerrar">×</button></div>
+    <div class="modal-body">
+      <div id="remoteModalError" class="modal-error" role="alert"></div>
+      <div class="modal-grid">
+        <div class="field"><label for="remoteHouseModal">VIVIENDA</label><select id="remoteHouseModal"></select></div>
+        <div class="field"><label for="remoteControlCode">CÓDIGO ÚNICO DEL CONTROL</label><input id="remoteControlCode" type="text" maxlength="80" placeholder="Ej. CT-001"></div>
+        <div class="field"><label for="remoteDescription">DESCRIPCIÓN / IDENTIFICACIÓN</label><input id="remoteDescription" type="text" maxlength="160" placeholder="Control PO de cuatro botones"></div>
+        <div class="field"><label for="remoteEndDate">FECHA FINAL DE VIGENCIA</label><input id="remoteEndDate" type="date"></div>
+        <div class="field wide"><label>ASIGNACIÓN DE BOTONES A, B, C Y D</label>
+          <div class="remote-control-buttons">
+            <label>A<select id="remoteButtonA"></select></label><label>B<select id="remoteButtonB"></select></label>
+            <label>C<select id="remoteButtonC"></select></label><label>D<select id="remoteButtonD"></select></label>
+          </div>
+        </div>
+      </div>
+      <div class="notice">Los botones se asignan en el inventario. Su programación física depende de verificar la compatibilidad del receptor PO1000.</div>
+    </div>
+    <div class="modal-foot"><button id="remoteCancel" type="button" class="btn">Cancelar</button><button id="remoteSave" type="button" class="btn primary">Guardar control</button></div>
+  </section>
+</div>
+<div id="remoteValidityModal" class="modal-shell" hidden>
+  <section class="modal-box" role="dialog" aria-modal="true">
+    <div class="modal-head"><div><span class="eyebrow">CONTROLES · VIGENCIA POR VIVIENDA</span><h3 id="remoteValidityTitle">Editar vigencia</h3></div><button id="remoteValidityClose" class="close" type="button">×</button></div>
+    <div class="modal-body"><div id="remoteValidityError" class="modal-error" role="alert"></div>
+      <div class="field"><label for="remoteValidityEnd">NUEVA FECHA FINAL</label><input id="remoteValidityEnd" type="date"></div>
+      <div class="notice">Aplica a todos los controles de esta vivienda, solo en el registro administrativo. No modifica vigencias de TAGs.</div>
+    </div>
+    <div class="modal-foot"><button id="remoteValidityCancel" class="btn" type="button">Cancelar</button><button id="remoteValiditySave" class="btn primary" type="button">Guardar vigencia</button></div>
+  </section>
+</div>
+<div id="remoteLogsModal" class="modal-shell" hidden>
+  <section class="modal-box wide" role="dialog" aria-modal="true">
+    <div class="modal-head"><div><span class="eyebrow">CONTROLES · AUDITORÍA</span><h3>Historial de controles remotos</h3></div><button id="remoteLogsClose" class="close" type="button">×</button></div>
+    <div class="modal-body"><div id="remoteLogsList" class="logs-list"></div></div>
+  </section>
+</div>
 <div id="tagModal" class="modal-shell" hidden>
   <section class="modal-box">
     <div class="modal-head"><div><span class="eyebrow">ZKTECO · CONTROL</span><h3>Agregar TAG a <span id="tagHouseLabel"></span></h3><p class="sub">Puedes vincular un TAG ya sincronizado o crear uno nuevo directamente en el C3-200.</p></div><button id="closeTagModal" class="close" type="button">×</button></div>
@@ -157,7 +300,7 @@
       <div id="tagModalError" class="modal-error" role="alert"></div>
       <div class="modal-grid">
         <div class="field wide"><label>TAG EXISTENTE SIN VIVIENDA</label><select id="existingTag"><option value="">— Crear un TAG nuevo —</option></select></div>
-        <div class="field wide"><label>NÚMERO DE TAG / TARJETA NUEVA</label><input id="newTagNumber" inputmode="numeric" placeholder="Ej. 5015731"></div>
+        <div class="field wide"><label>NÚMERO DE TAG NUEVO</label><input id="newTagNumber" name="zk_access_tag_create" type="search" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true" placeholder="Ej. 5015731"></div>
         <div class="field"><label>FECHA INICIAL</label><input id="newTagStart" type="date"></div>
         <div class="field"><label>FECHA FINAL DE VIGENCIA</label><input id="newTagEnd" type="date"></div>
         <div class="field wide"><label>ETIQUETA EN ZKTECO</label><input id="newTagName" maxlength="48" placeholder="Se autocompleta con calle y número"></div>
@@ -178,7 +321,7 @@
     <div class="modal-body">
       <div id="editTagError" class="modal-error" role="alert"></div>
       <div class="modal-grid">
-        <div class="field wide"><label>NÚMERO DE TAG / TARJETA</label><input id="editTagNumber" inputmode="numeric"></div>
+        <div class="field wide"><label>NÚMERO DE TAG</label><input id="editTagNumber" name="zk_access_tag_edit" type="search" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" data-1p-ignore="true" data-lpignore="true"></div>
         <div class="field"><label>FECHA INICIAL</label><input id="editTagStart" type="date" readonly disabled></div>
         <div class="field"><label>FECHA FINAL</label><input id="editTagEnd" type="date" readonly disabled></div>
         <div class="field">
@@ -210,6 +353,7 @@
       <button id="closeLogsModal" class="close" type="button">×</button>
     </div>
     <div class="modal-body">
+      <div id="connectionDiagnosis" class="logs-list" role="status" aria-live="polite"></div>
       <div id="logsList" class="logs-list"><div class="empty">Cargando logs…</div></div>
     </div>
     <div class="modal-foot"><button id="refreshLogs" class="btn clear" type="button">Actualizar</button><button id="closeLogs" class="btn primary" type="button">Cerrar</button></div>
@@ -219,11 +363,22 @@
 <div id="busy" class="busy" hidden><div class="busy-card"><div class="spinner"></div><div><strong id="busyTitle">Procesando…</strong><span id="busyText">No cierres esta ventana.</span></div></div></div>
 <div id="toast" class="toast"></div>
 
+<script src="assets/js/zkteco-address-filter.js?v=20261031-direccion"></script>
 <script>
-const API='https://demo.invalid/api';
+const API=window.MJ_API_URL||'https://api-misionjardines.listoenlinea.host/api';
 const token=localStorage.getItem('misionJardinesToken')||sessionStorage.getItem('misionJardinesToken');
 if(!token) location.replace('login.html');
 const $=id=>document.getElementById(id);
+// Son identificadores de acceso, NO números de tarjeta bancaria.
+// search + inputmode numérico conserva teclado de dígitos en iOS, sin
+// declararlos como campos de pago. Mantener cadena para ceros iniciales.
+for(const id of ['tagNumber','newTagNumber','editTagNumber']){
+ const field=$(id);
+ field?.addEventListener('input',()=>{
+  const digits=field.value.replace(/[^0-9]/g,'');
+  if(digits!==field.value)field.value=digits;
+ });
+}
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
 const headers=(json=false)=>({Authorization:'Bearer '+token,...(json?{'Content-Type':'application/json'}:{})});
 let role='';try{const u=JSON.parse(localStorage.getItem('misionJardinesUsuario')||sessionStorage.getItem('misionJardinesUsuario')||'{}');role=u?.rol?.nombre||u?.rol||''}catch(_){}
@@ -234,11 +389,18 @@ let currentPage=1;
 // Enlace preciso desde Análisis de cuotas; el ID prevalece sobre la búsqueda
 // por nombres de calles y se libera cuando se cambian manualmente los filtros.
 const linkParams=new URLSearchParams(window.location.search);
+const backButton=$('backToFinance');
+if(backButton&&linkParams.get('from')==='analisis'){
+ try{const state=JSON.parse(sessionStorage.getItem('mj_analisis_return_v1')||'null');
+  backButton.hidden=!(state&&Date.now()-Number(state.at)<30*60*1000);
+ }catch(_){backButton.hidden=true;}
+}
 const queryCasaId=Number(linkParams.get('casaId'));
 let linkedCasaId=Number.isSafeInteger(queryCasaId)&&queryCasaId>0?queryCasaId:null;
 if(linkedCasaId){
-  $('street').value=String(linkParams.get('calle')||'').slice(0,120);
-  $('houseNumber').value=String(linkParams.get('numero')||'').slice(0,30);
+  const linkCalle=String(linkParams.get('calle')||'').trim();
+  const linkNumero=String(linkParams.get('numero')||'').trim();
+  $('street').value=[linkCalle,linkNumero].filter(Boolean).join(' ').slice(0,150);
 }
 let pagination={page:1,limit:PAGE_SIZE,total:0,totalPages:1,hasPrev:false,hasNext:false};
 let pageRefreshInFlight=false;
@@ -282,7 +444,7 @@ function fmt(v){return v?window.MJDateDisplay.formatDateTime(v):'—'}
 async function loadStatus(){
   try{
     const r=await api('/zkteco/estado',{headers:headers()});
-    const d=r.data||{};$('connectionPill').className='status-pill ok';$('connectionPill').innerHTML='<i></i><span>'+(d.inventarioAuto?.lastError?'Simulador C3 · lectura de prueba':'C3-200 · Simulado')+'</span>';
+    const d=r.data||{};$('connectionPill').className='status-pill ok';$('connectionPill').innerHTML='<i></i><span>'+(d.inventarioAuto?.lastError?'C3 conectado · lectura en revisión':'Conectado al C3-200')+'</span>';
     $('deviceName').textContent=d.deviceName||d.modelo||'C3-200';$('deviceMode').textContent='Directa';$('deviceDoors').textContent=d.lockCount||'2';$('deviceFirmware').textContent=d.firmware||'—';$('deviceWriteMode').textContent=d.escrituraUsuarios==='PULLSDK'?(d.bridge?.controller?'Pull SDK oficial · conectado':(d.bridge?.error?'Pull SDK · '+d.bridge.error:'Pull SDK oficial')):'No configurada';$('deviceCards').textContent=d.tarjetas||0;
   }catch(e){$('connectionPill').className='status-pill err';$('connectionPill').innerHTML='<i></i><span>Sin conexión</span>';toast(errorText(e))}
 }
@@ -438,8 +600,9 @@ window.toggleTags=toggleTags;
 
 async function loadRows(){
   const q=new URLSearchParams();
-  if($('street').value.trim())q.set('calle',$('street').value.trim());
-  if($('houseNumber').value.trim())q.set('numero',$('houseNumber').value.trim());
+  const direccion=window.MJZkAddressSearch.separarDireccionZkteco($('street').value);
+  if(direccion.calle)q.set('calle',direccion.calle);
+  if(direccion.numero)q.set('numero',direccion.numero);
   if($('tagNumber').value.trim())q.set('tag',$('tagNumber').value.trim());
   if(linkedCasaId)q.set('casaId',String(linkedCasaId));
   q.set('orden',$('zkTagOrder').value);
@@ -481,12 +644,15 @@ async function refreshPage(page,{notify=false,reason}={}){
   setPageSyncStatus(reason||('Actualizando página '+target+' con ZKTeco…'),true);
   try{
     try{
-      const syncResponse=await syncBeforePageLoad({notify});
+      // Cambiar página o buscar solo consulta el reflejo en MySQL.
+      // El sondeo físico sigue activo cada ~60 s desde el backend y no
+      // se generan múltiples sesiones simultáneas por navegación.
+      const syncResponse=notify?await syncBeforePageLoad({notify}):null;
       partialCount=Number(syncResponse?.data?.noObservados||0);
       permissionsUncertain=syncResponse?.data?.autorizacionesConfiables===false;
     }catch(syncError){
       synchronized=false;
-      toast('No se pudo sincronizar antes de cargar la página: '+syncError.message,7000);
+      toast('No se pudo sincronizar antes de cargar la página: '+errorText(syncError),11000);
     }
     await loadRows();
     loaded=true;
@@ -494,19 +660,20 @@ async function refreshPage(page,{notify=false,reason}={}){
     pageRefreshInFlight=false;
     const message=!loaded?'No se pudo actualizar la página':
       !synchronized?'Datos locales; verificar lectura C3':
+      !notify?'Datos guardados en MySQL · sincronización física automática en segundo plano':
       partialCount?'Lectura parcial: '+partialCount+' TAG(s) no observados · revisar inventario':
       permissionsUncertain?'C3 leído · autorizaciones sin confirmar':
       'Inventario C3 confirmado para TAGs observados';
     setPageSyncStatus(message,false);
     window.clearTimeout(window.zkPageSyncStatusTimer);
-    window.zkPageSyncStatusTimer=setTimeout(()=>setPageSyncStatus(''),3500);
+    if(synchronized)window.zkPageSyncStatusTimer=setTimeout(()=>setPageSyncStatus(''),6500);
   }
 }
 async function goPage(page){
   const totalPages=Math.max(1,Number(pagination.totalPages||1));
   const target=Math.min(totalPages,Math.max(1,Number(page)||1));
   if(target===currentPage||pageRefreshInFlight)return;
-  await refreshPage(target,{reason:'Actualizando página '+target+' con ZKTeco…'});
+  await refreshPage(target,{reason:'Cargando página '+target+' desde MySQL…'});
   document.querySelector('.house-list')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 window.goPage=goPage;
@@ -514,17 +681,16 @@ async function applySearch(){
   if(pageRefreshInFlight)return;
   linkedCasaId=null;
   currentPage=1;
-  await refreshPage(1,{reason:'Buscando y actualizando resultados con ZKTeco…'});
+  await refreshPage(1,{reason:'Buscando viviendas en MySQL…'});
 }
 async function clearFilters(){
   if(pageRefreshInFlight)return;
   linkedCasaId=null;
   $('street').value='';
-  $('houseNumber').value='';
   $('tagNumber').value='';
   $('zkTagOrder').value='alta_desc';
   currentPage=1;
-  await refreshPage(1,{reason:'Limpiando filtros y actualizando página 1…'});
+  await refreshPage(1,{reason:'Actualizando filtros en MySQL…'});
 }
 const ACCESS_RETRY_MAX_ATTEMPTS=5;
 const ACCESS_RETRY_DELAY_MS=1200;
@@ -869,6 +1035,34 @@ async function loadLogs(){
     $('logsList').innerHTML='<div class="modal-error show"><strong>No se pudieron cargar los logs</strong>'+esc(errorText(e))+'</div>';
   }
 }
+async function runConnectionDiagnosis(){
+  const button=$('diagnoseConnection');
+  const target=$('connectionDiagnosis');
+  $('logsModal').hidden=false;
+  target.innerHTML='<div class="empty">Probando puerto TCP, sesión C3 y lectura de inventario desde Hostinger, sin modificar TAGs…</div>';
+  button.disabled=true;
+  try{
+    const result=await api('/zkteco/diagnostico/conexion',{headers:headers()});
+    const data=result.data||{};
+    const config=data.configuracion||{};
+    const steps=(data.pruebas||[]).map(step=>'<article class="log-item">'+
+      '<div class="log-top"><span class="log-action">'+esc(step.etapa||'ETAPA')+' · '+(step.ok?'Correcto':'Error')+'</span></div>'+
+      '<div class="log-error">'+esc([step.codigo,step.detalle].filter(Boolean).join(' · '))+'</div>'+
+      (step.serial?'<div class="log-meta">Serie de controlador: '+esc(step.serial)+'</div>':'')+
+      '</article>').join('');
+    target.innerHTML='<article class="log-item"><div class="log-top"><span class="log-action">Conexión: '+esc(data.estado||'SIN_VERIFICAR')+'</span></div>'+
+      '<div class="log-meta">Origen de host: '+esc(config.origenHost||'—')+
+      ' · Puerto: '+esc(config.puerto||'—')+' · Tiempo límite: '+esc(config.timeoutMs||'—')+' ms</div>'+
+      '<div class="log-error">'+esc(data.recomendacion||'Sin recomendación')+'</div></article>'+
+      steps+
+      (data.autoSync?.ultimoError?'<article class="log-item"><div class="log-action">Último error de sincronización automática</div>'+
+        '<div class="log-error">'+esc(data.autoSync.ultimoError)+'</div></article>':'');
+    await loadLogs();
+  }catch(error){
+    target.innerHTML='<div class="modal-error show"><strong>No se pudo completar el diagnóstico</strong>'+esc(errorText(error))+'</div>';
+  }finally{button.disabled=false;}
+}
+$('diagnoseConnection').onclick=runConnectionDiagnosis;
 async function openLogsModal(){
   $('logsModal').hidden=false;
   await loadLogs();
@@ -902,21 +1096,25 @@ $('sync').onclick=async()=>{
   }catch(e){toast(errorText(e))}
   finally{hideBusy()}
 };
-['street','houseNumber','tagNumber'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'&&!(e.target.getAttribute('aria-expanded')==='true'&&e.target.hasAttribute('aria-activedescendant')))applySearch()}));
+['street','tagNumber'].forEach(id=>$(id).addEventListener('keydown',e=>{if(e.key==='Enter'&&!(e.target.getAttribute('aria-expanded')==='true'&&e.target.hasAttribute('aria-activedescendant')))applySearch()}));
 const gateCollapse=$('gateCollapse');
 gateCollapse?.addEventListener('toggle',()=>{
   $('gateCollapseLabel').textContent=gateCollapse.open?'Ocultar':'Mostrar';
 });
-if(!canAdmin){$('sync').style.display='none';$('openLogs').style.display='none';}
+if(!canAdmin){$('sync').style.display='none';$('openLogs').style.display='none';$('diagnoseConnection').style.display='none';}
 (async()=>{
   await loadStatus();
-  await refreshPage(1,{reason:'Actualizando página 1 con ZKTeco…'});
+  await refreshPage(1,{reason:'Cargando viviendas desde MySQL…'});
 })().catch(e=>toast(errorText(e),7000));
 setInterval(async()=>{
   if(pageRefreshInFlight)return;
-  try{await Promise.all([loadStatus(),loadRows()])}catch(_){}
+  try{await loadRows()}catch(_){}
 },30000);
+// Una verificación de sesión directa cada dos minutos es suficiente para
+// la etiqueta de conexión; el autosync del servidor ya hace lectura periódica.
+setInterval(()=>{if(!pageRefreshInFlight)void loadStatus()},120000);
 </script>
+<script src="assets/js/zkteco-controles.js?v=20261110-v1"></script>
 <script src="assets/js/zkteco-calles.js?v=20261009-buscador"></script>
 <script src="assets/js/site-sidebar.js?v=20261021-refresco-scroll"></script>
 </body>
