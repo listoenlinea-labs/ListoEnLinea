@@ -69,6 +69,13 @@ const log=(accion,control,casaId)=>{state.logs.unshift({id:id(),accion,controlId
 const remotes=()=>houses().map(h=>({id:h.id,calle:h.calle,calleCorrecta:h.calle,numero:h.numero,controles:state.remotes.filter(x=>x.casaId===h.id).sort((a,b)=>b.id-a.id)}));
 function handle(uri,method,body,query){
  const parts=uri.split('/').filter(Boolean);
+ if(uri==='/casa-club/publico/fechas'&&method==='GET'){
+  const desde=query.get('desde')||ymd(),hasta=query.get('hasta')||'9999-12-31';
+  const ocupadas=fixtures().reservas.filter(r=>['PENDIENTE','APROBADA'].includes(r.estatus||r.estado)&&r.fecha>=desde&&r.fecha<=hasta)
+   .map(r=>({fecha:r.fecha,estatus:r.estatus||r.estado}));
+  return {ok:true,ocupadas};
+ }
+
  if(uri==='/controles-remotos/viviendas')return ok(remotes(),{integracionFisica:false,mensaje:'Simulación local; sin control físico'});
  if(uri==='/controles-remotos/logs')return ok(state.logs.slice(0,150));
  if(parts[0]==='controles-remotos'){

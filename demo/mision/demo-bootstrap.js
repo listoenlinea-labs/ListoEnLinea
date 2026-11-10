@@ -140,11 +140,11 @@ function fixture(){
  }
  const clubDay=offset=>date(new Date(yyyy,mm-1,now.getDate()+offset));
  const reservas=[
-  {id:80001,casaId:3,fecha:clubDay(7),fechaBloqueada:clubDay(7),estatus:'APROBADA',
+  {id:80001,casaId:3,fecha:clubDay(38),fechaBloqueada:clubDay(38),estatus:'APROBADA',
    solicitante:casas[2].nombre,telefono:casas[2].telefono,correo:casas[2].correo,
    motivo:'Convivio familiar',pagado:true,cuotaRecuperacion:800,depositoGarantia:1500,limpieza:300,
    garantiaDevuelta:false},
-  {id:80002,casaId:12,fecha:clubDay(19),fechaBloqueada:clubDay(19),estatus:'PENDIENTE',
+  {id:80002,casaId:12,fecha:clubDay(45),fechaBloqueada:clubDay(45),estatus:'PENDIENTE',
    solicitante:casas[11].nombre,telefono:casas[11].telefono,correo:casas[11].correo,
    motivo:'Cumpleaños',pagado:false,cuotaRecuperacion:0,depositoGarantia:0,limpieza:0}
  ];
@@ -175,7 +175,7 @@ if(state.version!==4){
 }
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn('Sin almacenamiento persistente',e)}};
 const byId=id=>state.casas.find(c=>Number(c.id)===Number(id)),byTag=id=>state.tags.find(t=>Number(t.id)===Number(id));
-const cap=n=>Math.max(0,Math.round(Number(n)||0));
+const cap=n=>Math.max(0,Math.round((Number(n)||0)*100)/100);
 const overdue=i=>i<curr||(i===curr&&now.getDate()>10);
 const periodCost=(c,i)=>c.cuota+(overdue(i)&&!c.exento?50:0);
 const debt=c=>{let total=0;for(let i=c.paidThrough+1;i<=curr;i++)total+=periodCost(c,i);return cap(Math.max(0,total-(c.credito||0)))};
@@ -191,7 +191,7 @@ function advance(c,money){
  if(n)state.tags.filter(t=>t.casaId===c.id).forEach(t=>{t.fechaFin=dueEnd(c);if(debt(c)===0)t.activo=true});
  return n;
 }
-const token='SIMULACION_PUBLICA_SIN_AUTENTICACION',admin={id:1,nombre:'Administrador',apellidoPaterno:'Demo',apellidoMaterno:'',correo:'admin@example.test',telefono:'3300000000',rol:{id:1,nombre:'ADMINISTRADOR'},casa:state.casas[0],roles:['ADMINISTRADOR'],administrador:true};
+const token='SIMULACION_PUBLICA_SIN_AUTENTICACION',admin={id:1,nombre:'Administrador',apellidoPaterno:'Demo',apellidoMaterno:'',correo:'admin@example.test',telefono:'3300000000',rol:{id:1,nombre:'ADMINISTRADOR'},casa:state.casas[5],roles:['ADMINISTRADOR'],administrador:true};
 try{localStorage.setItem('misionJardinesToken',token);localStorage.setItem('misionJardinesUsuario',JSON.stringify(admin));sessionStorage.setItem('misionJardinesToken',token)}catch{}
 window.MJ_API_URL=API;window.MJ_TOKEN=token;window.MJ_SHELL_MODE=false;
 const ok=(data={},extra={})=>({ok:true,data,...extra});
@@ -206,7 +206,9 @@ const card=t=>({id:t.id,numeroTarjeta:t.numeroTarjeta,numero:t.numeroTarjeta,num
 
 /* Cargos exactos por vivienda y periodo: centavos distribuidos sin perder saldo. */
 function extraCharges(c){
- const paid=new Set((state.pagosConcepto||[]).filter(x=>x.casaId===c.id&&x.tipoPago==='EXTRAORDINARIO').map(x=>x.conceptoId));
+ const paid=new Map();
+ for(const p of state.pagosConcepto||[])if(p.casaId===c.id&&p.tipoPago==='EXTRAORDINARIO')
+  paid.set(Number(p.conceptoId),(paid.get(Number(p.conceptoId))||0)+Number(p.monto||0));
  return state.cuotasExtra.flatMap(project=>{
   const months=Math.max(1,Number(project.meses)||1);
   const amount=Math.round(cap(project.monto)*100),units=state.casas.length*months;
@@ -216,9 +218,11 @@ function extraCharges(c){
    const index=i*state.casas.length+(c.id-1),amountCents=fixed+(index<remainder?1:0);
    const id=project.id*1000000+i*1000+c.id;
    return {id,proyectoId:project.id,periodo:yearMonth(begin+i),periodoIndice:begin+i,
-    concepto:'Cuota extraordinaria '+(project.concepto||'Proyecto DEMO'),monto:amountCents/100,
-    estado:paid.has(id)?'PAGADO':'PENDIENTE'};
-  }).filter(x=>x.monto>0);
+    concepto:'Cuota extraordinaria '+(project.concepto||'Proyecto DEMO'),
+    monto:Math.max(0,amountCents/100-(paid.get(id)||0)),
+    montoOriginal:amountCents/100,montoPagado:paid.get(id)||0,cuotaExtraordinariaId:project.id,
+    estado:(paid.get(id)||0)>=amountCents/100?'PAGADO':paid.has(id)?'PAGO_PARCIAL':'PENDIENTE'};
+  }).filter(x=>x.montoOriginal>0);
  });
 }
 const extraDue=c=>cap(extraCharges(c).filter(x=>x.estado!=='PAGADO'&&x.periodoIndice<=curr).reduce((sum,x)=>sum+x.monto,0));
@@ -328,6 +332,20 @@ function analisis(){
   const a=viviendas.filter(v=>v.calle===calle),done=a.filter(v=>v.pagada).length;
   return {calle,total:a.length,pagadas:done,pendientes:a.length-done,porcentaje:Math.round(done/a.length*100)};
  });
+ const projects=state.cuotasExtra.map(p=>{
+   const detail=viviendas.map(v=>{
+    const h=byId(v.casaId),charges=extraCharges(h).filter(q=>Number(q.proyectoId)===Number(p.id));
+    const target=charges.reduce((n,q)=>n+q.montoOriginal,0),contributed=charges.reduce((n,q)=>n+q.montoPagado,0),remaining=Math.max(0,target-contributed);
+    return {...v,proyectoId:p.id,montoCuota:target,montoPagado:contributed,saldoPendiente:remaining,
+     estatus:remaining===0?'PAGADO':contributed>0?'PAGO_PARCIAL':'PENDIENTE',noAplica:false};
+   });
+   const target=detail.reduce((n,h)=>n+h.montoCuota,0),received=detail.reduce((n,h)=>n+h.montoPagado,0);
+   return {id:p.id,nombre:p.nombre||p.concepto,fechaInicio:yearMonth(p.fechaInicioPeriodo),
+    totalEsperado:target,recaudado:received,saldoPendiente:Math.max(0,target-received),
+    viviendas:detail.length,cumplidos:detail.filter(h=>h.saldoPendiente<=0).length,
+    pendientes:detail.filter(h=>h.montoPagado<=0).length,noAplica:0,sinCargo:0,
+    porcentaje:target?Math.round(100*received/target):0,viviendasDetalle:detail};
+  });
  const other={EXTRAORDINARIO:viviendas.map(v=>{const pending=extraDue(byId(v.casaId));return {...v,saldoPendiente:pending,estatus:pending?'PENDIENTE':'PAGADO'}}),
   CASA_CLUB:viviendas.map(v=>{const pending=clubCharges(byId(v.casaId)).reduce((sum,x)=>sum+x.monto,0);
    return {...v,saldoPendiente:cap(pending),estatus:pending?'PENDIENTE':'PAGADO'}})};
@@ -344,7 +362,7 @@ function analisis(){
   avisoConciliacion:'Operaciones ficticias; ninguna verificación bancaria real',
   egresosCategorias:Object.fromEntries(state.egresos.filter(e=>String(e.fecha||'').slice(0,7)===yyyy+'-'+pad(mm)).map(e=>[e.categoria,e.monto])),
   egresos:state.egresos.filter(e=>String(e.fecha||'').slice(0,7)===yyyy+'-'+pad(mm)),
-  viviendas,viviendasMantenimiento:viviendas,viviendasConceptos:other};
+  proyectosExtraordinarios:projects,viviendas,viviendasMantenimiento:viviendas,viviendasConceptos:other};
 }
 const debug=(uri,input)=>state.logs.push({fecha:new Date().toISOString(),uri,accion:input.method||'GET'});
 function handle(uri,method,body,query){
@@ -499,7 +517,7 @@ function handle(uri,method,body,query){
  if(uri==='/casa-club/solicitudes-pendientes')
   return {ok:true,cantidad:state.reservas.filter(r=>clubStatus(r)==='PENDIENTE').length};
  if(uri==='/casa-club/reservas'&&method==='POST'){
-  const fecha=String(body.fecha||''),c=byId(body.casaId)||(!body.casaId?state.casas[0]:null);
+  const fecha=String(body.fecha||''),c=byId(body.casaId)||(!body.casaId?state.casas[5]:null);
   if(!validClubDate(fecha)||fecha<clubToday())
    return {ok:false,message:'Selecciona una fecha válida, desde hoy en adelante'};
   if(!c)return {ok:false,message:'Vivienda ficticia inexistente'};
@@ -516,7 +534,7 @@ function handle(uri,method,body,query){
   const entry={id:++state.lastId,usuarioId:admin.id,casaId:c.id,fecha,fechaBloqueada:fecha,
    solicitante:String(body.solicitante||c.nombre),telefono:String(body.telefono||c.telefono),
    correo:String(body.correo||c.correo),propietario:Boolean(body.propietario),
-   motivo:String(body.motivo||'Evento de demostración'),estatus:'PENDIENTE',
+   motivo:String(body.motivo||'Evento de demostración'),estatus:body.__demoAdministrador?'APROBADA':'PENDIENTE',
    pagado:false,cuotaRecuperacion:0,depositoGarantia:0,limpieza:0,
    garantiaDevuelta:false,fechaLimitePago:null,notas:''};
   state.reservas.push(entry);save();

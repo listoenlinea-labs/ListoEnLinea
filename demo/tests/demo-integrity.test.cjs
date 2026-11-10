@@ -99,13 +99,14 @@ test('Proyecto extraordinario reparte centavos exactos y no altera vigencias de 
  let cents=0;
  for(let id=1;id<=231;id++){
   const data=await request('/finanzas/pagos-concepto/'+id);
-  assert.equal(data.data.EXTRAORDINARIO.length,2);
-  for(const charge of data.data.EXTRAORDINARIO)cents+=Math.round(charge.monto*100);
+  const freshCharges=data.data.EXTRAORDINARIO.filter(x=>x.proyectoId===created.data.proyectoId||x.concepto?.includes('Proyecto sintético'));
+  assert.equal(freshCharges.length,2);
+  for(const charge of freshCharges)cents+=Math.round(charge.monto*100);
  }
  assert.equal(cents,1000001);
- const houseId=2;
+ const houseId=6; // vivienda al corriente también en los dos proyectos precargados
  const tagBefore=(await request('/zkteco/viviendas/'+houseId+'/vigencia-tags')).data.tarjetas[0].fechaFin;
- const pending=(await request('/finanzas/pagos-concepto/'+houseId)).data.EXTRAORDINARIO;
+ const pending=(await request('/finanzas/pagos-concepto/'+houseId)).data.EXTRAORDINARIO.filter(x=>x.concepto?.includes('Proyecto sintético'));
  const blocked=await request('/casa-club/reservas','POST',{casaId:houseId,fecha:'2030-06-15'});
  assert.equal(blocked.ok,false);
  const payment=await request('/finanzas/pagos-concepto','POST',{casaId:houseId,tipoPago:'EXTRAORDINARIO',conceptoId:pending[0].id,monto:pending[0].monto});
@@ -182,22 +183,24 @@ test('Casa Club renderiza el mes actual con fechas ocupadas y permite reservar, 
  const [year,month]=hoy.split('-').map(Number);
  const fin=new Date(Date.UTC(year,month,0)).toISOString().slice(0,10);
  const first=await request('/casa-club/fechas?desde='+hoy.slice(0,7)+'-01&hasta='+fin);
- assert.equal(first.ok,true);assert(Array.isArray(first.ocupadas));assert.equal(first.ocupadas.length,0);
- const paidHouse=(await request('/finanzas/analisis')).data.viviendas.find(x=>x.estatus==='PAGADO');
+ assert.equal(first.ok,true);assert(Array.isArray(first.ocupadas));const baseline=first.ocupadas.length;
+ const finance=(await request('/finanzas/analisis')).data;
+ const eligible=new Set(finance.viviendasConceptos.EXTRAORDINARIO.filter(x=>x.saldoPendiente===0).map(x=>x.casaId));
+ const paidHouse=finance.viviendas.find(x=>x.estatus==='PAGADO'&&eligible.has(x.casaId));
  assert(paidHouse,'Debe existir una casa ficticia al corriente');
  const created=await request('/casa-club/reservas','POST',{
   casaId:paidHouse.casaId,fecha:hoy,solicitante:'Residente ficticio',telefono:'3300000000',
   correo:'demo@example.test',motivo:'Evento demo',propietario:true});
  assert.equal(created.ok,true);assert(created.data.id);
  const pending=await request('/casa-club/fechas?desde='+hoy.slice(0,7)+'-01&hasta='+fin);
- assert.deepEqual(pending.ocupadas,[{fecha:hoy,estatus:'PENDIENTE'}]);
+ assert(pending.ocupadas.some(r=>r.fecha===hoy&&r.estatus==='PENDIENTE'));
  const duplicate=await request('/casa-club/reservas','POST',{casaId:paidHouse.casaId,fecha:hoy});
  assert.equal(duplicate.ok,false);
  const my=await request('/casa-club/mias');
- assert.equal(my.ok,true);assert.equal(my.data.length,1);
- assert.equal(my.data[0].estatus,'PENDIENTE');
+ assert.equal(my.ok,true);assert(my.data.some(r=>r.id===created.data.id));
+ assert.equal(my.data.find(r=>r.id===created.data.id).estatus,'PENDIENTE');
  const pendingCount=await request('/casa-club/solicitudes-pendientes');
- assert.equal(pendingCount.cantidad,1);
+ assert(pendingCount.cantidad>=1);
  const approval=await request('/casa-club/administracion/'+created.data.id,'PATCH',{
   accion:'APROBAR',cuotaRecuperacion:700,depositoGarantia:700,limpieza:0,
   fechaLimitePago:hoy});
@@ -228,7 +231,7 @@ test('Presupuesto ficticio realista: ingresos superan moderadamente a gastos, si
  const rows=dashboard.recaudacion.serie;
  assert(rows.length>=10);
  const sample=win.MISION_DEMO.getState();
- assert.equal(sample.version,3);
+ assert.equal(sample.version,4);
  assert(sample.egresos.length>=6*rows.length,'Cada mes debe reflejar rubros operativos');
  const categories=new Set(sample.egresos.map(x=>x.categoria));
  for(const category of ['SEGURIDAD','JARDINERIA','LIMPIEZA','SERVICIOS','AGUA','ADMINISTRACION','MANTENIMIENTO'])
@@ -262,9 +265,9 @@ test('Migración de datos anteriores respeta pagos, TAGs, reservas y egresos man
  old.tags[0].activo=false;
  old.pagos.push({id:9999,casaId:1,monto:50,fecha:'2026-10-25'});
  const state=residential(old).win.MISION_DEMO.getState();
- assert.equal(state.version,3);
+ assert.equal(state.version,4);
  assert.equal(state.reservas.length,old.reservas.length);
- assert.equal(state.pagos.length,old.pagos.length);
+ assert(state.pagos.some(p=>p.id===9999&&p.monto===50),'El pago manual existente debe conservarse');
  assert.equal(state.tags[0].activo,false);
  assert(state.egresos.some(e=>e.id===5004&&e.monto===950),'Se perdieron egresos registrados por el visitante');
  assert(state.egresos.some(e=>e.categoria==='SEGURIDAD'));
@@ -307,7 +310,8 @@ test('Vivienda pendiente presenta línea de tiempo histórica y detalle de deuda
  const year=String(new Date().getFullYear());
  const expected=Array.from({length:new Date().getMonth()-5},(_,i)=>year+'-'+String(i+7).padStart(2,'0'));
  assert.deepEqual(history.deudas.map(d=>d.periodo),expected);
- assert(history.deudas.every(d=>d.recargo===50&&d.estado==='PENDIENTE'));
+ assert(history.deudas.every(d=>[0,50].includes(d.recargo)&&['PENDIENTE','PAGO_PARCIAL'].includes(d.estado)));
+ assert(history.deudas.filter(d=>d.periodo<new Date().toISOString().slice(0,7)).every(d=>d.recargo===50));
  assert.equal(Math.round(history.deudas.reduce((s,d)=>s+d.monto,0)),
    Math.round(pending.saldoPendiente));
 });

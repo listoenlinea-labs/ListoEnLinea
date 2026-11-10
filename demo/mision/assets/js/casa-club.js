@@ -130,7 +130,7 @@
   submitting=true;syncSubmit();
   const values={fecha:selectedDate,calle:$('clubStreet').value.trim(),numero:$('clubNumber').value.trim(),
    solicitante:$('clubName').value.trim(),telefono:$('clubPhone').value.trim(),correo:$('clubEmail').value.trim(),
-   propietario:$('clubOwner').value==='SI',motivo:$('clubReason').value.trim(),aceptaWhatsApp:$('clubOptIn').checked};
+   propietario:$('clubOwner').value==='SI',motivo:$('clubReason').value.trim(),aceptaWhatsApp:$('clubOptIn').checked, __demoAdministrador:window.MISION_DEMO&&admin};
   try{
    const result=await api(profile?'/reservas':'/publico/solicitudes','POST',values);
    if(result.data?.pago)showPayment(result.data);
