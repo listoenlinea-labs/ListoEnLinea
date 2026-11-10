@@ -70,7 +70,7 @@ function fixture(){
  const casas=Array.from({length:231},(_,i)=>{
   const street=Math.floor(i/30), hash=(i*37+Math.floor(i/30)*23+(i*i)%31)%100;
   const threshold=callesMeta[street].tasa;
-  const paidThrough=i%41===0?period(yyyy-1,12):
+  const paidThrough=i%41===0||i%41===1?period(yyyy-1,12):
     i%13===0?period(yyyy,12):
     hash<threshold?seedEnd:hash<threshold+9?seedEnd-1:hash<threshold+17?seedEnd-2:
     hash<threshold+25?period(yyyy,7):period(yyyy,6);
@@ -83,7 +83,7 @@ function fixture(){
  for(const c of casas){
   for(let month=1;month<=12;month++){
    const coverage=period(yyyy,month);
-   if(coverage>c.paidThrough||c.id%41===1)continue;
+   if(coverage>c.paidThrough)continue;
    // Un porcentaje de casas anticipa su mensualidad y otro paga después:
    // los movimientos por mes no resultan líneas artificialmente planas.
    const shift=(c.id*13+month*7)%9===0?-1:(c.id*7+month*11)%11===0?-2:0;
@@ -122,10 +122,36 @@ function fixture(){
  });
  const otrosIngresos=Array.from({length:mm},(_,i)=>({id:4001+i,concepto:'Ingreso adicional ficticio',
   monto:200+((i*53+7)%9)*145,fecha:yyyy+'-'+pad(i+1)+'-19'}));
+ // Dos proyectos extraordinarios ficticios, con metas y contribuciones parciales.
+ const cuotasExtra=[
+  {id:7701,nombre:'Renovación de cámaras',concepto:'Renovación de cámaras',monto:231000,meses:1,fechaInicioPeriodo:period(yyyy,8),estado:'ACTIVO'},
+  {id:7702,nombre:'Rehabilitación de áreas verdes',concepto:'Rehabilitación de áreas verdes',monto:173250,meses:1,fechaInicioPeriodo:period(yyyy,10),estado:'ACTIVO'}
+ ];
+ const pagosConcepto=[];
+ for(const project of cuotasExtra)for(const casa of casas){
+  const status=(casa.id*17+project.id)%100;
+  if(status>=57)continue;
+  const total=Math.round(project.monto/casas.length);
+  const amount=status%8===0?Math.floor(total/2):total;
+  pagosConcepto.push({id:900000+pagosConcepto.length,casaId:casa.id,
+   conceptoId:project.id*1000000+casa.id,proyectoId:project.id,tipoPago:'EXTRAORDINARIO',
+   monto:amount,fecha:yyyy+'-'+pad(project.id===7701?8:10)+'-'+pad(3+(casa.id%20)),
+   referencia:'EXTRA-DEMO-'+project.id+'-'+casa.id,formaPago:'TRANSFERENCIA'});
+ }
+ const clubDay=offset=>date(new Date(yyyy,mm-1,now.getDate()+offset));
+ const reservas=[
+  {id:80001,casaId:3,fecha:clubDay(7),fechaBloqueada:clubDay(7),estatus:'APROBADA',
+   solicitante:casas[2].nombre,telefono:casas[2].telefono,correo:casas[2].correo,
+   motivo:'Convivio familiar',pagado:true,cuotaRecuperacion:800,depositoGarantia:1500,limpieza:300,
+   garantiaDevuelta:false},
+  {id:80002,casaId:12,fecha:clubDay(19),fechaBloqueada:clubDay(19),estatus:'PENDIENTE',
+   solicitante:casas[11].nombre,telefono:casas[11].telefono,correo:casas[11].correo,
+   motivo:'Cumpleaños',pagado:false,cuotaRecuperacion:0,depositoGarantia:0,limpieza:0}
+ ];
  const fixtureData={version:4,casas,tags,pagos,egresos:[],otrosIngresos,saldoInicial:12000,
   accesos:[],visitas:[{id:1,casaId:1,nombre:'Gabriela Ramos',placa:'DEM-001',
     motivo:'Visita familiar',estado:'PROGRAMADA',fecha:longDate,hora:'11:30',codigo:'VIS-DEMO-0001'}],
-  reportes:[],reservas:[],cuotasExtra:[],pagosConcepto:[],incidentes:[],cuentas:[],logs:[],lastId:5000};
+  reportes:[],reservas,cuotasExtra,pagosConcepto,incidentes:[],cuentas:[],logs:[],lastId:5000};
  fixtureData.egresos=demoOperatingExpenses(fixtureData);
  return fixtureData;
 }
