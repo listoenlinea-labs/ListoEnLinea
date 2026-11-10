@@ -140,11 +140,11 @@ function fixture(){
  }
  const clubDay=offset=>date(new Date(yyyy,mm-1,now.getDate()+offset));
  const reservas=[
-  {id:80001,casaId:3,fecha:clubDay(7),fechaBloqueada:clubDay(7),estatus:'APROBADA',
+  {id:80001,casaId:3,fecha:clubDay(36),fechaBloqueada:clubDay(36),estatus:'APROBADA',
    solicitante:casas[2].nombre,telefono:casas[2].telefono,correo:casas[2].correo,
    motivo:'Convivio familiar',pagado:true,cuotaRecuperacion:800,depositoGarantia:1500,limpieza:300,
    garantiaDevuelta:false},
-  {id:80002,casaId:12,fecha:clubDay(19),fechaBloqueada:clubDay(19),estatus:'PENDIENTE',
+  {id:80002,casaId:12,fecha:clubDay(45),fechaBloqueada:clubDay(45),estatus:'PENDIENTE',
    solicitante:casas[11].nombre,telefono:casas[11].telefono,correo:casas[11].correo,
    motivo:'Cumpleaños',pagado:false,cuotaRecuperacion:0,depositoGarantia:0,limpieza:0}
  ];
@@ -175,7 +175,7 @@ if(state.version!==4){
 }
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn('Sin almacenamiento persistente',e)}};
 const byId=id=>state.casas.find(c=>Number(c.id)===Number(id)),byTag=id=>state.tags.find(t=>Number(t.id)===Number(id));
-const cap=n=>Math.max(0,Math.round(Number(n)||0));
+const cap=n=>Math.max(0,Math.round((Number(n)||0)*100)/100);
 const overdue=i=>i<curr||(i===curr&&now.getDate()>10);
 const periodCost=(c,i)=>c.cuota+(overdue(i)&&!c.exento?50:0);
 const debt=c=>{let total=0;for(let i=c.paidThrough+1;i<=curr;i++)total+=periodCost(c,i);return cap(Math.max(0,total-(c.credito||0)))};
