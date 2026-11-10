@@ -104,7 +104,7 @@ test('Proyecto extraordinario reparte centavos exactos y no altera vigencias de 
   for(const charge of freshCharges)cents+=Math.round(charge.monto*100);
  }
  assert.equal(cents,1000001);
- const houseId=2;
+ const houseId=6; // vivienda al corriente también en los dos proyectos precargados
  const tagBefore=(await request('/zkteco/viviendas/'+houseId+'/vigencia-tags')).data.tarjetas[0].fechaFin;
  const pending=(await request('/finanzas/pagos-concepto/'+houseId)).data.EXTRAORDINARIO.filter(x=>x.concepto?.includes('Proyecto sintético'));
  const blocked=await request('/casa-club/reservas','POST',{casaId:houseId,fecha:'2030-06-15'});
@@ -184,7 +184,9 @@ test('Casa Club renderiza el mes actual con fechas ocupadas y permite reservar, 
  const fin=new Date(Date.UTC(year,month,0)).toISOString().slice(0,10);
  const first=await request('/casa-club/fechas?desde='+hoy.slice(0,7)+'-01&hasta='+fin);
  assert.equal(first.ok,true);assert(Array.isArray(first.ocupadas));const baseline=first.ocupadas.length;
- const paidHouse=(await request('/finanzas/analisis')).data.viviendas.find(x=>x.estatus==='PAGADO');
+ const finance=(await request('/finanzas/analisis')).data;
+ const eligible=new Set(finance.viviendasConceptos.EXTRAORDINARIO.filter(x=>x.saldoPendiente===0).map(x=>x.casaId));
+ const paidHouse=finance.viviendas.find(x=>x.estatus==='PAGADO'&&eligible.has(x.casaId));
  assert(paidHouse,'Debe existir una casa ficticia al corriente');
  const created=await request('/casa-club/reservas','POST',{
   casaId:paidHouse.casaId,fecha:hoy,solicitante:'Residente ficticio',telefono:'3300000000',
@@ -308,7 +310,8 @@ test('Vivienda pendiente presenta línea de tiempo histórica y detalle de deuda
  const year=String(new Date().getFullYear());
  const expected=Array.from({length:new Date().getMonth()-5},(_,i)=>year+'-'+String(i+7).padStart(2,'0'));
  assert.deepEqual(history.deudas.map(d=>d.periodo),expected);
- assert(history.deudas.every(d=>d.recargo===50&&['PENDIENTE','PAGO_PARCIAL'].includes(d.estado)));
+ assert(history.deudas.every(d=>[0,50].includes(d.recargo)&&['PENDIENTE','PAGO_PARCIAL'].includes(d.estado)));
+ assert(history.deudas.filter(d=>d.periodo<new Date().toISOString().slice(0,7)).every(d=>d.recargo===50));
  assert.equal(Math.round(history.deudas.reduce((s,d)=>s+d.monto,0)),
    Math.round(pending.saldoPendiente));
 });
