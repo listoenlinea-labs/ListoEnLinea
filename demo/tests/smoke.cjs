@@ -72,7 +72,7 @@ const assert = require('node:assert/strict');
   assert.equal(diagnostics.filter(d=>d.errors.length>0).length,0,'Errores JavaScript en pantallas: '+JSON.stringify(diagnostics.filter(d=>d.errors.length)));
 
   await page.goto('http://127.0.0.1:8765/index.html#portfolio');
-  for(const label of ['Floristería Magno','Dra. Yerena Riso','Misión Jardines']){
+  for(const label of ['Floristería Magno','Dra. Yerena Riso','Fraccionamiento Demo']){
    await page.locator('[data-project-details="'+label+'"]').click();
    await page.locator('#projectDetailsModal.show').waitFor();
    const title=await page.locator('#projectDetailsTitle').textContent();
