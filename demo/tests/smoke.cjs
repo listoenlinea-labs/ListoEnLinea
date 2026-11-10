@@ -39,7 +39,12 @@ const assert = require('node:assert/strict');
   });
   const extended=await page.evaluate(async()=>{
    const api='https://demo.invalid/api';const post=(path,data)=>fetch(api+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}).then(r=>r.json());
-   const before=MISION_DEMO.getState();const debtor=before.casas.find(c=>c.paidThrough<new Date().getFullYear()*12+new Date().getMonth()),payer=before.casas.find(c=>c.paidThrough>=new Date().getFullYear()*12+new Date().getMonth());
+   const before=MISION_DEMO.getState();
+   const financial=await fetch(api+'/finanzas/analisis').then(r=>r.json());
+   const eligibleIds=new Set((financial.data.viviendasConceptos?.EXTRAORDINARIO||[])
+     .filter(x=>x.saldoPendiente===0).map(x=>x.casaId));
+   const debtor=before.casas.find(c=>c.paidThrough<new Date().getFullYear()*12+new Date().getMonth());
+   const payer=before.casas.find(c=>c.paidThrough>=new Date().getFullYear()*12+new Date().getMonth()&&eligibleIds.has(c.id));
    const denied=await post('/casa-club/reservas',{casaId:debtor.id,fecha:'2026-12-15',nombre:'Evento de prueba'});
    const allowed=await post('/casa-club/reservas',{casaId:payer.id,fecha:'2026-12-16',nombre:'Evento ficticio'});
    const conflict=await post('/casa-club/reservas',{casaId:payer.id,fecha:'2026-12-16',nombre:'Otro evento'});
