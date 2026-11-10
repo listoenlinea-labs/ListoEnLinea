@@ -140,7 +140,7 @@ function fixture(){
  }
  const clubDay=offset=>date(new Date(yyyy,mm-1,now.getDate()+offset));
  const reservas=[
-  {id:80001,casaId:3,fecha:clubDay(36),fechaBloqueada:clubDay(36),estatus:'APROBADA',
+  {id:80001,casaId:3,fecha:clubDay(38),fechaBloqueada:clubDay(38),estatus:'APROBADA',
    solicitante:casas[2].nombre,telefono:casas[2].telefono,correo:casas[2].correo,
    motivo:'Convivio familiar',pagado:true,cuotaRecuperacion:800,depositoGarantia:1500,limpieza:300,
    garantiaDevuelta:false},
