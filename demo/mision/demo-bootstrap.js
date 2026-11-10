@@ -206,7 +206,9 @@ const card=t=>({id:t.id,numeroTarjeta:t.numeroTarjeta,numero:t.numeroTarjeta,num
 
 /* Cargos exactos por vivienda y periodo: centavos distribuidos sin perder saldo. */
 function extraCharges(c){
- const paid=new Set((state.pagosConcepto||[]).filter(x=>x.casaId===c.id&&x.tipoPago==='EXTRAORDINARIO').map(x=>x.conceptoId));
+ const paid=new Map();
+ for(const p of state.pagosConcepto||[])if(p.casaId===c.id&&p.tipoPago==='EXTRAORDINARIO')
+  paid.set(Number(p.conceptoId),(paid.get(Number(p.conceptoId))||0)+Number(p.monto||0));
  return state.cuotasExtra.flatMap(project=>{
   const months=Math.max(1,Number(project.meses)||1);
   const amount=Math.round(cap(project.monto)*100),units=state.casas.length*months;
@@ -216,8 +218,10 @@ function extraCharges(c){
    const index=i*state.casas.length+(c.id-1),amountCents=fixed+(index<remainder?1:0);
    const id=project.id*1000000+i*1000+c.id;
    return {id,proyectoId:project.id,periodo:yearMonth(begin+i),periodoIndice:begin+i,
-    concepto:'Cuota extraordinaria '+(project.concepto||'Proyecto DEMO'),monto:amountCents/100,
-    estado:paid.has(id)?'PAGADO':'PENDIENTE'};
+    concepto:'Cuota extraordinaria '+(project.concepto||'Proyecto DEMO'),
+    monto:Math.max(0,amountCents/100-(paid.get(id)||0)),
+    montoOriginal:amountCents/100,montoPagado:paid.get(id)||0,cuotaExtraordinariaId:project.id,
+    estado:(paid.get(id)||0)>=amountCents/100?'PAGADO':paid.has(id)?'PAGO_PARCIAL':'PENDIENTE'};
   }).filter(x=>x.monto>0);
  });
 }
@@ -328,6 +332,20 @@ function analisis(){
   const a=viviendas.filter(v=>v.calle===calle),done=a.filter(v=>v.pagada).length;
   return {calle,total:a.length,pagadas:done,pendientes:a.length-done,porcentaje:Math.round(done/a.length*100)};
  });
+ const projects=state.cuotasExtra.map(p=>{
+   const detail=viviendas.map(v=>{
+    const h=byId(v.casaId),charges=extraCharges(h).filter(q=>Number(q.proyectoId)===Number(p.id));
+    const target=charges.reduce((n,q)=>n+q.montoOriginal,0),contributed=charges.reduce((n,q)=>n+q.montoPagado,0),remaining=Math.max(0,target-contributed);
+    return {...v,proyectoId:p.id,montoCuota:target,montoPagado:contributed,saldoPendiente:remaining,
+     estatus:remaining===0?'PAGADO':contributed>0?'PAGO_PARCIAL':'PENDIENTE',noAplica:false};
+   });
+   const target=detail.reduce((n,h)=>n+h.montoCuota,0),received=detail.reduce((n,h)=>n+h.montoPagado,0);
+   return {id:p.id,nombre:p.nombre||p.concepto,fechaInicio:yearMonth(p.fechaInicioPeriodo),
+    totalEsperado:target,recaudado:received,saldoPendiente:Math.max(0,target-received),
+    viviendas:detail.length,cumplidos:detail.filter(h=>h.saldoPendiente<=0).length,
+    pendientes:detail.filter(h=>h.montoPagado<=0).length,noAplica:0,sinCargo:0,
+    porcentaje:target?Math.round(100*received/target):0,viviendasDetalle:detail};
+  });
  const other={EXTRAORDINARIO:viviendas.map(v=>{const pending=extraDue(byId(v.casaId));return {...v,saldoPendiente:pending,estatus:pending?'PENDIENTE':'PAGADO'}}),
   CASA_CLUB:viviendas.map(v=>{const pending=clubCharges(byId(v.casaId)).reduce((sum,x)=>sum+x.monto,0);
    return {...v,saldoPendiente:cap(pending),estatus:pending?'PENDIENTE':'PAGADO'}})};
@@ -344,7 +362,7 @@ function analisis(){
   avisoConciliacion:'Operaciones ficticias; ninguna verificación bancaria real',
   egresosCategorias:Object.fromEntries(state.egresos.filter(e=>String(e.fecha||'').slice(0,7)===yyyy+'-'+pad(mm)).map(e=>[e.categoria,e.monto])),
   egresos:state.egresos.filter(e=>String(e.fecha||'').slice(0,7)===yyyy+'-'+pad(mm)),
-  viviendas,viviendasMantenimiento:viviendas,viviendasConceptos:other};
+  proyectosExtraordinarios:projects,viviendas,viviendasMantenimiento:viviendas,viviendasConceptos:other};
 }
 const debug=(uri,input)=>state.logs.push({fecha:new Date().toISOString(),uri,accion:input.method||'GET'});
 function handle(uri,method,body,query){
