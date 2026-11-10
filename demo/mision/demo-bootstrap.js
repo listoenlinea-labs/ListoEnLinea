@@ -70,18 +70,20 @@ function fixture(){
  const casas=Array.from({length:231},(_,i)=>{
   const street=Math.floor(i/30), hash=(i*37+Math.floor(i/30)*23+(i*i)%31)%100;
   const threshold=callesMeta[street].tasa;
-  const paidThrough=hash<threshold?seedEnd:hash<threshold+9?seedEnd-1:hash<threshold+17?seedEnd-2:
+  const paidThrough=i%41===0?period(yyyy-1,12):
+    i%13===0?period(yyyy,12):
+    hash<threshold?seedEnd:hash<threshold+9?seedEnd-1:hash<threshold+17?seedEnd-2:
     hash<threshold+25?period(yyyy,7):period(yyyy,6);
   return {id:i+1,calle:streetList[street],calleCorrecta:streetList[street],
-    numero:11+(i%30)*2,nombre:owners[i%owners.length],cuota:i%11===0?150:300,
+    numero:11+(i%30)*2,nombre:owners[i%owners.length],cuota:300,
     paidThrough:Math.min(seedEnd,paidThrough),credito:0,exento:i%13===0,permisosAcceso:{},
     telefono:'330000'+pad(i+21)+'00',correo:'residente'+(i+1)+'@example.test'};
  });
  const pagos=[];
  for(const c of casas){
-  for(let month=1;month<=mm;month++){
+  for(let month=1;month<=12;month++){
    const coverage=period(yyyy,month);
-   if(coverage>c.paidThrough)continue;
+   if(coverage>c.paidThrough||c.id%41===1)continue;
    // Un porcentaje de casas anticipa su mensualidad y otro paga después:
    // los movimientos por mes no resultan líneas artificialmente planas.
    const shift=(c.id*13+month*7)%9===0?-1:(c.id*7+month*11)%11===0?-2:0;
@@ -120,7 +122,7 @@ function fixture(){
  });
  const otrosIngresos=Array.from({length:mm},(_,i)=>({id:4001+i,concepto:'Ingreso adicional ficticio',
   monto:200+((i*53+7)%9)*145,fecha:yyyy+'-'+pad(i+1)+'-19'}));
- const fixtureData={version:3,casas,tags,pagos,egresos:[],otrosIngresos,saldoInicial:12000,
+ const fixtureData={version:4,casas,tags,pagos,egresos:[],otrosIngresos,saldoInicial:12000,
   accesos:[],visitas:[{id:1,casaId:1,nombre:'Gabriela Ramos',placa:'DEM-001',
     motivo:'Visita familiar',estado:'PROGRAMADA',fecha:longDate,hora:'11:30',codigo:'VIS-DEMO-0001'}],
   reportes:[],reservas:[],cuotasExtra:[],pagosConcepto:[],incidentes:[],cuentas:[],logs:[],lastId:5000};
@@ -138,16 +140,16 @@ function debtForFixture(c){
 let state;try{state=JSON.parse(localStorage.getItem(KEY))}catch{}if(!state?.casas)state=fixture();
 // Se actualizan exclusivamente egresos de ejemplo anteriores; conservamos pagos,
 // cuotas, TAGs, reservas y egresos manuales creados por el visitante.
-if(state.version!==3){
+if(state.version!==4){
  state.egresos=(state.egresos||[]).filter(e=>!/^EGRESO-FICTICIO-\d+$/.test(String(e.referencia||''))&&
    e.origen!=='DEMO_OPERATIVO');
  state.egresos.push(...demoOperatingExpenses(state));
- state.version=3;
+ state.version=4;
  try{localStorage.setItem(KEY,JSON.stringify(state))}catch(_){}
 }
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){console.warn('Sin almacenamiento persistente',e)}};
 const byId=id=>state.casas.find(c=>Number(c.id)===Number(id)),byTag=id=>state.tags.find(t=>Number(t.id)===Number(id));
-const cap=n=>Math.max(0,Math.round((Number(n)||0)*100)/100);
+const cap=n=>Math.max(0,Math.round(Number(n)||0));
 const overdue=i=>i<curr||(i===curr&&now.getDate()>10);
 const periodCost=(c,i)=>c.cuota+(overdue(i)&&!c.exento?50:0);
 const debt=c=>{let total=0;for(let i=c.paidThrough+1;i<=curr;i++)total+=periodCost(c,i);return cap(Math.max(0,total-(c.credito||0)))};
@@ -559,6 +561,7 @@ function handle(uri,method,body,query){
  if(uri.startsWith('/entorno/'))return ok({trafico:[],noticias:[],data:[],eventos:[]});
  return {ok:false,message:'Este flujo aún no tiene contrato simulado: '+uri};
 }
+// Las ampliaciones del contrato de la demo se cargan inmediatamente después de este archivo.
 const nativeFetch=window.fetch.bind(window);
 window.fetch=async(input,init={})=>{
  const url=new URL(typeof input==='string'?input:input.url,location.href);
