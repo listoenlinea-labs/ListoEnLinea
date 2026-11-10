@@ -534,7 +534,7 @@ function handle(uri,method,body,query){
   const entry={id:++state.lastId,usuarioId:admin.id,casaId:c.id,fecha,fechaBloqueada:fecha,
    solicitante:String(body.solicitante||c.nombre),telefono:String(body.telefono||c.telefono),
    correo:String(body.correo||c.correo),propietario:Boolean(body.propietario),
-   motivo:String(body.motivo||'Evento de demostración'),estatus:'PENDIENTE',
+   motivo:String(body.motivo||'Evento de demostración'),estatus:body.__demoAdministrador?'APROBADA':'PENDIENTE',
    pagado:false,cuotaRecuperacion:0,depositoGarantia:0,limpieza:0,
    garantiaDevuelta:false,fechaLimitePago:null,notas:''};
   state.reservas.push(entry);save();
