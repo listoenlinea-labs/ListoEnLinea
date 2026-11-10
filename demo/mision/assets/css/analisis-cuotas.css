@@ -184,7 +184,7 @@ select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='ht
 .history-debt-list{display:grid;gap:8px}.history-debt{display:flex;justify-content:space-between;gap:12px;align-items:center;background:#fff6ee;border:1px solid #f1ddca;border-radius:12px;padding:11px 13px}
 .history-debt>div{display:flex;flex-direction:column;gap:4px}.history-debt strong{font-size:12px;color:#72523f}.history-debt small{font-size:11px;color:#977a69}.history-debt b{font-size:14px;color:#9b5835;text-align:right}
 .history-paid-up,.history-empty{padding:14px;border:1px solid #d9eddf;border-radius:12px;background:#f5fbf6;color:#417154;font-size:12px}
-@media(max-width:580px){.history-summary{grid-template-columns:1fr 1fr}.history-stat.debt{grid-column:1/-1}.history-stat strong{font-size:16px}.history-debt{align-items:flex-start}.tags-detail-header{display:none}.tags-detail-item{min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px}.tags-detail-item .tags-dates{grid-column:1/-1;border-top:1px solid #edf0f5;padding-top:9px}}
+@media(max-width:580px){.history-summary{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:1fr}.history-summary .history-stat{min-width:0;padding:12px;justify-content:space-between}.history-summary .history-stat.debt{grid-column:auto}.history-stat strong{font-size:16px}.history-debt{align-items:flex-start}.tags-detail-header{display:none}.tags-detail-item{min-width:0;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px}.tags-detail-item .tags-dates{grid-column:1/-1;border-top:1px solid #edf0f5;padding-top:9px}}
 
 /* Mensaje verde únicamente cuando el servidor confirma el registro del pago. */
 #financeNotice[data-kind="success"]{border-color:#cae8d7;background:#f1faf5;color:#276347}
@@ -467,11 +467,11 @@ body.page-analisis .analysis-page nav.analysis-tabs[hidden]{
 .finance-receipt-toolbar button{min-height:37px;padding:9px 18px;border-radius:11px;white-space:nowrap}
 .finance-receipt-toolbar button:disabled{opacity:.48;cursor:not-allowed}
 .maintenance-receipt-active .houses-scroll table{min-width:1120px}
-.maintenance-receipt-active .houses-scroll #financeHouseRows>tr[data-receipt-row]{cursor:pointer}
-.maintenance-receipt-active .houses-scroll #financeHouseRows>tr[data-receipt-row]:focus-visible{outline:3px solid #b4753b;outline-offset:-3px}
-.maintenance-receipt-active .houses-scroll #financeHouseRows>tr.house-receipt-selected{background:#f5d0a7}
-.maintenance-receipt-active .houses-scroll #financeHouseRows>tr.house-receipt-selected>td{background:#f5d0a7;border-bottom-color:#daa576}
-.maintenance-receipt-active .houses-scroll #financeHouseRows>tr.house-receipt-selected>td:first-child{box-shadow:none}
+:is(.maintenance-receipt-active,.extraordinary-receipt-active) .houses-scroll #financeHouseRows>tr[data-receipt-row]{cursor:pointer}
+:is(.maintenance-receipt-active,.extraordinary-receipt-active) .houses-scroll #financeHouseRows>tr[data-receipt-row]:focus-visible{outline:3px solid #b4753b;outline-offset:-3px}
+:is(.maintenance-receipt-active,.extraordinary-receipt-active) .houses-scroll #financeHouseRows>tr.house-receipt-selected{background:#f5d0a7}
+:is(.maintenance-receipt-active,.extraordinary-receipt-active) .houses-scroll #financeHouseRows>tr.house-receipt-selected>td{background:#f5d0a7;border-bottom-color:#daa576}
+:is(.maintenance-receipt-active,.extraordinary-receipt-active) .houses-scroll #financeHouseRows>tr.house-receipt-selected>td:first-child{box-shadow:none}
 .finance-receipt-dialog{width:min(800px,100%)}
 .finance-receipt-status{margin:12px 0;padding:10px 13px;border:1px solid #e4e7ef;border-radius:10px;background:#f9f8fb;color:#59647a;font-size:12px;line-height:1.5}
 .finance-receipt-status[data-kind="error"]{border-color:#ecc9b5;background:#fff4ec;color:#985037}
@@ -697,4 +697,1003 @@ button.finance-export-card:is(:hover,:focus-visible) .finance-export-icon{
 .house-annual-button:focus-visible{outline:2px solid #9962b5;outline-offset:2px}
 .house-annual-option p{flex:1 1 230px;margin:0;color:#687891;font-size:11px;line-height:1.55}
 .house-annual-label{display:inline-flex;align-items:center;padding:6px 10px;border:1px solid #cce8d5;border-radius:9px;background:#eef9f1;color:#2f744e;font-weight:850;white-space:nowrap}
-@media(max-width:640px){.house-annual-option{align-items:stretch;flex-direction:column;gap:7px}.house-annual-button{width:100%}}
+@media(max-width:640px){
+  .house-annual-option{
+    align-items:stretch;
+    flex-direction:column;
+    gap:6px;
+    padding:9px 11px;
+    height:auto;
+    min-height:0;
+    align-self:start;
+  }
+  .house-annual-button{width:100%}
+  /* En columna, el flex-basis de 230px del texto se convertía en altura vacía. */
+  .house-annual-option p{flex:0 1 auto;min-height:0}
+}
+
+/* Deuda pendiente: rojo pastel, con importe legible y selección preservada. */
+.houses-scroll #financeHouseRows>tr.house-row-overdue>td{
+  background:#fff1f2;border-bottom-color:#f5d9dc;
+}
+.houses-scroll #financeHouseRows>tr.house-row-overdue>td:first-child{
+  box-shadow:inset 3px 0 #e7a2aa;
+}
+.houses-scroll #financeHouseRows .house-amount.is-overdue{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:80px;padding:8px 12px;border:1px solid #efbbc1;
+  border-radius:10px;background:#ffe1e4;color:#ae3446;
+  font-weight:850;font-variant-numeric:tabular-nums;
+}
+.houses-scroll #financeHouseRows>tr.house-row-overdue .house-paid-history.is-pending{
+  border-color:#efc6ca;background:#fff9fa;color:#a34e59;
+}
+.maintenance-receipt-active .houses-scroll #financeHouseRows>tr.house-row-overdue.house-receipt-selected>td{
+  background:#f5d0a7;border-bottom-color:#daa576;
+}
+body.page-analisis.mj-shared-sidebar-enabled .houses-scroll #financeHouseRows>tr.house-row-overdue:not(.house-receipt-selected)>td{
+  background:#fff1f2!important;
+}
+
+/* Gráficas de cumplimiento: en escritorio permanecen visibles.
+   Solo el móvil muestra un botón independiente para cada panel. */
+.analysis-chart-toggle{display:none}
+@media(max-width:700px){
+  body.page-analisis .analysis-chart-card{
+    padding:0;
+    margin-bottom:0;
+    min-width:0;
+    min-height:0;
+    height:auto;
+    align-self:start;
+    overflow:hidden;
+  }
+  /* product-ui.css fuerza 12px !important en .analysis-card.
+     Hay que neutralizarlo solo para estos dos acordeones. */
+  body.page-analisis.mj-shared-sidebar-enabled .analysis-columns > .analysis-card.analysis-chart-card{
+    padding:0!important;
+    margin-bottom:0!important;
+  }
+  /* Conservar separación con "Consulta de viviendas" después del segundo panel. */
+  body.page-analisis.mj-shared-sidebar-enabled .analysis-columns > .analysis-chart-card:last-child{
+    margin-bottom:13px!important;
+  }
+  /* Mismo alto compacto que «Otros indicadores financieros» al estar cerrada. */
+  body.page-analisis .analysis-chart-card:not(.is-expanded){
+    height:46px;
+    min-height:46px;
+    max-height:46px;
+  }
+  body.page-analisis .analysis-chart-toggle{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    box-sizing:border-box;
+    width:100%;
+    height:46px;
+    min-height:46px;
+    padding:0 14px;
+    border:0;
+    background:transparent;
+    color:#965418;
+    font-size:12px;
+    font-weight:800;
+    text-align:left;
+    cursor:pointer;
+  }
+  body.page-analisis .analysis-chart-toggle:focus-visible{
+    outline:3px solid #d09b65;
+    outline-offset:-4px;
+    border-radius:13px;
+  }
+  body.page-analisis .analysis-chart-toggle-action{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    flex:0 0 auto;
+    font-size:12px;
+  }
+  body.page-analisis .analysis-chart-toggle-arrow{
+    display:inline-block;
+    width:auto;
+    height:auto;
+    border:0;
+    transform:none;
+    line-height:1;
+  }
+  body.page-analisis .analysis-chart-toggle-arrow::before{content:"▾"}
+  body.page-analisis .analysis-chart-card.is-expanded .analysis-chart-toggle-arrow::before{content:"▴"}
+  body.page-analisis .analysis-chart-panel{display:none}
+  body.page-analisis .analysis-chart-card.is-expanded .analysis-chart-panel{
+    display:block;
+    padding:4px 14px 14px;
+    min-width:0;
+  }
+}
+/* El resumen superior también usa 11px en teléfonos pequeños. */
+@media(max-width:430px){
+  body.page-analisis .analysis-chart-toggle{font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){
+  .analysis-chart-toggle-arrow{transition:none!important}
+}
+
+/* Resumen financiero móvil: evita que los KPI compactos globales pongan
+   el título y la cifra lado a lado, partiendo palabras letra por letra. */
+@media(max-width:700px){
+  body.page-analisis.mj-shared-sidebar-enabled #financialSummary > button.finance-export-card{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+    width:100%!important;
+    min-width:0!important;
+    min-height:112px!important;
+    height:auto!important;
+    padding:12px!important;
+    text-align:left!important;
+  }
+  body.page-analisis.mj-shared-sidebar-enabled #financialSummary > button.finance-export-card > small{
+    display:flex!important;
+    align-items:flex-start!important;
+    flex:0 0 auto!important;
+    gap:7px!important;
+    min-width:0!important;
+    width:100%!important;
+    margin:0!important;
+    font-size:clamp(10px,2.8vw,12px)!important;
+    font-weight:750!important;
+    line-height:1.3!important;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:normal!important;
+  }
+  body.page-analisis.mj-shared-sidebar-enabled #financialSummary .finance-export-icon{
+    flex:0 0 18px!important;
+    width:18px!important;
+    min-width:18px!important;
+    height:18px!important;
+  }
+  body.page-analisis.mj-shared-sidebar-enabled #financialSummary .finance-export-label{
+    display:block!important;
+    flex:1 1 auto!important;
+    min-width:0!important;
+    white-space:normal!important;
+    word-break:normal!important;
+    overflow-wrap:normal!important;
+    hyphens:none!important;
+    text-align:left!important;
+  }
+  body.page-analisis.mj-shared-sidebar-enabled #financialSummary > button.finance-export-card > strong{
+    display:block!important;
+    flex:0 0 auto!important;
+    align-self:stretch!important;
+    width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    font-size:clamp(15px,4.3vw,19px)!important;
+    line-height:1.2!important;
+    white-space:nowrap!important;
+    word-break:normal!important;
+    overflow-wrap:normal!important;
+    text-align:left!important;
+  }
+}
+
+/* Acciones financieras y confirmaciones críticas. */
+.finance-export-tools{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin:4px 0 14px}
+.finance-export-tools button{min-width:150px}
+.history-delete-button{margin-left:8px;padding:9px 14px;border:1px solid #e8a8ac;color:#a63542;background:#fff7f7;border-radius:10px;font-weight:750;font-size:11px}
+.history-delete-button:hover{background:#ffecec}
+.history-delete-button:disabled{opacity:.5}
+#financeBackupModal .finance-pay-dialog{max-width:520px}
+#financeBackupModal label{display:block;margin:16px 0 10px;color:#55667b;font-size:13px;font-weight:700}
+#financeBackupPeriod{display:block;width:100%;padding:12px;border:1px solid #ced9e6;border-radius:10px;margin-top:6px}
+#financeBackupStatus{font-size:12px;line-height:1.6;white-space:pre-wrap;color:#536b83}
+.finance-backup-check{display:flex!important;align-items:center;gap:9px}
+.finance-backup-check input{width:17px;height:17px}
+.finance-backup-actions{display:flex;justify-content:flex-end;margin-top:15px}
+@media(max-width:700px){.finance-export-tools{display:grid;grid-template-columns:1fr 1fr}.finance-export-tools button{min-width:0}.finance-export-tools button:last-child{grid-column:1/-1}}
+
+/* Los estilos personalizados del modal no deben cancelar el atributo hidden. */
+#financeBackupModal [hidden]{display:none!important}
+#financeBackupModal select{width:100%;padding:12px;border:1px solid #ced9e6;border-radius:10px;background:#fff;margin-top:7px}
+#financeBackupModal select:disabled,#financeBackupModal button:disabled{opacity:.55;cursor:wait}
+#financeBackupPeriodsNote{margin-top:6px;margin-bottom:12px}
+#financeBackupStatus[data-kind="error"]{color:#ae3941}
+#financeBackupStatus[data-kind="success"]{color:#246f4d}
+#houseHistoryDeleteStatus{min-height:0;line-height:1.5}
+
+.finance-drive-folder{padding:13px 15px;margin:15px 0;border:1px solid #deeadf;border-radius:12px;background:#f8fcf9}
+.finance-drive-folder[hidden],.finance-drive-folder a[hidden]{display:none!important}
+.finance-drive-folder #financeDriveChooseFolder{margin:4px 0 9px}
+.finance-drive-folder #financeDriveFolderStatus{color:#415b51;margin:3px 0 9px;font-weight:700}
+.finance-drive-folder a{font-size:12px;font-weight:750;color:#305f91;text-decoration:underline}
+.finance-drive-folder button:disabled{opacity:.5;cursor:wait}
+
+/* Panel financiero para administración: acumulados por calle y por concepto. */
+.finance-monthly-columns>.analysis-card{min-width:0}
+.finance-monthly-columns>.analysis-card>h2{margin-bottom:6px;font-size:17px}
+.finance-period-summary{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;
+ margin:14px 0;padding:12px 14px;background:#f6fbf8;border:1px solid #d9ecdf;border-radius:12px;
+ color:#466451;font-size:12px}
+.finance-period-summary span{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center}
+.finance-period-summary b{font-size:15px;font-variant-numeric:tabular-nums;color:#285b40}
+.finance-monthly-columns .money-bars{display:grid;gap:9px;margin:14px 0 18px;overflow:visible;min-width:0}
+.finance-monthly-columns .bar-row{display:grid;grid-template-columns:minmax(85px,138px) minmax(10px,1fr) minmax(72px,95px);
+ gap:10px;align-items:center;min-width:0}
+.finance-monthly-columns .bar-row strong:first-child{overflow-wrap:anywhere}
+.finance-monthly-columns .bar-row b{text-align:right;color:#355b49;font-variant-numeric:tabular-nums}
+.finance-monthly-columns .bar-row .track{min-width:0;height:15px}
+.finance-monthly-columns .finance-monthly-table{max-height:315px;overflow:auto;margin-bottom:12px}
+.finance-monthly-columns .finance-monthly-table table{width:100%;min-width:360px;table-layout:fixed}
+.finance-monthly-columns .finance-monthly-table th,
+.finance-monthly-columns .finance-monthly-table td{padding:10px 9px;white-space:normal;overflow-wrap:anywhere}
+.finance-monthly-columns .finance-monthly-table thead th{font-size:10px;line-height:1.45}
+.finance-monthly-columns .finance-monthly-table tbody th{background:transparent;color:#35465d;position:static;font-weight:650}
+.finance-monthly-columns .finance-monthly-table td{text-align:right;font-variant-numeric:tabular-nums}
+.finance-monthly-columns .finance-monthly-table tfoot{position:sticky;bottom:0;background:#edf8f1;font-weight:900}
+.finance-monthly-columns .finance-monthly-table tfoot th{position:static;background:#edf8f1;color:#295d42}
+.finance-monthly-columns .finance-monthly-table tfoot td{color:#295d42}
+@media(max-width:650px){
+ .finance-monthly-columns .bar-row{grid-template-columns:minmax(75px,115px) minmax(14px,1fr) minmax(66px,85px);gap:7px}
+ .finance-monthly-columns .bar-row b{font-size:10px}
+ .finance-monthly-columns .finance-monthly-table table{min-width:330px}
+ .finance-period-summary{gap:8px;font-size:11px}
+}
+
+/* Resumen financiero mensual y desglose histórico bajo demanda. */
+.finance-expense-select{display:block;width:100%;margin:0;padding:6px 8px;border:1px solid transparent;
+ border-radius:10px;background:transparent;color:inherit;text-align:left;font:inherit;cursor:pointer;
+ transition:background .15s ease,border-color .15s ease}
+.finance-expense-select:hover{background:#fbf5f0;border-color:#f0d5cb}
+.finance-expense-select:focus-visible{outline:3px solid #e6a57f;outline-offset:2px}
+.finance-expense-select.is-selected{background:#fff4eb;border-color:#e8bfa9}
+.finance-expense-select .bar-row{width:100%;margin:0}
+.finance-expense-select .bar-row strong{min-width:0}
+.finance-expense-select .bar-row .track{pointer-events:none}
+.finance-expense-click-hint{margin:4px 0 12px}
+.finance-expense-history[hidden]{display:none!important}
+.finance-expense-history{margin-top:17px;padding:13px;border:1px solid #e4dbe9;border-radius:13px;
+ background:#fefcff}
+.finance-expense-history-heading{display:flex;align-items:center;justify-content:space-between;
+ gap:12px;margin-bottom:7px}
+.finance-expense-history-heading h3{font-size:15px;margin:0;color:#35445d}
+.finance-expense-history-heading button{flex:0 0 auto}
+.finance-expense-history .finance-monthly-table{max-height:440px;overflow:auto}
+.finance-expense-history .finance-monthly-table th,
+.finance-expense-history .finance-monthly-table td{font-variant-numeric:tabular-nums}
+.finance-expense-history .finance-monthly-table tfoot{background:#f5edf6}
+@media(max-width:700px){.finance-expense-history{padding:10px}.finance-expense-select{padding:6px 3px}}
+
+/* Historial financiero: dos modales en lugar de tablas bajo las gráficas. */
+.finance-history-overlay[hidden]{display:none!important}
+.finance-history-overlay{z-index:10120}
+.finance-historical-dialog{width:min(780px,100%);max-height:min(750px,calc(100vh - 36px));overflow:hidden;
+ display:flex;flex-direction:column;gap:12px;padding:22px}
+.finance-historical-dialog .finance-pay-heading{flex:0 0 auto}
+.finance-historical-dialog .finance-pay-heading h2{font-size:20px;margin:4px 0 0}
+.finance-historical-dialog>p{margin:0}
+.finance-historical-table{max-height:58vh;min-height:0;overflow:auto;border:1px solid #e2e8f0;border-radius:12px}
+.finance-historical-table table{width:100%;border-collapse:collapse;min-width:340px}
+.finance-historical-table th,.finance-historical-table td{padding:12px 14px;border-bottom:1px solid #edf0f3;
+ font-size:12px;line-height:1.4}
+.finance-historical-table thead{position:sticky;top:0;background:#f7f4fa;z-index:1}
+.finance-historical-table thead th{text-align:left;color:#6d5887;font-weight:850}
+.finance-historical-table th:nth-child(3),.finance-historical-table td:nth-child(3){text-align:right;font-variant-numeric:tabular-nums}
+.finance-historical-table tbody tr:hover{background:#fafcfb}
+.finance-historical-table tbody th{font-weight:650;color:#36445c;text-align:left}
+.finance-historical-table tfoot{position:sticky;bottom:0;background:#eaf7ef;z-index:1}
+.finance-historical-table tfoot th,.finance-historical-table tfoot td{border-bottom:0;font-weight:900;color:#2d6146}
+.finance-monthly-columns .finance-income-select,
+.finance-monthly-columns .finance-expense-select{display:block;width:100%;min-width:0;padding:6px 8px;margin:0;
+ border:1px solid transparent;border-radius:10px;background:transparent;color:inherit;text-align:left;
+ font:inherit;cursor:pointer;transition:background .15s,border-color .15s}
+.finance-monthly-columns .finance-income-select:hover{background:#f0faf4;border-color:#bfe1ca}
+.finance-monthly-columns .finance-income-select:focus-visible{outline:3px solid #8bc9a0;outline-offset:1px}
+.finance-monthly-columns .finance-income-select .bar-row,
+.finance-monthly-columns .finance-expense-select .bar-row{width:100%;margin:0}
+.finance-monthly-columns .finance-income-select .track{pointer-events:none}
+.finance-history-hint{margin:7px 0 10px}
+@media(max-width:650px){
+ .finance-historical-dialog{width:min(100%,700px);padding:14px;max-height:calc(100vh - 20px)}
+ .finance-historical-table th,.finance-historical-table td{padding:10px 8px;font-size:11px}
+ .finance-history-overlay{padding:10px}
+}
+
+/* Picker es un diálogo que Google inserta fuera de nuestro modal.
+   El overlay financiero tiene z-index:10090 y tapaba su iframe.
+   Mientras Picker está activo, ocultar SOLO el overlay del formulario;
+   nunca marcarlo como hidden, así conservamos el mes y datos ingresados. */
+#financeBackupModal.finance-picker-active{
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+
+/* Edición de totales históricos de egresos dentro del modal. */
+.finance-historical-table .finance-expense-month-cell{min-width:230px;vertical-align:middle}
+.finance-expense-month-display{display:flex;justify-content:flex-end;align-items:center;gap:10px}
+.finance-expense-month-display strong{font-variant-numeric:tabular-nums}
+.finance-expense-month-edit-button{padding:5px 9px!important;font-size:11px!important;white-space:nowrap}
+.finance-expense-month-form{display:flex;align-items:end;justify-content:flex-end;flex-wrap:wrap;gap:7px;margin:0}
+.finance-expense-month-form[hidden],.finance-expense-month-display[hidden]{display:none!important}
+.finance-expense-month-input-label{display:flex;flex-direction:column;gap:3px;font-size:10px;font-weight:700;
+ color:#496075;text-align:left;min-width:108px;flex:1 1 120px}
+.finance-expense-month-input-label input{width:100%;height:37px;min-width:0;max-width:180px;padding:7px 9px;
+ border:1px solid #c9d6e7;border-radius:8px;background:white;color:#20334c;
+ font-size:13px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.finance-expense-month-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.finance-expense-month-actions button{min-height:34px;padding:6px 10px;font-size:11px}
+.finance-expense-month-feedback{display:block;font-size:11px;color:#b63e40;margin-top:4px;max-width:260px;
+ white-space:normal}
+.finance-expense-month-feedback:empty{display:none}
+.finance-historical-table tbody tr:has(.finance-expense-month-form:not([hidden])){background:#eff9f2}
+.finance-historical-table tbody tr:has(.finance-expense-month-form:not([hidden])) td{min-width:290px}
+@media(max-width:650px){
+ .finance-historical-table .finance-expense-month-cell{min-width:210px}
+ .finance-expense-month-form{justify-content:flex-start}
+ .finance-expense-month-actions button{min-height:34px}
+}
+
+
+/* Gráficas financieras gemelas: misma estructura, ancho, pista, altura y
+   separación por cada una de las ocho calles/categorías. */
+body.page-analisis .finance-monthly-columns > .finance-chart-card{
+  display:flex;flex-direction:column;min-width:0;
+}
+.finance-monthly-columns .finance-chart-card > h2{
+  margin:3px 0 1px;font-size:17px;line-height:1.4;
+}
+.finance-monthly-columns .finance-chart-card > .finance-card-subtitle{
+  margin:4px 0 8px;color:#3d6a56;font-size:15px;font-weight:800;line-height:1.35;
+}
+.finance-monthly-columns .finance-chart-card > .finance-chart-description{
+  margin:0 0 4px;min-height:3.4em;line-height:1.6;font-size:11px;
+}
+.finance-monthly-columns .finance-chart-card > .finance-period-summary{
+  box-sizing:border-box;min-height:55px;justify-content:flex-start;
+  margin:12px 0 14px;align-items:center;
+}
+.finance-monthly-columns .finance-chart-card > .finance-graph-help{
+  margin:0 0 8px;min-height:2.75em;line-height:1.45;font-size:11px;
+}
+.finance-monthly-columns .finance-chart-card .money-bars{
+  display:grid;gap:7px;margin:8px 0 16px;max-height:none;
+  min-width:0;overflow:visible;
+}
+.finance-monthly-columns .finance-chart-card .finance-income-select,
+.finance-monthly-columns .finance-chart-card .finance-expense-select{
+  box-sizing:border-box;width:100%;min-height:47px;min-width:0;
+  padding:8px 9px;margin:0;display:block;
+  border:1px solid transparent;border-radius:10px;
+  font:inherit;color:inherit;text-align:left;background:transparent;
+  cursor:pointer;transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.finance-monthly-columns .finance-chart-card .finance-income-select .bar-row,
+.finance-monthly-columns .finance-chart-card .finance-expense-select .bar-row{
+  display:grid;grid-template-columns:minmax(86px,138px) minmax(20px,1fr) minmax(72px,95px);
+  align-items:center;gap:10px;width:100%;margin:0;min-width:0;
+}
+.finance-monthly-columns .finance-chart-card .bar-row strong{
+  font-size:11px;line-height:1.25;color:#263b53;min-width:0;
+}
+.finance-monthly-columns .finance-chart-card .bar-row b{
+  font-size:12px;line-height:1.25;color:#285b40;text-align:right;
+  font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.finance-monthly-columns .finance-chart-card .bar-row .track{
+  height:16px;min-width:0;pointer-events:none;
+}
+.finance-monthly-columns .finance-chart-card .finance-income-select:hover,
+.finance-monthly-columns .finance-chart-card .finance-income-select:focus-visible{
+  background:#ecf8f1;border-color:#b0dec0;
+  box-shadow:0 1px 4px rgba(33,112,67,.06);
+}
+.finance-monthly-columns .finance-chart-card .finance-expense-select:hover,
+.finance-monthly-columns .finance-chart-card .finance-expense-select:focus-visible{
+  background:#fff2e9;border-color:#f2cdb4;
+  box-shadow:0 1px 4px rgba(160,90,44,.06);
+}
+.finance-monthly-columns .finance-chart-card .finance-income-select:focus-visible{
+  outline:2px solid #8bc9a0;outline-offset:1px;
+}
+.finance-monthly-columns .finance-chart-card .finance-expense-select:focus-visible{
+  outline:2px solid #edaa79;outline-offset:1px;
+}
+.finance-monthly-columns .finance-chart-card .finance-income-select:is(:hover,:focus-visible) strong,
+.finance-monthly-columns .finance-chart-card .finance-expense-select:is(:hover,:focus-visible) strong{
+  color:#153b2c;
+}
+@media(max-width:700px){
+  .finance-monthly-columns .finance-chart-card > .finance-chart-description,
+  .finance-monthly-columns .finance-chart-card > .finance-graph-help{
+    min-height:0;
+  }
+  .finance-monthly-columns .finance-chart-card .finance-income-select .bar-row,
+  .finance-monthly-columns .finance-chart-card .finance-expense-select .bar-row{
+    grid-template-columns:minmax(74px,108px) minmax(12px,1fr) minmax(65px,80px);gap:7px;
+  }
+  .finance-monthly-columns .finance-chart-card .bar-row b{font-size:10px}
+  .finance-monthly-columns .finance-chart-card .bar-row strong{font-size:10px}
+}
+
+/* Cumplimiento y desglose: dos acordeones cerrados inicialmente en escritorio
+   y móvil; se conservan independientes de la sección de ingresos/egresos. */
+body.page-analisis .analysis-columns > .analysis-card.analysis-chart-card{
+  box-sizing:border-box;align-self:start;min-width:0;
+  padding:0!important;overflow:hidden;
+}
+body.page-analisis .analysis-columns > .analysis-chart-card:not(.is-expanded){
+  height:46px;min-height:46px;max-height:46px;
+}
+body.page-analisis .analysis-chart-toggle{
+  display:flex!important;align-items:center;justify-content:space-between;
+  gap:12px;width:100%;height:46px;min-height:46px;
+  margin:0;padding:0 14px;border:0;background:transparent;
+  color:#965418;font-size:12px;font-weight:800;text-align:left;cursor:pointer;
+}
+body.page-analisis .analysis-chart-toggle:hover{background:#fff6eb}
+body.page-analisis .analysis-chart-toggle:focus-visible{
+  outline:2px solid #d09b65;outline-offset:-3px;border-radius:12px;
+}
+body.page-analisis .analysis-chart-toggle-action{
+  display:inline-flex;align-items:center;gap:8px;flex:0 0 auto;
+}
+body.page-analisis .analysis-chart-toggle-arrow::before{content:"▾"}
+body.page-analisis .analysis-chart-card.is-expanded .analysis-chart-toggle-arrow::before{content:"▴"}
+body.page-analisis .analysis-chart-panel,
+body.page-analisis .analysis-chart-panel[hidden]{display:none!important}
+body.page-analisis .analysis-chart-card.is-expanded .analysis-chart-panel:not([hidden]){
+  display:block!important;padding:12px 16px 16px;min-width:0;
+}
+@media(prefers-reduced-motion:reduce){
+  .finance-monthly-columns .finance-chart-card .finance-income-select,
+  .finance-monthly-columns .finance-chart-card .finance-expense-select{transition:none}
+}
+
+
+/* PR UI: gráficos de ingresos y egresos más compactos, sin espacio entre
+   renglones y con un divisor muy sutil que no bloquea el hover. */
+.finance-monthly-columns .finance-chart-card .money-bars{
+  display:grid;
+  gap:0;
+  margin:3px 0 8px;
+  overflow:visible;
+}
+.finance-monthly-columns .finance-chart-card .finance-income-select,
+.finance-monthly-columns .finance-chart-card .finance-expense-select{
+  position:relative;
+  min-height:37px;
+  padding:6px 9px;
+  border-radius:8px;
+}
+.finance-monthly-columns .finance-chart-card .money-bars > button:not(:first-child)::before{
+  content:"";
+  position:absolute;
+  left:9px;
+  right:9px;
+  top:0;
+  height:1px;
+  background:#e7eaf0;
+  pointer-events:none;
+}
+.finance-monthly-columns .finance-chart-card .bar-row .track{
+  height:13px;
+}
+.finance-monthly-columns .finance-chart-card .bar-row strong{
+  line-height:1.15;
+}
+.finance-monthly-columns .finance-chart-card .bar-row b{
+  line-height:1.15;
+}
+@media(max-width:700px){
+  .finance-monthly-columns .finance-chart-card .finance-income-select,
+  .finance-monthly-columns .finance-chart-card .finance-expense-select{
+    min-height:35px;
+    padding:6px 7px;
+  }
+}
+
+/* Compactar la consulta sin eliminar los anuncios accesibles del orden. */
+.finance-visually-hidden{
+  position:absolute!important;
+  width:1px!important;
+  height:1px!important;
+  padding:0!important;
+  margin:-1px!important;
+  overflow:hidden!important;
+  clip:rect(0,0,0,0)!important;
+  white-space:nowrap!important;
+  border:0!important;
+}
+
+/* Cuatro acciones, una sola línea. A ancho reducido se desplazan
+   horizontalmente; los botones nunca se cortan ni se apilan. */
+body.page-analisis .finance-export-tools.finance-actions-row{
+  box-sizing:border-box;
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  justify-content:flex-start;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  padding:4px 0 7px;
+  margin:4px 0 8px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-inline:contain;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+body.page-analisis .finance-actions-row >button,
+body.page-analisis .finance-actions-row #financeGenerateReceipt{
+  box-sizing:border-box;
+  flex:0 0 auto;
+  width:auto!important;
+  min-width:0!important;
+  min-height:40px;
+  padding:9px 13px;
+  font-size:11px;
+  line-height:1.2;
+  border-radius:10px;
+  white-space:nowrap;
+  grid-column:auto!important;
+}
+body.page-analisis .finance-actions-row >button:first-child{
+  margin-left:auto;
+}
+body.page-analisis .finance-actions-row .finance-receipt-inline{
+  display:contents;
+  border:0;
+  background:transparent;
+  padding:0;
+  margin:0;
+}
+body.page-analisis .finance-actions-row .finance-receipt-inline[hidden]{
+  display:none!important;
+}
+body.page-analisis .finance-actions-row #financeGenerateReceipt:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+@media(max-width:700px){
+  body.page-analisis .finance-actions-row >button,
+  body.page-analisis .finance-actions-row #financeGenerateReceipt{
+    min-height:39px;
+    padding:9px 12px;
+  }
+}
+
+/* El campo Concepto ocupa el espacio liberado por la nota de referencia;
+   la referencia sigue generándose automáticamente en el servidor. */
+.expense-form > .expense-concept-field{
+  grid-column:span 2;
+}
+@media(max-width:700px){
+  .expense-form > .expense-concept-field{grid-column:auto}
+}
+
+
+/* Cuotas extraordinarias: proyectos independientes, reglas flexibles y conciliación. */
+.finance-project-panel{margin:12px 0 15px;padding:17px 19px;border:1px solid #e4d9ec;border-radius:16px;background:linear-gradient(115deg,#fbf8ff,#f7fbf9)}
+.finance-project-panel[hidden],.finance-project-form[hidden]{display:none!important}
+.finance-project-top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px}
+.finance-project-top>label{flex:1;min-width:230px;font-weight:800;font-size:12px;color:#655574}
+.finance-project-top select{display:block;width:100%;height:43px;margin-top:6px;padding:9px 35px 9px 13px;border:1px solid #ddd1e9;border-radius:10px;background-color:#fff;color:#273851}
+.finance-project-actions{display:flex;flex-wrap:wrap;gap:8px}
+.finance-project-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:14px 0 8px}
+.finance-project-metrics>div{background:#fff;border:1px solid #e3e8ee;border-radius:11px;padding:11px 12px;min-width:0}
+.finance-project-metrics small{display:block;font-size:10px;color:#75819c}
+.finance-project-metrics strong{font-size:16px;color:#163e41;display:block;margin-top:5px;overflow-wrap:anywhere}
+.finance-project-info{font-size:11px;color:#67758f;line-height:1.6;margin:8px 0 0}
+.finance-project-form{margin-top:14px;border:1px solid #e4e9f0;background:white;border-radius:13px;padding:16px;display:grid;gap:11px}
+.finance-project-form h3{font-size:15px;color:#25324a;margin:0}
+.finance-project-form .hint{margin:0}
+.finance-project-fields{display:grid;grid-template-columns:minmax(210px,2fr) repeat(2,minmax(140px,1fr));gap:10px}
+.finance-project-fields label,.finance-project-form>label{font-size:11px;font-weight:750;color:#4f6080}
+.finance-project-form input:not([type=checkbox]),.finance-project-form textarea{display:block;width:100%;margin-top:5px;padding:10px 12px;font:inherit;border:1px solid #d8dfed;border-radius:9px;background:#fff;color:#26354b}
+.finance-project-form textarea{min-height:90px;resize:vertical;font-size:12px}
+.finance-project-form>button{justify-self:start}
+.finance-project-check{display:flex!important;align-items:flex-start;gap:9px;font-weight:650!important;line-height:1.5}
+.finance-project-check input{width:16px;height:16px;flex:none;margin-top:2px}
+.finance-project-preview{display:grid;gap:10px;max-height:300px;overflow:auto}
+.finance-project-preview-card{padding:12px;border:1px solid #d9e4e5;border-radius:10px;background:#f8fbfb;font-size:11px}
+.finance-project-preview-card strong{font-size:12px}
+.finance-project-warning{color:#8a580e;margin:7px 0}
+.finance-project-error{color:#bb253a;margin:7px 0}
+.house-project-edit{display:block;margin-top:6px;border:1px solid #d6e1ef;background:#f7fafd;border-radius:8px;padding:7px 9px;color:#526383;font-size:10px;font-weight:800}
+.house-project-edit:hover{background:#edf5fc}
+@media(max-width:850px){.finance-project-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.finance-project-fields{grid-template-columns:1fr}.finance-project-top{align-items:stretch}.finance-project-actions{width:100%}}
+@media(max-width:480px){.finance-project-panel{padding:12px}.finance-project-metrics strong{font-size:14px}.finance-project-actions .soft{flex:1;padding:10px 8px}}
+
+.finance-project-actions [hidden]{display:none!important}
+.finance-rules-dialog{width:min(900px,100%);max-height:calc(100vh - 20px);display:flex;flex-direction:column;gap:10px}
+.finance-rules-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.finance-rules-controls label{font-size:12px;font-weight:700}
+.finance-rules-controls input{display:block;width:100%;margin-top:5px;padding:10px;border:1px solid #d8dfea;border-radius:8px}
+.finance-rules-scroll{flex:1;overflow:auto;min-height:130px}
+.finance-rules-scroll table{width:100%;border-collapse:collapse}
+.finance-rules-scroll th{position:sticky;top:0;background:#fafbfe;text-align:left}
+.finance-rules-scroll td,.finance-rules-scroll th{border-bottom:1px solid #e8edf3;padding:8px}
+.finance-rules-scroll input{width:125px;max-width:100%;padding:7px;border:1px solid #ddd;border-radius:8px}
+.finance-rules-actions{display:flex;justify-content:flex-end;gap:10px}
+@media(max-width:600px){.finance-rules-controls{grid-template-columns:1fr}.finance-rules-scroll input{width:86px}}
+
+#financeNewProjectRules[hidden]{display:none!important}
+
+
+/* Proyectos extraordinarios · ficha compacta y detalles plegables (nov 2026) */
+.finance-project-panel-compact{padding:13px 16px;margin:12px 0;background:linear-gradient(115deg,#fbf9ff,#f8fbfa)}
+.finance-project-panel-compact .finance-project-top{gap:12px;align-items:end}
+.finance-project-panel-compact .finance-project-top>label{min-width:min(240px,100%);font-size:12px;color:#3a4a64}
+.finance-project-panel-compact .finance-project-top select{height:42px;margin-top:6px}
+.finance-project-panel-compact .finance-project-actions{width:auto;flex:none}
+.finance-project-panel-compact .finance-project-actions .primary{min-height:42px;padding:10px 18px;white-space:nowrap}
+.finance-project-details{margin-top:10px;border:1px solid #e3e7ed;background:#fff;border-radius:11px;overflow:hidden}
+.finance-project-details:not([open])>:not(summary){display:none!important}
+.finance-project-details>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 13px;cursor:pointer;list-style:none;font-size:12px;font-weight:750;color:#445273;user-select:none}
+.finance-project-details>summary::-webkit-details-marker{display:none}
+.finance-project-details>summary:before{content:"▸";margin-right:4px;color:#7a6b9d;transition:transform .2s ease}
+.finance-project-details[open]>summary:before{transform:rotate(90deg)}
+.finance-project-details>summary span:first-child{margin-right:auto}
+.finance-project-expand-label{color:#8266ad;font-size:11px;font-weight:700}
+.finance-project-details[open] .finance-project-expand-label{font-size:0}
+.finance-project-details[open] .finance-project-expand-label:after{content:"Ocultar indicadores";font-size:11px}
+.finance-project-details .finance-project-metrics{grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin:0;padding:0 12px 10px}
+.finance-project-details .finance-project-metrics>div{padding:8px 9px;border-radius:8px;background:#fafbfd}
+.finance-project-details .finance-project-metrics small{font-size:10px;line-height:1.3}
+.finance-project-details .finance-project-metrics strong{font-size:14px;margin-top:4px}
+.finance-project-details .finance-project-info{margin:0 12px 11px;font-size:11px}
+
+/* Alta en un solo modal: presupuesto, reparto exacto y excepciones en 231 filas */
+#financeProjectRulesModal .finance-rules-dialog{width:min(1060px,100%);height:min(92vh,900px);max-height:calc(100vh - 24px);overflow:hidden;padding:20px;gap:12px}
+#financeProjectRulesModal .finance-pay-heading{align-items:start}
+#financeProjectRulesModal .finance-pay-heading h2{font-size:22px;margin:3px 0 5px}
+#financeProjectRulesModal .finance-rules-controls{grid-template-columns:minmax(170px,2fr) minmax(165px,1.3fr) minmax(140px,1fr);gap:10px}
+#financeProjectRulesModal .finance-rules-controls label{font-size:12px;color:#3d4b66}
+#financeProjectRulesModal .finance-rules-controls input{height:43px;background:#fff;font-size:13px;border:1px solid #d9e2ed}
+#financeProjectRulesModal .finance-rules-controls input:focus,#financeProjectRulesModal .finance-rules-list-heading input:focus{outline:2px solid #c2aedf;outline-offset:1px}
+.finance-rules-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.finance-rules-overview>div{background:#f7fafb;border:1px solid #e4ecf0;border-radius:10px;padding:8px 10px;min-width:0}
+.finance-rules-overview span{display:block;color:#77839a;font-size:10px}
+.finance-rules-overview strong{display:block;color:#1e4544;font-size:15px;margin-top:3px;overflow-wrap:anywhere}
+.finance-rules-list-heading{display:flex;gap:14px;align-items:end;justify-content:space-between}
+.finance-rules-list-heading>div{flex:1;min-width:0}
+.finance-rules-list-heading strong{font-size:13px;color:#253a55}
+.finance-rules-list-heading .hint{font-size:11px;line-height:1.5;margin:5px 0 0}
+.finance-rules-list-heading label{min-width:210px;font-size:11px;font-weight:700;color:#536482}
+.finance-rules-list-heading input{display:block;margin-top:4px;width:100%;height:38px;padding:8px 10px;border-radius:9px;border:1px solid #dce3ee}
+#financeProjectRulesModal .finance-rules-scroll{min-height:110px;flex:1;overflow:auto;border:1px solid #e0e6ee;border-radius:11px}
+#financeProjectRulesModal .finance-rules-scroll table{width:100%;border-collapse:collapse;font-size:12px}
+#financeProjectRulesModal .finance-rules-scroll th{position:sticky;top:0;background:#f5f3fa;z-index:1;font-size:11px;color:#5e6585;text-align:left;padding:11px 12px}
+#financeProjectRulesModal .finance-rules-scroll td{border-bottom:1px solid #ebedf3;padding:8px 12px;vertical-align:middle}
+#financeProjectRulesModal .finance-rules-scroll tbody tr:hover{background:#fcfbff}
+#financeProjectRulesModal .finance-rules-scroll td:first-child{font-weight:750}
+#financeProjectRulesModal .finance-rules-scroll td:nth-child(2){font-variant-numeric:tabular-nums;white-space:nowrap;color:#224f49;font-weight:750}
+#financeProjectRulesModal .finance-rules-scroll input{width:115px;padding:8px;border-radius:7px;border:1px solid #cbb8e3;background:#fff}
+#financeProjectRulesModal .finance-rules-scroll .soft{font-size:11px;padding:7px 9px}
+#financeProjectRulesModal .finance-rules-actions{border-top:1px solid #e8ecf2;padding-top:10px;flex:none}
+#financeProjectRulesModal #financeRulesStatus{margin:0;color:#985124;font-size:12px}
+#financeProjectRulesModal #financeRulesStatus:empty{display:none}
+#houseProjectTariffInfo:not([hidden]){font-size:12px;line-height:1.5;padding:9px 10px;border-radius:8px;background:#f7f8fc}
+#houseTariffNoFeeWrap[hidden],#houseProjectTariffInfo[hidden]{display:none!important}
+@media(max-width:980px){
+ .finance-project-details .finance-project-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #financeProjectRulesModal .finance-rules-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+ .finance-project-panel-compact{padding:11px}
+ .finance-project-panel-compact .finance-project-top{align-items:stretch}
+ .finance-project-panel-compact .finance-project-actions{width:100%}
+ .finance-project-panel-compact .finance-project-actions .primary{width:100%}
+ .finance-project-details .finance-project-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #financeProjectRulesModal .finance-rules-dialog{height:calc(100vh - 12px);max-height:calc(100vh - 12px);padding:12px;gap:9px}
+ #financeProjectRulesModal .finance-pay-heading h2{font-size:17px}
+ #financeProjectRulesModal .finance-rules-controls{grid-template-columns:1fr;gap:7px}
+ #financeProjectRulesModal .finance-rules-controls input{height:39px}
+ .finance-rules-overview{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+ .finance-rules-overview>div{padding:6px 8px}
+ .finance-rules-overview strong{font-size:13px}
+ .finance-rules-list-heading{display:block}
+ .finance-rules-list-heading label{display:block;min-width:0;margin-top:7px}
+ #financeProjectRulesModal .finance-rules-scroll th,#financeProjectRulesModal .finance-rules-scroll td{padding:7px 5px}
+ #financeProjectRulesModal .finance-rules-scroll input{width:82px}
+ #financeProjectRulesModal .finance-rules-actions button{flex:1}
+}
+
+
+/* Proyecto seleccionado: acento pastel menta, legible sin perder la flecha nativa. */
+#financeProjectPanel #financeProjectSelect[data-has-selection="true"]{
+ background-color:#e3f4ed;border-color:#a2d5bd;
+ color:#185647;font-weight:800;
+ box-shadow:0 0 0 2px rgba(83,165,129,.12);
+ transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+#financeProjectPanel #financeProjectSelect[data-has-selection="true"]:hover{
+ background-color:#d9efe4;border-color:#7dbda0;
+}
+#financeProjectPanel #financeProjectSelect:focus-visible{
+ outline:2px solid #3c9775;outline-offset:2px;
+}
+#financeProjectPanel #financeProjectSelect option{background-color:#fff;color:#273851}
+#financeProjectPanel #financeProjectRulesEdit[disabled]{opacity:.48;cursor:not-allowed}
+#financeProjectPanel .finance-project-actions .soft{min-height:42px;padding:10px 14px;white-space:nowrap}
+#financeProjectPanel .finance-project-actions .soft:not([disabled]):hover{
+ background:#f5effb;border-color:#dac3ed;
+}
+
+/* Restauración del editor masivo anterior, independiente del modal Nuevo proyecto. */
+#financeProjectBulkModal .finance-bulk-dialog{
+ width:min(1100px,100%);
+ height:min(88vh,860px);
+ max-height:calc(100vh - 24px);
+ min-height:0;
+ display:flex;flex-direction:column;gap:16px;
+ overflow:hidden;padding:24px 28px;
+}
+#financeProjectBulkModal .finance-pay-heading{align-items:center;gap:15px}
+#financeProjectBulkModal .finance-pay-heading h2{
+ margin:0;color:#23354e;font-size:clamp(17px,1.65vw,23px);line-height:1.35;
+ overflow-wrap:anywhere;
+}
+#financeProjectBulkModal .finance-rules-controls{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;
+}
+#financeProjectBulkModal .finance-rules-controls label{font-size:12px;color:#44536f;font-weight:800}
+#financeProjectBulkModal .finance-rules-controls input{
+ display:block;width:100%;height:46px;margin-top:7px;
+ padding:10px 13px;border:1px solid #d4dff0;border-radius:11px;
+ background:#fff;color:#263b54;font-size:14px;
+}
+#financeProjectBulkModal .finance-rules-controls input:focus-visible,
+#financeProjectBulkModal .finance-rules-scroll input:focus-visible{
+ outline:2px solid #baa5db;outline-offset:1px;
+}
+#financeProjectBulkModal .finance-rules-controls+.hint{
+ font-size:12px;color:#72809b;margin:1px 0;
+}
+#financeProjectBulkModal .finance-bulk-total{
+ font-size:14px;color:#304157;font-weight:600;
+ margin:4px 0 0;padding:7px 0;
+ font-variant-numeric:tabular-nums;
+}
+#financeProjectBulkModal .finance-rules-scroll{
+ min-height:120px;flex:1;overflow:auto;border:1px solid #e8ecf1;border-radius:10px;
+}
+#financeProjectBulkModal .finance-rules-scroll table{border-collapse:collapse;width:100%;font-size:13px}
+#financeProjectBulkModal .finance-rules-scroll thead th{
+ position:sticky;top:0;z-index:1;background:#f8f9fc;color:#686c91;
+ padding:13px 10px;text-align:left;font-size:12px;
+}
+#financeProjectBulkModal .finance-rules-scroll td{
+ padding:9px 10px;border-bottom:1px solid #e8edf4;vertical-align:middle;color:#475775;
+}
+#financeProjectBulkModal .finance-rules-scroll td:nth-child(2){
+ font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#financeProjectBulkModal .finance-rules-scroll td:nth-child(2) small{
+ display:inline-block;margin-left:6px;color:#75809b;font-size:11px;
+}
+#financeProjectBulkModal .finance-rules-scroll tr.has-exception{background:#f8fbf8}
+#financeProjectBulkModal .finance-rules-scroll .soft{font-size:12px;padding:8px 11px}
+#financeProjectBulkModal .finance-rules-scroll input{
+ width:135px;max-width:100%;padding:9px 10px;
+ border:1px solid #cbb6e3;border-radius:9px;font:inherit;
+}
+#financeProjectBulkModal #financeBulkStatus{font-size:12px;margin:0;color:#a24c30}
+#financeProjectBulkModal #financeBulkStatus:empty{display:none}
+#financeProjectBulkModal .finance-rules-actions{
+ flex:none;display:flex;gap:12px;justify-content:flex-end;
+ padding-top:10px;border-top:1px solid #edf0f5;
+}
+#financeProjectBulkModal .finance-rules-actions button{min-height:44px}
+@media(max-width:700px){
+ #financeProjectBulkModal .finance-bulk-dialog{
+  height:calc(100vh - 16px);max-height:calc(100vh - 16px);
+  padding:14px;gap:10px;
+ }
+ #financeProjectBulkModal .finance-rules-controls{grid-template-columns:1fr;gap:8px}
+ #financeProjectBulkModal .finance-rules-controls input{height:41px}
+ #financeProjectBulkModal .finance-rules-scroll thead th,
+ #financeProjectBulkModal .finance-rules-scroll td{padding:8px 5px;font-size:12px}
+ #financeProjectBulkModal .finance-rules-scroll td:nth-child(2) small{display:block;margin:2px 0 0}
+ #financeProjectBulkModal .finance-rules-scroll input{width:82px}
+ #financeProjectBulkModal .finance-rules-actions button{flex:1}
+}
+
+/* Dirección y residente con espacio visible en la lista de 231 viviendas */
+#financeProjectRulesModal .finance-rules-resident{display:inline;font-size:11px;font-weight:500;color:#72819b;white-space:normal;}
+
+
+/* Cuotas extraordinarias: distinción semántica entre pago y vivienda exenta */
+#houseProjectNoAplica[hidden],#houseProjectNoAplicaStatus[hidden]{display:none!important}
+.house-project-no-aplica-button{background:#eff8f3;border-color:#b7dbc7;color:#266e51;min-height:42px}
+.house-project-no-aplica-button:not(:disabled):hover{background:#e0f3e7;border-color:#88bf9d}
+.house-project-no-aplica-button[aria-pressed="true"]{background:#e4f4eb;border-color:#a8d0b8;color:#267149}
+.house-project-no-aplica-button:disabled{opacity:.7;cursor:not-allowed}
+.house-project-no-aplica-status{margin:0 0 10px;text-align:right;color:#536a60}
+.house-no-aplica-tag,.house-amount-no-aplica,.house-not-applicable-pay{
+ display:inline-flex;align-items:center;justify-content:center;
+ padding:7px 10px;border-radius:9px;border:1px solid #cfe4d8;
+ background:#f0f7f3;color:#39745b;font-size:12px;font-weight:800;
+}
+.house-not-applicable-pay{min-height:38px;white-space:nowrap}
+.house-paid-history.is-neutral .house-no-aplica-tag{border:0;background:transparent;padding:0}
+@media(max-width:600px){
+ .history-tariff-toolbar{gap:8px!important}
+ .house-project-no-aplica-button{min-height:40px}
+ .house-project-no-aplica-status{text-align:left}
+}
+
+
+/* Etiquetas semánticas de casas exentas en la tabla principal */
+.houses-scroll #financeHouseRows .house-paid-history.is-no-aplica{
+ border-color:#cfe4d8;background:#f0f7f3;color:#39745b;
+}
+.houses-scroll #financeHouseRows .house-paid-history.is-no-aplica:hover,
+.houses-scroll #financeHouseRows .house-paid-history.is-no-aplica:focus-visible{
+ border-color:#92c4a8;background:#e5f2eb;
+}
+@media(min-width:1024px){
+ .houses-scroll #financeHouseRows .house-field-value>.house-no-aplica-tag,
+ .houses-scroll #financeHouseRows .house-field-value>.house-amount-no-aplica{
+  box-sizing:border-box;min-width:128px;max-width:128px;width:128px;min-height:36px;
+  display:inline-flex;align-items:center;justify-content:center;text-align:center;
+ }
+}
+
+/* Recibo por correo: dirección vinculada, envío explícito y estados reales. */
+.finance-receipt-send .finance-receipt-email-label{margin-top:12px;display:block;font-weight:800}
+.finance-receipt-send #houseReceiptEmailInput{width:100%;min-height:42px;color:#334358;background:#f7fafc}
+.finance-receipt-email-button{background:#167658;border-color:#167658}
+.finance-receipt-email-button:disabled{opacity:.5;cursor:not-allowed}
+@media(max-width:720px){.finance-receipt-actions{flex-wrap:wrap}.finance-receipt-email-button{width:100%}}
+
+/* Proyectos: permitir nombres largos sin invadir otras tarjetas o columnas. */
+#financialSecondary .metric{min-width:0;overflow:hidden}
+#financialSecondary .metric.finance-project-name-card strong{display:block;max-width:100%;font-size:clamp(13px,1.05vw,16px);line-height:1.4;overflow-wrap:anywhere;white-space:normal;word-break:normal}
+#financialSecondary .metric.finance-project-name-card small{margin-bottom:8px}
+#financialSecondary .metric.finance-project-name-card{align-content:start}
+/* Correo de un solo envío: texto editable sin alterar dirección almacenada. */
+#houseReceiptEmailInput:not(:disabled){background:#fff;cursor:text}
+#houseReceiptEmailInput[aria-invalid="true"]{border-color:#ce6a71;box-shadow:0 0 0 2px #ce6a7124}
+#houseReceiptEmailInput:focus-visible{outline:2px solid #3f9c7e;outline-offset:2px}
+
+/* Recibos: guardar contactos de la vivienda sin modificar usuarios vinculados. */
+.finance-receipt-contact-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:9px}
+.finance-receipt-contact-row>input{min-width:0}
+.finance-receipt-contact-save{min-height:43px;padding:9px 13px!important;border:1px solid #d7c5e8!important;border-radius:10px!important;background:#f5eefb!important;color:#644782!important;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
+.finance-receipt-contact-save:hover:not(:disabled){background:#eadcf5!important}
+.finance-receipt-contact-save:disabled{opacity:.5;cursor:not-allowed}
+.finance-receipt-send small[data-saved="true"]{color:#167658;font-weight:700}
+@media(max-width:540px){.finance-receipt-contact-row{grid-template-columns:minmax(0,1fr)}.finance-receipt-contact-save{width:100%}}
+/* Confirmación de envío: siempre visible en el centro, por encima del modal. */
+.finance-receipt-email-success{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2147483000;display:flex;align-items:center;gap:14px;max-width:min(490px,calc(100vw - 28px));min-width:min(350px,calc(100vw - 28px));box-sizing:border-box;padding:19px 22px;background:#f2fcf5;border:2px solid #78bd91;border-radius:18px;box-shadow:0 24px 90px #102c224c;color:#175d39;pointer-events:none}
+.finance-receipt-email-success[hidden]{display:none!important}
+.finance-receipt-email-success-icon{width:42px;height:42px;flex:0 0 auto;display:grid;place-items:center;border-radius:50%;background:#217b4f;color:white;font-weight:900;font-size:25px}
+.finance-receipt-email-success strong{display:block;font-size:17px;line-height:1.4}
+.finance-receipt-email-success span[id]{display:block;margin-top:3px;font-size:12px;color:#397b58;overflow-wrap:anywhere}
+
+
+/* Balance informativo: tres gráficas horizontales en monitores amplios. */
+body.page-analisis .finance-monthly-columns{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch;
+}
+body.page-analisis .finance-monthly-columns > .finance-chart-card{
+ box-sizing:border-box;min-width:0;margin:0;height:100%;
+}
+.finance-monthly-columns .finance-chart-card .bar-row{
+ grid-template-columns:minmax(72px,96px) minmax(25px,1fr) minmax(60px,80px);
+ gap:7px;
+}
+.finance-balance-card{display:flex;flex-direction:column}
+.finance-balance-visual{display:flex;flex-direction:column;gap:18px;padding:16px 4px;margin:2px 0 8px}
+.finance-balance-rows{display:grid;gap:12px}
+.finance-balance-rows>div:not(.finance-balance-track){display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:#4b5c70}
+.finance-balance-rows strong{font-size:15px;color:#183b2b}
+.finance-balance-track{width:100%;height:16px;background:#f2eaf0;border-radius:9px;overflow:hidden}
+.finance-balance-fill{display:block;height:100%;width:0;transition:width .25s ease;border-radius:9px;background:#7bbd99}
+.finance-balance-fill.expense{background:#e9947b}
+.finance-balance-result{margin-top:10px;border-top:1px solid #e5eaf0;padding:18px 8px;display:grid;gap:8px;text-align:center}
+.finance-balance-result small{color:#6b788a;font-size:12px}
+.finance-balance-result strong{font-size:clamp(24px,2.4vw,35px);color:#276f4c;overflow-wrap:anywhere}
+.finance-balance-result span{font-size:12px;font-weight:800;color:#29734d}
+.finance-balance-card[data-balance-state="SALDO_EN_CONTRA"] .finance-balance-result strong,
+.finance-balance-card[data-balance-state="SALDO_EN_CONTRA"] .finance-balance-result span{color:#b54b3f}
+.finance-balance-card[data-balance-state="EN_EQUILIBRIO"] .finance-balance-result strong,
+.finance-balance-card[data-balance-state="EN_EQUILIBRIO"] .finance-balance-result span{color:#66768a}
+@media(max-width:1260px){
+ body.page-analisis .finance-monthly-columns{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body.page-analisis #financeBalanceCard{grid-column:1/-1}
+}
+@media(max-width:800px){
+ body.page-analisis .finance-monthly-columns{grid-template-columns:minmax(0,1fr)}
+ body.page-analisis #financeBalanceCard{grid-column:auto}
+ .finance-monthly-columns .finance-chart-card .bar-row{
+  grid-template-columns:minmax(80px,120px) minmax(24px,1fr) minmax(65px,94px);
+ }
+}
+@media(min-width:1600px){
+ .finance-monthly-columns .finance-chart-card .bar-row{
+  grid-template-columns:minmax(105px,145px) minmax(24px,1fr) minmax(75px,110px);
+ }
+}
+@media(prefers-reduced-motion:reduce){.finance-balance-fill{transition:none}}
+
+
+/* PR: únicamente celular, carrusel horizontal que encaja una gráfica entera. */
+.finance-monthly-pagination{display:none}
+@media(max-width:700px){
+ body.page-analisis .finance-monthly-columns{
+  display:flex!important;
+  flex-direction:row!important;
+  flex-wrap:nowrap!important;
+  align-items:flex-start!important;
+  gap:0!important;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  padding:0;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  scroll-padding-inline:0;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  border-radius:16px;
+  transition:height .2s ease;
+ }
+ body.page-analisis .finance-monthly-columns::-webkit-scrollbar{display:none}
+ body.page-analisis .finance-monthly-columns > .finance-chart-card{
+  flex:0 0 100%!important;
+  width:100%!important;
+  min-width:100%!important;
+  max-width:100%!important;
+  height:auto!important;
+  min-height:0;
+  align-self:flex-start!important;
+  scroll-snap-align:center;
+  scroll-snap-stop:always;
+  box-sizing:border-box;
+  margin:0!important;
+ }
+ body.page-analisis .finance-monthly-columns:focus-visible{
+  outline:2px solid #eb963e;outline-offset:2px;
+ }
+ body.page-analisis .finance-monthly-pagination{
+  display:flex;justify-content:center;align-items:center;
+  gap:6px;margin:10px 0 18px;padding:0 3px;
+ }
+ body.page-analisis .finance-monthly-jump{
+  min-width:0;flex:1 1 0;max-width:130px;
+  padding:9px 6px;border:1px solid #e3e7ed;
+  border-radius:999px;background:#fff;color:#66748a;
+  font-size:11px;font-weight:750;line-height:1.25;
+  cursor:pointer;transition:background .15s,border-color .15s;
+ }
+ body.page-analisis .finance-monthly-jump.is-active{
+  border-color:#e9bc87;background:#fff2e0;color:#9a5213;
+ }
+ body.page-analisis .finance-monthly-jump:focus-visible{
+  outline:2px solid #df8a34;outline-offset:2px;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ body.page-analisis .finance-monthly-columns{transition:none}
+ body.page-analisis .finance-monthly-jump{transition:none}
+}
+
+/* Mantener el rojo del adeudo aun después de recibir una mensualidad aislada. */
+.houses-scroll #financeHouseRows .house-abono-debt-tag{
+ display:inline-flex;align-items:center;margin:5px 0 0;padding:4px 8px;
+ border-radius:8px;border:1px solid #f4bf83;background:#fff3e2;
+ color:#93510b;font-size:11px;font-weight:800;white-space:nowrap;
+}
+.houses-scroll #financeHouseRows>tr.house-row-overdue .house-abono-debt-tag{
+ border-color:#efb7a3;background:#ffe8d8;color:#9b4b24;
+}
