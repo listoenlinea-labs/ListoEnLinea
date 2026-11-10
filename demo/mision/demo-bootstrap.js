@@ -191,7 +191,7 @@ function advance(c,money){
  if(n)state.tags.filter(t=>t.casaId===c.id).forEach(t=>{t.fechaFin=dueEnd(c);if(debt(c)===0)t.activo=true});
  return n;
 }
-const token='SIMULACION_PUBLICA_SIN_AUTENTICACION',admin={id:1,nombre:'Administrador',apellidoPaterno:'Demo',apellidoMaterno:'',correo:'admin@example.test',telefono:'3300000000',rol:{id:1,nombre:'ADMINISTRADOR'},casa:state.casas[0],roles:['ADMINISTRADOR'],administrador:true};
+const token='SIMULACION_PUBLICA_SIN_AUTENTICACION',admin={id:1,nombre:'Administrador',apellidoPaterno:'Demo',apellidoMaterno:'',correo:'admin@example.test',telefono:'3300000000',rol:{id:1,nombre:'ADMINISTRADOR'},casa:state.casas[5],roles:['ADMINISTRADOR'],administrador:true};
 try{localStorage.setItem('misionJardinesToken',token);localStorage.setItem('misionJardinesUsuario',JSON.stringify(admin));sessionStorage.setItem('misionJardinesToken',token)}catch{}
 window.MJ_API_URL=API;window.MJ_TOKEN=token;window.MJ_SHELL_MODE=false;
 const ok=(data={},extra={})=>({ok:true,data,...extra});
@@ -517,7 +517,7 @@ function handle(uri,method,body,query){
  if(uri==='/casa-club/solicitudes-pendientes')
   return {ok:true,cantidad:state.reservas.filter(r=>clubStatus(r)==='PENDIENTE').length};
  if(uri==='/casa-club/reservas'&&method==='POST'){
-  const fecha=String(body.fecha||''),c=byId(body.casaId)||(!body.casaId?state.casas[0]:null);
+  const fecha=String(body.fecha||''),c=byId(body.casaId)||(!body.casaId?state.casas[5]:null);
   if(!validClubDate(fecha)||fecha<clubToday())
    return {ok:false,message:'Selecciona una fecha válida, desde hoy en adelante'};
   if(!c)return {ok:false,message:'Vivienda ficticia inexistente'};
